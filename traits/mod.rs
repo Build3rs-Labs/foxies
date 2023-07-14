@@ -1,3 +1,2 @@
-pub mod marketplace;
 pub mod staking;
-pub mod mint_character;
+pub mod mint_token;
