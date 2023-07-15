@@ -10,6 +10,12 @@ ink = { version = "4.2.0", default-features = false }
 scale = { package = "parity-scale-codec", version = "3", default-features = false, features = ["derive"] }
 scale-info = { version = "2.6", default-features = false, features = ["derive"], optional = true }
 
+# Include brush as a dependency and enable default implementation for PSP22 via brush feature
+openbrush = { git = "https://github.com/Brushfam/openbrush-contracts", tag="3.1.1", default-features = false, features = ["psp34"]}
+
+foxies = { path = "../..", default-features = false }
+
+
 [dev-dependencies]
 ink_e2e = "4.2.0"
 
@@ -22,6 +28,8 @@ std = [
     "ink/std",
     "scale/std",
     "scale-info/std",
+    "openbrush/std",
+    "foxies/std",
 ]
 ink-as-dependency = []
 e2e-tests = []
