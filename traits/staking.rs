@@ -1,7 +1,4 @@
-use openbrush::{
-    contracts::psp34::{PSP34Error, Id},
-    traits::{AccountId, Balance},
-};
+use openbrush::contracts::psp34::{Id, PSP34Error};
 
 #[openbrush::wrapper]
 pub type StakingRef = dyn Staking;

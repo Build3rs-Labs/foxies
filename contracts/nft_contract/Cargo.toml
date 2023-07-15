@@ -13,6 +13,8 @@ scale-info = { version = "2.6", default-features = false, features = ["derive"],
 # Include brush as a dependency and enable default implementation for PSP22 via brush feature
 openbrush = { git = "https://github.com/Brushfam/openbrush-contracts", tag="3.1.1", default-features = false, features = ["psp34"]}
 
+foxies = { path = "../..", default-features = false }
+
 [lib]
 name = "nft_contract"
 path = "lib.rs"
@@ -25,5 +27,6 @@ std = [
     "scale-info/std",
 
     "openbrush/std",
+    "foxies/std",
 ]
 ink-as-dependency = []
