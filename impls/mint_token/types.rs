@@ -15,4 +15,5 @@ pub struct Data {
     pub last_token_id: u64,
     // Balance to mint chickens and foxes token
     pub price_per_mint: Balance,
+    pub _reserved: Option<()>,
 }
