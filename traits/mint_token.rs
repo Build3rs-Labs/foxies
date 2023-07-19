@@ -9,13 +9,11 @@ pub type PayableMintRef = dyn PayableMint;
 
 #[openbrush::trait_definition]
 pub trait PayableMint {
-    /// Mint chickens tokens
+    /// Mint chickens or foxes tokens
     #[ink(message, payable)]
-    fn mint_chickens(&mut self, to: AccountId) -> Result<(), PSP34Error>;
+    fn mint_characters(&mut self, to: AccountId) -> Result<(), PSP34Error>;
 
-    /// Mint foxes tokens
-    #[ink(message, payable)]
-    fn mint_foxes(&mut self, to: AccountId) -> Result<(), PSP34Error>;
+    
 
     /// Set new value for the baseUri
     #[ink(message)]

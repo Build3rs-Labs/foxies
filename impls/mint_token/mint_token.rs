@@ -11,12 +11,10 @@ impl<T> PayableMint for T
 where
     T: Storage<Data>,
 {
-    default fn mint_chickens(&mut self, to: AccountId) -> Result<(), PSP34Error> {
+    default fn mint_characters(&mut self, to: AccountId) -> Result<(), PSP34Error> {
         Ok(())
     }
-    default fn mint_foxes(&mut self, to: AccountId) -> Result<(), PSP34Error> {
-        Ok(())
-    }
+
     default fn set_base_uri(&mut self, uri: PreludeString) -> Result<(), PSP34Error> {
         Ok(())
     }
