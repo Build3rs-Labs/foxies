@@ -1,8 +1,8 @@
+use ink::prelude::{string::String as PreludeString, vec::Vec};
 use openbrush::{
     contracts::psp34::PSP34Error,
     traits::{AccountId, Balance},
 };
-use ink::prelude::string::String as PreludeString;
 
 #[openbrush::wrapper]
 pub type PayableMintRef = dyn PayableMint;
@@ -11,9 +11,7 @@ pub type PayableMintRef = dyn PayableMint;
 pub trait PayableMint {
     /// Mint chickens or foxes tokens
     #[ink(message, payable)]
-    fn mint_characters(&mut self, to: AccountId) -> Result<(), PSP34Error>;
-
-    
+    fn mint_token(&mut self, to: AccountId) -> Result<(), PSP34Error>;
 
     /// Set new value for the baseUri
     #[ink(message)]
@@ -25,9 +23,13 @@ pub trait PayableMint {
 
     /// Get max supply of tokens
     #[ink(message)]
-    fn total_supply(&self) -> u64;
+    fn max_supply(&self) -> u64;
 
     /// Get token price
     #[ink(message)]
     fn price(&self) -> Balance;
+
+    /// Get random number in vector
+    #[ink(message)]
+    fn get_random_numbers_vector(&self) -> Vec<u64>;
 }
