@@ -4,15 +4,22 @@ use ink::env::hash;
 use ink::prelude::string::String as PreludeString;
 use ink::prelude::vec::Vec;
 use openbrush::{
-    contracts::psp34::PSP34Error,
+    contracts::psp34::{extensions::enumerable::*, Id, PSP34Error},
     traits::{AccountId, Balance, Storage},
 };
 impl<T> PayableMint for T
 where
-    T: Storage<Data>,
+    T: Storage<Data> + Storage<psp34::Data<enumerable::Balances>>,
 {
     default fn mint_token(&mut self, to: AccountId) -> Result<(), PSP34Error> {
+        self.check_value(Self::env().transferred_value(), 1)?;
+        // Caller of the contract
+        let caller = Self::env().caller();
+        // Random number generated using `generate_random_number()` function (i.e. token_id)
         let random_number = self.generate_random_number().unwrap_or_default();
+        // mint token
+        self.data::<psp34::Data<enumerable::Balances>>()
+            ._mint_to(caller, Id::U64(random_number))?;
         Ok(())
     }
 
@@ -39,6 +46,12 @@ pub trait Internal {
     // The max_value is used to determine the maximum value in the range.
     // The modulo operator % (max_value + 1) is then used to return a number between 0 and the maximum value in the range.
     fn generate_random_number(&mut self) -> Result<u64, MintTokenError>;
+
+    // Check if the transferred mint values is as expected
+    fn check_value(&self, transferred_value: u128, mint_amount: u64) -> Result<(), PSP34Error>;
+
+    // Check if token is minted
+    fn token_exists(&self, id: Id) -> Result<(), PSP34Error>;
 }
 
 impl<T> Internal for T
@@ -80,5 +93,23 @@ where
 
         // otherwise return success
         Ok(random_number)
+    }
+
+    default fn check_value(
+        &self,
+        transferred_value: u128,
+        mint_amount: u64,
+    ) -> Result<(), PSP34Error> {
+        if let Some(value) = (mint_amount as u128).checked_mul(self.data::<Data>().price_per_mint) {
+            if transferred_value == value {
+                // TODO: need to transfer the value to owner account
+                return Ok(());
+            }
+        }
+        return Err(PSP34Error::Custom(MintTokenError::BadMintValue.as_str()));
+    }
+
+    default fn token_exists(&self, id: Id) -> Result<(), PSP34Error> {
+        Ok(())
     }
 }

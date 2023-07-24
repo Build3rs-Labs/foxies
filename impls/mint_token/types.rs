@@ -22,12 +22,14 @@ pub struct Data {
 #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
 pub enum MintTokenError {
     RepetativeRandomNumber,
+    BadMintValue,
 }
 
 impl MintTokenError {
     pub fn as_str(&self) -> String {
         match self {
             MintTokenError::RepetativeRandomNumber => String::from("RepetativeRandomNumber"),
+            MintTokenError::BadMintValue => String::from("BadMintValue"),
         }
     }
 }
