@@ -18,8 +18,10 @@ pub mod staking_contract {
 
     impl StakingContract {
         #[ink(constructor)]
-        pub fn new() -> Self {
-            Self::default()
+        pub fn new(nft_contract_address: AccountId) -> Self {
+            let mut instance = Self::default();
+            instance.foxies.nft_contract_address = nft_contract_address;
+            instance
         }
     }
 }
