@@ -145,11 +145,12 @@ where
         // Step 1 - Check if the token is belong to caller
         let caller = Self::env().caller();
         let current_time = Self::env().block_timestamp();
-        let request_unstake_time = self.get_request_unstake_time(caller, item.clone());
 
         for item in token_ids.iter() {
             // Step 2 - Check request unstaked and time request unstaked
             // 1 min = 60000 milliseconds
+            let request_unstake_time = self.get_request_unstake_time(caller, item.clone());
+
             if let Some(checked_mul_value) =
                 self.data::<Data>().limit_unstaking_time.checked_add(60000)
             {
@@ -171,12 +172,12 @@ where
                     }
 
                     // Step 4 - Remove from pending_unstaking_list
-                    self.data::<Data>()
-                        .pending_unstaking_list
-                        .remove_value(caller, item.clone());
-                    self.data::<Data>()
-                        .request_unstaking_time
-                        .insert(&(&caller, item.clone()), &0);
+                    // self.data::<Data>()
+                    //     .pending_unstaking_list
+                    //     .remove_value(caller, item.clone());
+                    // self.data::<Data>()
+                    //     .request_unstaking_time
+                    //     .insert(&(&caller, item.clone()), &0);
 
                     // TODO: emit_event
                 } else {
@@ -196,23 +197,23 @@ where
             .unwrap_or_default()
     }
 
-    default fn get_total_staked_chickens_by_account(&self, account: AccountId) -> u64 {
-        self.data::<Data>()
-            .total_staked_token_by_account
-            .get(account)
-            .unwrap_or_default()
-    }
+    // default fn get_total_staked_chickens_by_account(&self, account: AccountId) -> u64 {
+    //     self.data::<Data>()
+    //         .total_staked_token_by_account
+    //         .get(account)
+    //         .unwrap_or_default()
+    // }
 }
 
 pub trait Internal {
-    fn get_request_unstake_time(&self, account: AccountId, token_id: u64) -> u64;
+    fn get_request_unstake_time(&self, account: AccountId, token_id: Id) -> u64;
 }
 
 impl<T> Internal for T
 where
     T: Storage<Data>,
 {
-    default fn get_request_unstake_time(&self, account: AccountId, token_id: u64) -> u64 {
+    default fn get_request_unstake_time(&self, account: AccountId, token_id: Id) -> u64 {
         self.data::<Data>()
             .request_unstaking_time
             .get(&(&account, &token_id))

@@ -22,7 +22,7 @@ pub struct Data {
     // Staking list mapping
     pub staking_list: MultiMapping<AccountId, Id, ValueGuard<AccountId>>,
     // pending unstaking list
-    pub pending_unstaking_list: MultiMapping<AccountId, u64, ValueGuard<AccountId>>,
+    pub pending_unstaking_list: MultiMapping<AccountId, Id, ValueGuard<AccountId>>,
     // Total number of token staked by account
     pub total_staked_token_by_account: Mapping<AccountId, u64>,
     // Total number of token staked
@@ -30,7 +30,7 @@ pub struct Data {
     // unstaking time limit
     pub limit_unstaking_time: u64,
     // request unstaking time
-    pub request_unstaking_time: Mapping<(AccountId, u64), u64, RequestUnstakingTimeKey>,
+    pub request_unstaking_time: Mapping<(AccountId, Id), u64, RequestUnstakingTimeKey>,
     // Earn `$Eggs` per day by each staked token
     pub amount_of_eggs_token_earn_per_day: Balance,
     pub is_claimed: Mapping<AccountId, bool>,
