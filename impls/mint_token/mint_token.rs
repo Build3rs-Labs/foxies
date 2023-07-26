@@ -23,19 +23,6 @@ where
         Ok(())
     }
 
-    default fn set_base_uri(&mut self, uri: PreludeString) -> Result<(), PSP34Error> {
-        Ok(())
-    }
-    default fn get_base_uri(&self, token_id: u64) -> Result<(), PSP34Error> {
-        Ok(())
-    }
-    default fn max_supply(&self) -> u64 {
-        self.data::<Data>().max_supply
-    }
-    default fn price(&self) -> Balance {
-        self.data::<Data>().price_per_mint
-    }
-
     default fn get_random_numbers_vector(&self) -> Vec<u64> {
         self.data::<Data>().random_number.clone()
     }

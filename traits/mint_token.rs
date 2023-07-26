@@ -13,21 +13,7 @@ pub trait PayableMint {
     #[ink(message, payable)]
     fn mint_token(&mut self, to: AccountId) -> Result<(), PSP34Error>;
 
-    /// Set new value for the baseUri
-    #[ink(message)]
-    fn set_base_uri(&mut self, uri: PreludeString) -> Result<(), PSP34Error>;
-
-    /// Get URI from token ID
-    #[ink(message)]
-    fn get_base_uri(&self, token_id: u64) -> Result<(), PSP34Error>;
-
-    /// Get max supply of tokens
-    #[ink(message)]
-    fn max_supply(&self) -> u64;
-
-    /// Get token price
-    #[ink(message)]
-    fn price(&self) -> Balance;
+   
 
     /// Get random number in vector
     #[ink(message)]

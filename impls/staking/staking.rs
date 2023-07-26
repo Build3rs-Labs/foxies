@@ -53,7 +53,8 @@ where
                     // self.data::<Data>().staking_list.insert(caller, &item.clone());
                     self.data::<Data>()
                         .staking_list
-                        .insert(&caller, &vec![item.clone()]);
+                        // .insert(&caller, &vec![item.clone()]);
+                        .insert(caller, item);
 
                     // Step 3 - Transfer Token from Caller to staking contract
                     let builder = PSP34Ref::transfer_builder(
@@ -89,7 +90,102 @@ where
             return Err(StakingError::FailedToIncreaseTotalStaked);
         }
     }
+
+    default fn request_un_stake(&mut self, token_ids: Vec<Id>) -> Result<(), StakingError> {
+        let caller = Self::env().caller();
+        let leng = token_ids.len();
+
+        for item in token_ids.iter() {
+            // Step 1 - Check owner token is Contract Staking
+            if let Some(token_owner) =
+                PSP34Ref::owner_of(&self.data::<Data>().nft_contract_address, item.clone())
+            {
+                if Self::env().account_id() != token_owner {
+                    return Err(StakingError::InvalidCaller);
+                }
+
+                // Step 2 - Check staker
+                if !self
+                    .data::<Data>()
+                    .staking_list
+                    .contains_value(caller, &item.clone())
+                {
+                    return Err(StakingError::InvalidInput);
+                }
+
+                // Step 3 - Remove token from `staking_list`
+                self.data::<Data>()
+                    .staking_list
+                    .remove_value(caller, &item.clone());
+
+                // Step 4 - Add token to pending unstaking list
+                let current_time = Self::env().block_timestamp();
+                self.data::<Data>()
+                    .request_unstaking_time
+                    .insert(&(&caller, item.clone()), &current_time);
+                self.data::<Data>()
+                    .pending_unstaking_list
+                    .insert(&caller, &item.clone());
+
+                // TODO: emit_event
+            } else {
+                return Err(StakingError::CannotFindTokenOwner);
+            }
+        }
+
+        if let Some(total_staked) = self.data::<Data>().total_staked.checked_sub(leng as u64) {
+            self.data::<Data>().total_staked = total_staked;
+            Ok(())
+        } else {
+            return Err(StakingError::FailedToDescreaseTotalStaked);
+        }
+    }
+
     default fn un_stake(&mut self, token_ids: Vec<Id>) -> Result<(), StakingError> {
+        // Step 1 - Check if the token is belong to caller
+        let caller = Self::env().caller();
+        let current_time = Self::env().block_timestamp();
+        let request_unstake_time = self.get_request_unstake_time(caller, item.clone());
+
+        for item in token_ids.iter() {
+            // Step 2 - Check request unstaked and time request unstaked
+            // 1 min = 60000 milliseconds
+            if let Some(checked_mul_value) =
+                self.data::<Data>().limit_unstaking_time.checked_add(60000)
+            {
+                if let Some(unstake_time) = request_unstake_time.checked_add(checked_mul_value) {
+                    if unstake_time > current_time {
+                        return Err(StakingError::NotEnoughtTimeToRequestUnstake);
+                    }
+
+                    // Step 3 - transfer token to caller if enough time
+                    if PSP34Ref::transfer(
+                        &self.data::<Data>().nft_contract_address,
+                        caller,
+                        item.clone(),
+                        Vec::<u8>::new(),
+                    )
+                    .is_err()
+                    {
+                        return Err(StakingError::CannotTransfer);
+                    }
+
+                    // Step 4 - Remove from pending_unstaking_list
+                    self.data::<Data>()
+                        .pending_unstaking_list
+                        .remove_value(caller, item.clone());
+                    self.data::<Data>()
+                        .request_unstaking_time
+                        .insert(&(&caller, item.clone()), &0);
+
+                    // TODO: emit_event
+                } else {
+                    return Err(StakingError::FailedToCalculateTimeRequstUnstake);
+                }
+            } else {
+                return Err(StakingError::FailedToCalculateTimeRequstUnstake);
+            }
+        }
         Ok(())
     }
 
@@ -105,5 +201,21 @@ where
             .total_staked_token_by_account
             .get(account)
             .unwrap_or_default()
+    }
+}
+
+pub trait Internal {
+    fn get_request_unstake_time(&self, account: AccountId, token_id: u64) -> u64;
+}
+
+impl<T> Internal for T
+where
+    T: Storage<Data>,
+{
+    default fn get_request_unstake_time(&self, account: AccountId, token_id: u64) -> u64 {
+        self.data::<Data>()
+            .request_unstaking_time
+            .get(&(&account, &token_id))
+            .unwrap_or(0)
     }
 }
