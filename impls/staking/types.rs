@@ -23,17 +23,15 @@ pub struct Data {
     pub staking_list: MultiMapping<AccountId, Id, ValueGuard<AccountId>>,
     // pending unstaking list
     pub pending_unstaking_list: MultiMapping<AccountId, Id, ValueGuard<AccountId>>,
-    // Total number of token staked by account
-    pub total_staked_token_by_account: Mapping<AccountId, u64>,
-    // Total number of token staked
-    pub total_staked_token: Mapping<u64, (AccountId, Id)>,
     // unstaking time limit
     pub limit_unstaking_time: u64,
     // request unstaking time
-    pub request_unstaking_time: Mapping<(AccountId, Id), u64, RequestUnstakingTimeKey>,
+    pub request_unstaking_time: Mapping<(AccountId, Id), u64>,
     // Earn `$Eggs` per day by each staked token
     pub amount_of_eggs_token_earn_per_day: Balance,
+    //
     pub is_claimed: Mapping<AccountId, bool>,
+    //
     pub _reserved: Option<()>,
 }
 
@@ -46,8 +44,6 @@ impl Default for Data {
             staking_list: Default::default(),
             total_staked: Default::default(),
             pending_unstaking_list: Default::default(),
-            total_staked_token_by_account: Mapping::default(),
-            total_staked_token: Mapping::default(),
             limit_unstaking_time: Default::default(),
             amount_of_eggs_token_earn_per_day: Default::default(),
             is_claimed: Default::default(),

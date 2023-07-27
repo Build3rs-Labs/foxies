@@ -120,12 +120,13 @@ where
 
                 // Step 4 - Add token to pending unstaking list
                 let current_time = Self::env().block_timestamp();
+
                 self.data::<Data>()
                     .request_unstaking_time
-                    .insert(&(&caller, item.clone()), &current_time);
+                    .insert(&(caller, item.clone()), &current_time);
                 self.data::<Data>()
                     .pending_unstaking_list
-                    .insert(&caller, &item.clone());
+                    .insert(caller, &item.clone());
 
                 // TODO: emit_event
             } else {
@@ -172,12 +173,12 @@ where
                     }
 
                     // Step 4 - Remove from pending_unstaking_list
-                    // self.data::<Data>()
-                    //     .pending_unstaking_list
-                    //     .remove_value(caller, item.clone());
-                    // self.data::<Data>()
-                    //     .request_unstaking_time
-                    //     .insert(&(&caller, item.clone()), &0);
+                    self.data::<Data>()
+                        .pending_unstaking_list
+                        .remove_value(caller, &item.clone());
+                    self.data::<Data>()
+                        .request_unstaking_time
+                        .insert(&(caller, item.clone()), &0);
 
                     // TODO: emit_event
                 } else {
@@ -189,20 +190,6 @@ where
         }
         Ok(())
     }
-
-    default fn get_staking_list_token(&self, account: AccountId) -> Vec<Id> {
-        self.data::<Data>()
-            .staking_list
-            .get(&account)
-            .unwrap_or_default()
-    }
-
-    // default fn get_total_staked_chickens_by_account(&self, account: AccountId) -> u64 {
-    //     self.data::<Data>()
-    //         .total_staked_token_by_account
-    //         .get(account)
-    //         .unwrap_or_default()
-    // }
 }
 
 pub trait Internal {
@@ -216,7 +203,7 @@ where
     default fn get_request_unstake_time(&self, account: AccountId, token_id: Id) -> u64 {
         self.data::<Data>()
             .request_unstaking_time
-            .get(&(&account, &token_id))
-            .unwrap_or(0)
+            .get((account, token_id))
+            .unwrap_or_default()
     }
 }
