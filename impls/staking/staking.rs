@@ -1,6 +1,5 @@
 use crate::impls::staking::types::Data;
 pub use crate::traits::staking::Staking;
-use ink::prelude::vec;
 use ink::{env::CallFlags, prelude::vec::Vec};
 use openbrush::{
     contracts::psp34::{Id, *},
@@ -50,11 +49,7 @@ where
                     }
 
                     // Insert staking item in mapping with respect to caller
-                    // self.data::<Data>().staking_list.insert(caller, &item.clone());
-                    self.data::<Data>()
-                        .staking_list
-                        // .insert(&caller, &vec![item.clone()]);
-                        .insert(caller, item);
+                    self.data::<Data>().staking_list.insert(caller, item);
 
                     // Step 3 - Transfer Token from Caller to staking contract
                     let builder = PSP34Ref::transfer_builder(
@@ -145,15 +140,32 @@ where
     default fn un_stake(&mut self, token_ids: Vec<Id>) -> Result<(), StakingError> {
         // Step 1 - Check if the token is belong to caller
         let caller = Self::env().caller();
-        let current_time = Self::env().block_timestamp();
+
+        if self.data::<Data>().pending_unstaking_list.count(caller) == 0 {
+            return Err(StakingError::InvalidInput);
+        }
 
         for item in token_ids.iter() {
             // Step 2 - Check request unstaked and time request unstaked
+
+            if !self
+                .data::<Data>()
+                .pending_unstaking_list
+                .contains_value(caller, &item.clone())
+            {
+                return Err(StakingError::InvalidInput);
+            }
+
             // 1 min = 60000 milliseconds
             let request_unstake_time = self.get_request_unstake_time(caller, item.clone());
+            if request_unstake_time == 0 {
+                return Err(StakingError::InvalidTime);
+            }
+
+            let current_time = Self::env().block_timestamp();
 
             if let Some(checked_mul_value) =
-                self.data::<Data>().limit_unstaking_time.checked_add(60000)
+                self.data::<Data>().limit_unstaking_time.checked_mul(60000)
             {
                 if let Some(unstake_time) = request_unstake_time.checked_add(checked_mul_value) {
                     if unstake_time > current_time {

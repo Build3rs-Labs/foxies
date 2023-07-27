@@ -1,4 +1,3 @@
-use ink::prelude::vec::Vec;
 use ink::storage::Mapping;
 use openbrush::{
     contracts::psp34::{Id, PSP34Error},
@@ -65,6 +64,7 @@ pub enum StakingError {
     PSP34Error(PSP34Error),
     InvalidCaller,
     InvalidInput,
+    InvalidTime,
     NotEnoughtTimeToRequestUnstake,
     FailedToCalculateTimeRequstUnstake,
 }
@@ -77,6 +77,7 @@ impl StakingError {
             StakingError::CannotTransfer => String::from("CannotTransfer"),
             StakingError::CannotFindTokenOwner => String::from("CannotFindTokenOwner"),
             StakingError::InvalidInput => String::from("InvalidInput"),
+            StakingError::InvalidTime => String::from("InvalidTime"),
             StakingError::FailedToCalculateTimeRequstUnstake => {
                 String::from("FailedToCalculateTimeRequstUnstake")
             }

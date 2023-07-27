@@ -1,11 +1,10 @@
 use crate::impls::mint_token::types::{Data, MintTokenError};
 pub use crate::traits::mint_token::PayableMint;
 use ink::env::hash;
-use ink::prelude::string::String as PreludeString;
 use ink::prelude::vec::Vec;
 use openbrush::{
     contracts::psp34::{extensions::enumerable::*, Id, PSP34Error},
-    traits::{AccountId, Balance, Storage},
+    traits::{AccountId, Storage},
 };
 impl<T> PayableMint for T
 where

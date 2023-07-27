@@ -1,5 +1,5 @@
 use ink::prelude::vec::Vec;
-use openbrush::{contracts::psp34::Id, traits::AccountId};
+use openbrush::contracts::psp34::Id;
 
 use crate::impls::staking::types::StakingError;
 
