@@ -10,27 +10,21 @@ pub const STORAGE_KEY: u32 = openbrush::storage_unique_key!(Data);
 #[derive(Debug)]
 #[openbrush::upgradeable_storage(STORAGE_KEY)]
 pub struct Data {
-    // Contract owner address
     pub admin_address: AccountId,
-    // NFT contract address
     pub nft_contract_address: AccountId,
-    // `$Eggs` token (i.e. psp22) address
     pub eggs_token_address: AccountId,
-    // All chicken staked token count
+    pub staked_accounts: MultiMapping<u8, AccountId, ValueGuard<u8>>, // 0 is staked status, 1 is request unstake status
     pub total_staked: u64,
-    // Staking list mapping
     pub staking_list: MultiMapping<AccountId, Id, ValueGuard<AccountId>>,
-    // pending unstaking list
     pub pending_unstaking_list: MultiMapping<AccountId, Id, ValueGuard<AccountId>>,
-    // unstaking time limit
     pub limit_unstaking_time: u64,
-    // request unstaking time
     pub request_unstaking_time: Mapping<(AccountId, Id), u64>,
-    // Earn `$Eggs` per day by each staked token
     pub amount_of_eggs_token_earn_per_day: Balance,
-    //
     pub is_claimed: Mapping<AccountId, bool>,
-    //
+    pub staking_start_time: Mapping<(AccountId, Id), u64>,
+    pub unstaking_time: Mapping<(AccountId, Id), u64>,
+    pub reward_pool: Balance,
+    pub claimable_reward: Balance,
     pub _reserved: Option<()>,
 }
 
@@ -40,6 +34,7 @@ impl Default for Data {
             admin_address: ZERO_ADDRESS.into(),
             nft_contract_address: ZERO_ADDRESS.into(),
             eggs_token_address: ZERO_ADDRESS.into(),
+            staked_accounts: Default::default(),
             staking_list: Default::default(),
             total_staked: Default::default(),
             pending_unstaking_list: Default::default(),
@@ -47,6 +42,10 @@ impl Default for Data {
             amount_of_eggs_token_earn_per_day: Default::default(),
             is_claimed: Default::default(),
             request_unstaking_time: Default::default(),
+            staking_start_time: Default::default(),
+            unstaking_time: Default::default(),
+            reward_pool: Default::default(),
+            claimable_reward: Default::default(),
             _reserved: Default::default(),
         }
     }
@@ -67,6 +66,13 @@ pub enum StakingError {
     InvalidTime,
     NotEnoughtTimeToRequestUnstake,
     FailedToCalculateTimeRequstUnstake,
+    ClaimMustBeFalse,
+    InvalidTotalStake,
+    InvalidUserStake,
+    InvalidRewardPool,
+    NotEnoughBalance,
+    FailToDecreaseClaimableReward,
+    FailedToCalculateReward,
 }
 
 impl StakingError {
@@ -78,6 +84,13 @@ impl StakingError {
             StakingError::CannotFindTokenOwner => String::from("CannotFindTokenOwner"),
             StakingError::InvalidInput => String::from("InvalidInput"),
             StakingError::InvalidTime => String::from("InvalidTime"),
+            StakingError::ClaimMustBeFalse => String::from("ClaimMustBeFalse"),
+            StakingError::InvalidTotalStake => String::from("InvalidTotalStake"),
+            StakingError::InvalidUserStake => String::from("InvalidUserStake"),
+            StakingError::InvalidRewardPool => String::from("InvalidRewardPool"),
+            StakingError::NotEnoughBalance => String::from("NotEnoughBalance"),
+            StakingError::FailToDecreaseClaimableReward => String::from("FailToDecreaseClaimableReward"),
+            StakingError::FailedToCalculateReward => String::from("FailedToCalculateReward"),
             StakingError::FailedToCalculateTimeRequstUnstake => {
                 String::from("FailedToCalculateTimeRequstUnstake")
             }

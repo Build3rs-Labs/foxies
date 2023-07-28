@@ -10,7 +10,7 @@ impl<T> PayableMint for T
 where
     T: Storage<Data> + Storage<psp34::Data<enumerable::Balances>>,
 {
-    default fn mint_token(&mut self, to: AccountId) -> Result<(), PSP34Error> {
+    default fn mint_token(&mut self) -> Result<(), PSP34Error> {
         self.check_value(Self::env().transferred_value(), 1)?;
         // Caller of the contract
         let caller = Self::env().caller();
@@ -35,9 +35,6 @@ pub trait Internal {
 
     // Check if the transferred mint values is as expected
     fn check_value(&self, transferred_value: u128, mint_amount: u64) -> Result<(), PSP34Error>;
-
-    // Check if token is minted
-    fn token_exists(&self, id: Id) -> Result<(), PSP34Error>;
 }
 
 impl<T> Internal for T
@@ -93,9 +90,5 @@ where
             }
         }
         return Err(PSP34Error::Custom(MintTokenError::BadMintValue.as_str()));
-    }
-
-    default fn token_exists(&self, id: Id) -> Result<(), PSP34Error> {
-        Ok(())
     }
 }

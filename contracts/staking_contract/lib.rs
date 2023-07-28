@@ -18,11 +18,25 @@ pub mod staking_contract {
 
     impl StakingContract {
         #[ink(constructor)]
-        pub fn new(nft_contract_address: AccountId, eggs_token_address: AccountId) -> Self {
+        pub fn new(
+            admin_address: AccountId,
+            nft_contract_address: AccountId,
+            eggs_token_address: AccountId,
+            limit_unstaking_time: u64,
+            amount_of_eggs_token_earn_per_day: Balance,
+        ) -> Self {
             let mut instance = Self::default();
+            instance.foxies.admin_address = admin_address;
             instance.foxies.nft_contract_address = nft_contract_address;
             instance.foxies.eggs_token_address = eggs_token_address;
+            instance.foxies.limit_unstaking_time = limit_unstaking_time;
+            instance.foxies.amount_of_eggs_token_earn_per_day = amount_of_eggs_token_earn_per_day;
             instance
         }
+
+        // #[ink(message)]
+        // pub fn abc(&self) -> u64 {
+        //     self.env().block_timestamp()
+        // }
     }
 }
