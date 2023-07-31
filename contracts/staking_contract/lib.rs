@@ -33,10 +33,5 @@ pub mod staking_contract {
             instance.foxies.amount_of_eggs_token_earn_per_day = amount_of_eggs_token_earn_per_day;
             instance
         }
-
-        // #[ink(message)]
-        // pub fn abc(&self) -> u64 {
-        //     self.env().block_timestamp()
-        // }
     }
 }

@@ -4,7 +4,7 @@ use ink::env::hash;
 use ink::prelude::vec::Vec;
 use openbrush::{
     contracts::psp34::{extensions::enumerable::*, Id, PSP34Error},
-    traits::{AccountId, Storage},
+    traits::{AccountId, Storage, String},
 };
 impl<T> PayableMint for T
 where
@@ -19,6 +19,16 @@ where
         // mint token
         self.data::<psp34::Data<enumerable::Balances>>()
             ._mint_to(caller, Id::U64(random_number))?;
+        // emit event
+        if random_number < 1500 {
+            self.emit_mint_foxes_token_event(caller, random_number, String::from("Foxes Token"));
+        } else {
+            self.emit_mint_chicken_token_event(
+                caller,
+                random_number,
+                String::from("Chicken Token"),
+            );
+        }
         Ok(())
     }
 
@@ -90,5 +100,31 @@ where
             }
         }
         return Err(PSP34Error::Custom(MintTokenError::BadMintValue.as_str()));
+    }
+}
+
+// Events of TokenMinting
+pub trait TokenMintingEvents {
+    fn emit_mint_foxes_token_event(&self, owner: AccountId, item_id: u64, token_name: String);
+    fn emit_mint_chicken_token_event(&self, owner: AccountId, item_id: u64, token_name: String);
+}
+
+impl<T> TokenMintingEvents for T
+where
+    T: Storage<Data>,
+{
+    default fn emit_mint_foxes_token_event(
+        &self,
+        owner: AccountId,
+        item_id: u64,
+        token_name: String,
+    ) {
+    }
+    default fn emit_mint_chicken_token_event(
+        &self,
+        owner: AccountId,
+        item_id: u64,
+        token_name: String,
+    ) {
     }
 }

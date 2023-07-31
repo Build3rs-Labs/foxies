@@ -4,13 +4,16 @@
 
 #[openbrush::contract]
 pub mod my_psp34 {
+    use foxies::impls::mint_token::mint_token::TokenMintingEvents;
     use foxies::{impls::mint_token::*, traits::mint_token::*};
+    use ink::codegen::EmitEvent;
+    use ink::codegen::Env;
     use openbrush::{
         contracts::{
             ownable::*,
             psp34::extensions::{enumerable::*, metadata::*},
         },
-        traits::Storage,
+        traits::{Storage, String},
     };
     #[ink(storage)]
     #[derive(Default, Storage)]
@@ -23,6 +26,26 @@ pub mod my_psp34 {
         ownable: ownable::Data,
         #[storage_field]
         foxies: types::Data,
+    }
+
+    #[ink(event)]
+    pub struct FoxesEvent {
+        #[ink(topic)]
+        owner: AccountId,
+        #[ink(topic)]
+        item_id: u64,
+        #[ink(topic)]
+        token_name: String,
+    }
+
+    #[ink(event)]
+    pub struct ChickenEvent {
+        #[ink(topic)]
+        owner: AccountId,
+        #[ink(topic)]
+        item_id: u64,
+        #[ink(topic)]
+        token_name: String,
     }
 
     impl Ownable for Contract {}
@@ -39,6 +62,28 @@ pub mod my_psp34 {
             instance.foxies.max_supply = max_value;
             instance.foxies.price_per_mint = price_per_mint;
             instance
+        }
+    }
+
+    impl TokenMintingEvents for Contract {
+        fn emit_mint_foxes_token_event(&self, owner: AccountId, item_id: u64, token_name: String) {
+            self.env().emit_event(FoxesEvent {
+                owner,
+                item_id,
+                token_name,
+            });
+        }
+        fn emit_mint_chicken_token_event(
+            &self,
+            owner: AccountId,
+            item_id: u64,
+            token_name: String,
+        ) {
+            self.env().emit_event(ChickenEvent {
+                owner,
+                item_id,
+                token_name,
+            });
         }
     }
 }

@@ -1,6 +1,7 @@
-use crate::impls::staking::types::Data;
 pub use crate::traits::staking::Staking;
-use ink::{env::CallFlags, prelude::vec::Vec};
+use crate::{impls::staking::types::Data, traits::staking};
+use ink::prelude::vec;
+use ink::{env::CallFlags, prelude::vec::Vec, reflect::DispatchError};
 use openbrush::{
     contracts::psp34::{Id, *},
     traits::{AccountId, Storage},
@@ -132,10 +133,10 @@ where
                 // Step 4 - Update `request_unstaking_time` to current time
                 let current_time = Self::env().block_timestamp();
                 self.data::<Data>()
-                .request_unstaking_time
-                .insert(&(caller, item.clone()), &current_time);
-            
-            // Step 5 - Add token to pending unstaking list
+                    .request_unstaking_time
+                    .insert(&(caller, item.clone()), &current_time);
+
+                // Step 5 - Add token to pending unstaking list
                 self.data::<Data>()
                     .pending_unstaking_list
                     .insert(caller, &item.clone());
@@ -186,7 +187,6 @@ where
                 return Err(StakingError::InvalidInput);
             }
 
-            // 1 min = 60000 milliseconds
             let request_unstake_time = self.get_request_unstake_time(caller, item.clone());
             if request_unstake_time == 0 {
                 return Err(StakingError::InvalidTime);
@@ -194,6 +194,7 @@ where
 
             let current_time = Self::env().block_timestamp();
             if let Some(checked_mul_value) =
+                // 1 min = 60000 milliseconds
                 self.data::<Data>().limit_unstaking_time.checked_mul(60000)
             {
                 if let Some(unstake_time) = request_unstake_time.checked_add(checked_mul_value) {
@@ -218,6 +219,36 @@ where
                         .pending_unstaking_list
                         .remove_value(caller, &item.clone());
 
+                    // Caclulate how many days he staked his nft
+                    let staking_item_time = self
+                        .data::<Data>()
+                        .staking_start_time
+                        .get(&(caller, item.clone()));
+                    let unstaking_item_time = self
+                        .data::<Data>()
+                        .request_unstaking_time
+                        .get(&(caller, item.clone()));
+
+                    let time_difference = unstaking_item_time
+                        .unwrap_or_default()
+                        .checked_sub(staking_item_time.unwrap_or_default());
+
+                    // Convert the time difference to the number of days
+                    let days_staked = time_difference
+                        .unwrap_or_default()
+                        .checked_div(86400)
+                        .unwrap_or_default();
+
+                    // Add nft staking days
+                    let mut days = self
+                        .data::<Data>()
+                        .nft_staking_days
+                        .get(&(caller, item.clone()))
+                        .unwrap_or_default();
+                    days.push(days_staked);
+                    self.data::<Data>()
+                        .nft_staking_days
+                        .insert(&(caller, item.clone()), &days);
                     // Step 5 - update `request_unstaking_time` to 0
                     self.data::<Data>()
                         .request_unstaking_time
@@ -238,6 +269,13 @@ where
         Ok(())
     }
 
+    default fn get_staked_item(&self, account: AccountId, item: Id) -> Vec<u64> {
+        self.data::<Data>()
+            .nft_staking_days
+            .get((account, item))
+            .unwrap_or_default()
+    }
+
     default fn claim_rewards(&mut self) -> Result<(), StakingError> {
         let caller = Self::env().caller();
         let is_claimed = self.data::<Data>().is_claimed.get(&caller);
@@ -247,72 +285,11 @@ where
             if claimed {
                 return Err(StakingError::ClaimMustBeFalse);
             } else {
-                self.data::<Data>().is_claimed.insert(&caller, &true); // Can only claim once
+                // self.data::<Data>().is_claimed.insert(&caller, &true); // Can only claim once
 
-                // Check if the total NFT staked is greater than 0 to avoid division by ZERO error
-                if self.data::<Data>().total_staked == 0 {
-                    return Err(StakingError::InvalidTotalStake);
-                }
 
-                // Check how many NFT the user stake, it must be greater than ZERO
-                let staked_amount = self.data::<Data>().staking_list.count(caller);
-                if staked_amount == 0 {
-                    return Err(StakingError::InvalidUserStake);
-                }
 
-                // Check if reward pool has balance to pay for stakers
-                if self.data::<Data>().reward_pool == 0 {
-                    return Err(StakingError::InvalidRewardPool);
-                }
-
-                // calculate how much reward to pay for staker
-                if let Some(checked_mul_value) =
-                    self.data::<Data>().reward_pool.checked_mul(staked_amount)
-                {
-                    if let Some(reward) =
-                        checked_mul_value.checked_div(self.data::<Data>().total_staked as u128)
-                    {
-                        if self.data::<Data>().claimable_reward >= reward {
-                            // send the reward to the staker
-                            if let Some(claimable_reward) =
-                                self.data::<Data>().claimable_reward.checked_sub(reward)
-                            {
-                                self.data::<Data>().claimable_reward = claimable_reward;
-                                if reward > Self::env().balance() {
-                                    return Err(StakingError::NotEnoughBalance);
-                                }
-
-                                // Need to transfer $EGGS token
-                                if Self::env().transfer(caller, reward).is_err() {
-                                    return Err(StakingError::CannotTransfer);
-                                }
-
-                                // TODO:: Emit ClaimReward event to the network
-                            } else {
-                                return Err(StakingError::FailToDecreaseClaimableReward);
-                            }
-                        } else {
-                            if self.data::<Data>().claimable_reward > Self::env().balance() {
-                                return Err(StakingError::NotEnoughBalance);
-                            }
-
-                            // If there is not enough fund to pay, transfer everything in the pool to staker
-                            if Self::env()
-                                .transfer(caller, self.data::<Data>().claimable_reward)
-                                .is_err()
-                            {
-                                return Err(StakingError::CannotTransfer);
-                            }
-
-                            // TODO: emit ClaimedReward event
-                        }
-                        Ok(())
-                    } else {
-                        return Err(StakingError::FailedToCalculateReward);
-                    }
-                } else {
-                    return Err(StakingError::FailedToCalculateReward);
-                }
+                Ok(())
             }
         } else {
             return Err(StakingError::ClaimMustBeFalse);
@@ -322,6 +299,16 @@ where
     default fn set_claimed_status(&mut self, staker: AccountId) -> Result<(), StakingError> {
         self.data::<Data>().is_claimed.insert(&staker, &false); // Can only claim once
         Ok(())
+    }
+
+    // Get User NFT staked in the contract
+    default fn get_total_staked_by_account(&self, account: AccountId) -> u64 {
+        return self.data::<Data>().staking_list.count(account) as u64;
+    }
+
+    // Get User NFT staked in the contract
+    default fn get_total_pending_unstaked_by_account(&self, account: AccountId) -> u64 {
+        return self.data::<Data>().pending_unstaking_list.count(account) as u64;
     }
 }
 

@@ -1,3 +1,4 @@
+use ink::prelude::vec::Vec;
 use ink::storage::Mapping;
 use openbrush::{
     contracts::psp34::{Id, PSP34Error},
@@ -17,12 +18,13 @@ pub struct Data {
     pub total_staked: u64,
     pub staking_list: MultiMapping<AccountId, Id, ValueGuard<AccountId>>,
     pub pending_unstaking_list: MultiMapping<AccountId, Id, ValueGuard<AccountId>>,
-    pub limit_unstaking_time: u64,
-    pub request_unstaking_time: Mapping<(AccountId, Id), u64>,
+    pub limit_unstaking_time: u64, // minutes
     pub amount_of_eggs_token_earn_per_day: Balance,
     pub is_claimed: Mapping<AccountId, bool>,
     pub staking_start_time: Mapping<(AccountId, Id), u64>,
+    pub request_unstaking_time: Mapping<(AccountId, Id), u64>,
     pub unstaking_time: Mapping<(AccountId, Id), u64>,
+    pub nft_staking_days: Mapping<(AccountId, Id), Vec<u64>>,
     pub reward_pool: Balance,
     pub claimable_reward: Balance,
     pub _reserved: Option<()>,
@@ -45,6 +47,7 @@ impl Default for Data {
             staking_start_time: Default::default(),
             unstaking_time: Default::default(),
             reward_pool: Default::default(),
+            nft_staking_days: Default::default(),
             claimable_reward: Default::default(),
             _reserved: Default::default(),
         }
@@ -89,7 +92,9 @@ impl StakingError {
             StakingError::InvalidUserStake => String::from("InvalidUserStake"),
             StakingError::InvalidRewardPool => String::from("InvalidRewardPool"),
             StakingError::NotEnoughBalance => String::from("NotEnoughBalance"),
-            StakingError::FailToDecreaseClaimableReward => String::from("FailToDecreaseClaimableReward"),
+            StakingError::FailToDecreaseClaimableReward => {
+                String::from("FailToDecreaseClaimableReward")
+            }
             StakingError::FailedToCalculateReward => String::from("FailedToCalculateReward"),
             StakingError::FailedToCalculateTimeRequstUnstake => {
                 String::from("FailedToCalculateTimeRequstUnstake")
