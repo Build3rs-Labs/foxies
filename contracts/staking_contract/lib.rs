@@ -4,9 +4,11 @@
 
 #[openbrush::contract]
 pub mod staking_contract {
+    use foxies::impls::staking::staking::TokenStakingEvents;
     use foxies::{impls::staking::*, traits::staking::*};
-    use openbrush::traits::Storage;
-
+    use ink::codegen::EmitEvent;
+    use ink::codegen::Env;
+    use openbrush::{contracts::psp34::Id, traits::Storage};
     #[ink(storage)]
     #[derive(Default, Storage)]
     pub struct StakingContract {
@@ -32,6 +34,66 @@ pub mod staking_contract {
             instance.foxies.limit_unstaking_time = limit_unstaking_time;
             instance.foxies.amount_of_eggs_token_earn_per_day = amount_of_eggs_token_earn_per_day;
             instance
+        }
+    }
+
+    #[ink(event)]
+    pub struct StakeEvent {
+        #[ink(topic)]
+        owner: AccountId,
+        #[ink(topic)]
+        item_id: Id,
+    }
+
+    #[ink(event)]
+    pub struct RequestUnStakeEvent {
+        #[ink(topic)]
+        owner: AccountId,
+        #[ink(topic)]
+        item_id: Id,
+    }
+
+    #[ink(event)]
+    pub struct CancelRequestUnStakeEvent {
+        #[ink(topic)]
+        owner: AccountId,
+        #[ink(topic)]
+        item_id: Id,
+    }
+
+    #[ink(event)]
+    pub struct UnStakeEvent {
+        #[ink(topic)]
+        owner: AccountId,
+        #[ink(topic)]
+        item_id: Id,
+    }
+
+    #[ink(event)]
+    pub struct ClaimRewardEvent {
+        #[ink(topic)]
+        owner: AccountId,
+        #[ink(topic)]
+        reward: u64,
+    }
+
+    impl TokenStakingEvents for StakingContract {
+        fn emit_stake_token_event(&self, owner: AccountId, item_id: Id) {
+            self.env().emit_event(StakeEvent { owner, item_id });
+        }
+        fn emit_request_unstake_token_event(&self, owner: AccountId, item_id: Id) {
+            self.env()
+                .emit_event(RequestUnStakeEvent { owner, item_id });
+        }
+        fn emit_cancel_request_unstake_token_event(&self, owner: AccountId, item_id: Id) {
+            self.env()
+                .emit_event(CancelRequestUnStakeEvent { owner, item_id });
+        }
+        fn emit_unstake_token_event(&self, owner: AccountId, item_id: Id) {
+            self.env().emit_event(UnStakeEvent { owner, item_id });
+        }
+        fn claim_reqard_event(&self, owner: AccountId, reward: u64) {
+            self.env().emit_event(ClaimRewardEvent { owner, reward });
         }
     }
 }

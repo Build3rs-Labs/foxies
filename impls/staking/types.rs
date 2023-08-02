@@ -24,7 +24,7 @@ pub struct Data {
     pub staking_start_time: Mapping<(AccountId, Id), u64>,
     pub request_unstaking_time: Mapping<(AccountId, Id), u64>,
     pub unstaking_time: Mapping<(AccountId, Id), u64>,
-    pub nft_staking_days: Mapping<(AccountId, Id), Vec<u64>>,
+    pub nft_staking_days: Mapping<(AccountId, Id), u64>,
     pub reward_pool: Balance,
     pub claimable_reward: Balance,
     pub _reserved: Option<()>,
@@ -76,11 +76,13 @@ pub enum StakingError {
     NotEnoughBalance,
     FailToDecreaseClaimableReward,
     FailedToCalculateReward,
+    CantStakeFoxesToken
 }
 
 impl StakingError {
     pub fn as_str(&self) -> String {
         match self {
+            StakingError::CantStakeFoxesToken => String::from("CantStakeFoxesToken"),
             StakingError::NotTokenOwner => String::from("NotTokenOwner"),
             StakingError::NotApproved => String::from("NotApproved"),
             StakingError::CannotTransfer => String::from("CannotTransfer"),

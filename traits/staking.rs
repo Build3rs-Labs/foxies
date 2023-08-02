@@ -1,5 +1,5 @@
 use ink::prelude::vec::Vec;
-use openbrush::{contracts::psp34::Id, traits::AccountId};
+use openbrush::{contracts::psp34::Id, traits::{AccountId, Balance}};
 
 use crate::impls::staking::types::StakingError;
 
@@ -16,17 +16,28 @@ pub trait Staking {
     #[ink(message)]
     fn request_un_stake(&mut self, token_ids: Vec<Id>) -> Result<(), StakingError>;
 
+    // cancle request_un_stake chickens tokens
+    #[ink(message)]
+    fn cancel_request_unstake(&mut self, token_ids: Vec<Id>) -> Result<(), StakingError>;
+
     /// un-stake chickens tokens
     #[ink(message)]
     fn un_stake(&mut self, token_ids: Vec<Id>) -> Result<(), StakingError>;
 
     /// claim rewards
     #[ink(message)]
-    fn claim_rewards(&mut self) -> Result<(), StakingError>;
+    fn claim_token_rewards(&mut self, account: AccountId, item: Id) -> Result<(), StakingError>;
 
     /// Set Account so it can claim the reward. Must run by backend every month before add_reward
     #[ink(message)]
     fn set_claimed_status(&mut self, staker: AccountId) -> Result<(), StakingError>;
+
+    #[ink(message)]
+    fn set_limit_unstaking_time(&mut self, limit_unstaking_time: u64) -> Result<(), StakingError>;
+
+    #[ink(message)]
+    fn set_token_earn_per_day(&mut self, amount_of_eggs_token_earn_per_day: Balance) -> Result<(), StakingError>;
+
 
     /// This function returns the total NFT Staked by an account
     #[ink(message)]
@@ -37,5 +48,5 @@ pub trait Staking {
     fn get_total_pending_unstaked_by_account(&self, account: AccountId) -> u64;
 
     #[ink(message)]
-    fn get_staked_item(&self, account: AccountId, item: Id) -> Vec<u64>;
+    fn get_staked_item_days(&self, account: AccountId, item: Id) -> u64;
 }
