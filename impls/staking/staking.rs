@@ -1,7 +1,8 @@
 pub use crate::traits::staking::Staking;
 use crate::{impls::staking::types::Data, traits::staking};
+use ink::env::hash;
 use ink::prelude::vec;
-use ink::{env::CallFlags, prelude::vec::Vec, reflect::DispatchError};
+use ink::{env::CallFlags, prelude::vec::Vec};
 use openbrush::{
     contracts::{
         psp22::*,
@@ -288,21 +289,20 @@ where
                     let staking_item_time = self
                         .data::<Data>()
                         .staking_start_time
-                        .get(&(caller, item.clone()));
+                        .get(&(caller, item.clone()))
+                        .unwrap_or_default();
                     let unstaking_item_time = self
                         .data::<Data>()
                         .request_unstaking_time
-                        .get(&(caller, item.clone()));
+                        .get(&(caller, item.clone()))
+                        .unwrap_or_default();
 
                     let time_difference = unstaking_item_time
-                        .unwrap_or_default()
-                        .checked_sub(staking_item_time.unwrap_or_default());
+                        .checked_sub(staking_item_time)
+                        .unwrap_or_default();
 
                     // Convert the time difference to the number of days
-                    let days_staked = time_difference
-                        .unwrap_or_default()
-                        .checked_div(86400)
-                        .unwrap_or_default();
+                    let days_staked = time_difference.checked_div(86400).unwrap_or_default();
 
                     // Add nft staking days
                     self.data::<Data>()
@@ -345,23 +345,67 @@ where
             if days > 0 {
                 let amount_of_eggs_token_earn_per_day =
                     self.data::<Data>().amount_of_eggs_token_earn_per_day;
-                let value = days as u128 * amount_of_eggs_token_earn_per_day; // TODO: need to update how much eggs token earn per day
 
-                // mint EGGS token to tokwn owner
-                PSP22Ref::transfer(
-                    &self.data::<Data>().eggs_token_address,
-                    account,
-                    value,
-                    vec![],
-                )
-                .unwrap_or_default();
+                // number of $Eggs token earn by account as per staking days
+                let earn_by_staking = days as u128 * amount_of_eggs_token_earn_per_day; // TODO: need to update how much eggs token earn per day
+
+                // Stealing mechanism : We define the stealing mechanism function. When a chicken tries to claim their $EGGS,
+                // there should be a chance that a fox can steal some or all of it.
+                // get random foxes NFT token (foxes NFT token between 0 - 1500)
+                let random_foxes_nft = self.random_number(1499).unwrap_or_default();
+                // get random foxes NFT token owner who steal some or all of caller `$Eggs` token
+                if let Some(random_foxes_nft_owner) = PSP34Ref::owner_of(
+                    &self.data::<Data>().nft_contract_address,
+                    Id::U64(random_foxes_nft),
+                ) {
+                    // get random number between 0 and `earn_by_staking` to steal some or all of it
+                    let steal_some_or_all_eggs = self
+                        .random_number(earn_by_staking as u64)
+                        .unwrap_or_default();
+
+                    // check if all eggs are transferring or just some eggs
+                    if steal_some_or_all_eggs == earn_by_staking as u64 {
+                        // transfer all EGGS token to random_foxes_nft_owner wallet
+                        PSP22Ref::transfer(
+                            &self.data::<Data>().eggs_token_address,
+                            random_foxes_nft_owner,
+                            earn_by_staking,
+                            vec![],
+                        )
+                        .unwrap_or_default();
+                    } else {
+                        // transfer some eggs to random_foxes_nft_owner wallet
+                        PSP22Ref::transfer(
+                            &self.data::<Data>().eggs_token_address,
+                            random_foxes_nft_owner,
+                            steal_some_or_all_eggs as u128,
+                            vec![],
+                        )
+                        .unwrap_or_default();
+
+                        // transfer remaining eggs to token owner wallet
+                        PSP22Ref::transfer(
+                            &self.data::<Data>().eggs_token_address,
+                            account,
+                            earn_by_staking - steal_some_or_all_eggs as u128,
+                            vec![],
+                        )
+                        .unwrap_or_default();
+                    }
+                    self.claim_request_event(
+                        account,
+                        earn_by_staking as u64 - steal_some_or_all_eggs,
+                    );
+                    Ok(())
+                } else {
+                    return Err(StakingError::RandomFoxesNFTNotFound);
+                }
             } else {
                 return Err(StakingError::CannotTransfer);
             }
         } else {
             return Err(StakingError::InvalidTime);
         }
-        Ok(())
     }
 
     default fn set_token_earn_per_day(
@@ -398,6 +442,10 @@ where
 
 pub trait Internal {
     fn get_request_unstake_time(&self, account: AccountId, token_id: Id) -> u64;
+    // When a chicken tries to claim their $EGGS, there should be a chance that a fox can steal some or all of it
+    fn setaling_eggs(&self) -> Result<(), StakingError>;
+    // max_value: 1499
+    fn random_number(&mut self, max_value: u64) -> Result<u64, StakingError>;
 }
 
 impl<T> Internal for T
@@ -410,6 +458,37 @@ where
             .get((account, token_id))
             .unwrap_or_default()
     }
+
+    // When a chicken tries to claim their $EGGS, there should be a chance that a fox can steal some or all of it
+    default fn setaling_eggs(&self) -> Result<(), StakingError> {
+        Ok(())
+    }
+
+    default fn random_number(&mut self, max_value: u64) -> Result<u64, StakingError> {
+        let seed = Self::env().block_timestamp();
+        // Define mutable empty vector
+        let mut input: Vec<u8> = Vec::new();
+        // `extend_from_slice()` Clones and appends all elements in a slice to the Vec
+        // `to_be_bytes()` Return the memory representation of this integer as a byte array in big-endian (network) byte order.
+        input.extend_from_slice(&seed.to_be_bytes());
+        input.extend_from_slice(&self.data::<Data>().salt.to_be_bytes());
+        // `hash` Provides type definitions and traits for the built-in cryptographic hashes.
+        // `keccak256` The KECCAK crypto hash with 256-bit output.
+        // `HashOutput` The output type of built-in cryptographic hash functions.
+        let mut output = <hash::Keccak256 as hash::HashOutput>::Type::default();
+        // `hash_bytes` Conducts the crypto hash of the given input and stores the result in output.
+        // and takes two arguments: the input and the output
+        ink::env::hash_bytes::<hash::Keccak256>(&input, &mut output);
+        // increase `self.data<Data>().salt` by 1
+        self.data::<Data>().salt += 1;
+        // if we use just `output[0]` then we can't use value more than `u8::MAX`
+        // to use more bits we can make `number_bytes` like this
+        let number_bytes = [output[0], output[1]];
+        let z = u16::from_be_bytes(number_bytes);
+        let random_number = z as u64 % (max_value + 1);
+
+        Ok(random_number)
+    }
 }
 
 // Events of TokenStaking
@@ -418,7 +497,7 @@ pub trait TokenStakingEvents {
     fn emit_request_unstake_token_event(&self, owner: AccountId, item_id: Id);
     fn emit_cancel_request_unstake_token_event(&self, owner: AccountId, item_id: Id);
     fn emit_unstake_token_event(&self, owner: AccountId, item_id: Id);
-    fn claim_reqard_event(&self, owner: AccountId, reward: u64);
+    fn claim_request_event(&self, owner: AccountId, reward: u64);
 }
 
 impl<T> TokenStakingEvents for T
@@ -429,5 +508,5 @@ where
     default fn emit_request_unstake_token_event(&self, owner: AccountId, item_id: Id) {}
     default fn emit_cancel_request_unstake_token_event(&self, owner: AccountId, item_id: Id) {}
     default fn emit_unstake_token_event(&self, owner: AccountId, item_id: Id) {}
-    default fn claim_reqard_event(&self, owner: AccountId, reward: u64) {}
+    default fn claim_request_event(&self, owner: AccountId, reward: u64) {}
 }

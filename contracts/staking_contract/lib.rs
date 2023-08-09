@@ -92,7 +92,7 @@ pub mod staking_contract {
         fn emit_unstake_token_event(&self, owner: AccountId, item_id: Id) {
             self.env().emit_event(UnStakeEvent { owner, item_id });
         }
-        fn claim_reqard_event(&self, owner: AccountId, reward: u64) {
+        fn claim_request_event(&self, owner: AccountId, reward: u64) {
             self.env().emit_event(ClaimRewardEvent { owner, reward });
         }
     }

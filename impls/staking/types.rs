@@ -27,6 +27,7 @@ pub struct Data {
     pub nft_staking_days: Mapping<(AccountId, Id), u64>,
     pub reward_pool: Balance,
     pub claimable_reward: Balance,
+    pub salt: u64,
     pub _reserved: Option<()>,
 }
 
@@ -49,6 +50,7 @@ impl Default for Data {
             reward_pool: Default::default(),
             nft_staking_days: Default::default(),
             claimable_reward: Default::default(),
+            salt: Default::default(),
             _reserved: Default::default(),
         }
     }
@@ -76,12 +78,14 @@ pub enum StakingError {
     NotEnoughBalance,
     FailToDecreaseClaimableReward,
     FailedToCalculateReward,
-    CantStakeFoxesToken
+    CantStakeFoxesToken,
+    RandomFoxesNFTNotFound
 }
 
 impl StakingError {
     pub fn as_str(&self) -> String {
         match self {
+            StakingError::RandomFoxesNFTNotFound => String::from("RandomFoxesNFTNotFound"),
             StakingError::CantStakeFoxesToken => String::from("CantStakeFoxesToken"),
             StakingError::NotTokenOwner => String::from("NotTokenOwner"),
             StakingError::NotApproved => String::from("NotApproved"),
