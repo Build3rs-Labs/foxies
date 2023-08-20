@@ -1,15 +1,20 @@
-use crate::impls::mint_token::types::{Data, MintTokenError};
 pub use crate::traits::mint_token::PayableMint;
+use crate::{
+    ensure,
+    impls::mint_token::types::{Data, MintTokenError},
+};
 use ink::env::hash;
 use ink::prelude::vec::Vec;
 use openbrush::{
     contracts::psp34::{extensions::enumerable::*, Id, PSP34Error},
-    traits::{AccountId, Storage, String},
+    modifier_definition, modifiers,
+    traits::{AccountId, AccountIdExt, Storage, String},
 };
 impl<T> PayableMint for T
 where
     T: Storage<Data> + Storage<psp34::Data<enumerable::Balances>>,
 {
+    #[modifiers(valid_user)]
     default fn mint_token(&mut self) -> Result<(), PSP34Error> {
         self.check_value(Self::env().transferred_value(), 1)?;
         // Caller of the contract
@@ -44,7 +49,7 @@ pub trait Internal {
     fn generate_random_number(&mut self) -> Result<u64, MintTokenError>;
 
     // Check if the transferred mint values is as expected
-    fn check_value(&self, transferred_value: u128, mint_amount: u64) -> Result<(), PSP34Error>;
+    fn check_value(&self, transferred_value: u128, mint_amount: u64) -> Result<(), MintTokenError>;
 }
 
 impl<T> Internal for T
@@ -92,14 +97,14 @@ where
         &self,
         transferred_value: u128,
         mint_amount: u64,
-    ) -> Result<(), PSP34Error> {
+    ) -> Result<(), MintTokenError> {
         if let Some(value) = (mint_amount as u128).checked_mul(self.data::<Data>().price_per_mint) {
             if transferred_value == value {
                 // TODO: need to transfer the value to owner account
                 return Ok(());
             }
         }
-        return Err(PSP34Error::Custom(MintTokenError::BadMintValue.as_str()));
+        return Err(MintTokenError::BadMintValue);
     }
 }
 
@@ -127,4 +132,21 @@ where
         token_name: String,
     ) {
     }
+}
+
+#[modifier_definition]
+pub fn valid_user<T, F, R, E>(instance: &mut T, body: F) -> Result<R, E>
+where
+    T: Storage<Data>,
+    F: FnOnce(&mut T) -> Result<R, E>,
+    E: From<MintTokenError>,
+{
+    // AccountId mustn't be zero
+    ensure!(!T::env().caller().is_zero(), MintTokenError::InvalidAccount);
+    // Contract owner can't mint
+    ensure!(
+        T::env().caller() != instance.data().owner,
+        MintTokenError::OwnerCantMint
+    );
+    body(instance)
 }

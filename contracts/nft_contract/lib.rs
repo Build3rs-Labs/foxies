@@ -57,8 +57,9 @@ pub mod my_psp34 {
     impl Contract {
         // Add max value while contract uploading
         #[ink(constructor)]
-        pub fn new(max_value: u64, price_per_mint: Balance) -> Self {
+        pub fn new(max_value: u64, price_per_mint: Balance, owner: AccountId) -> Self {
             let mut instance = Self::default();
+            instance.foxies.owner = owner;
             instance.foxies.max_supply = max_value;
             instance.foxies.price_per_mint = price_per_mint;
             instance
