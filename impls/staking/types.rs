@@ -2,8 +2,8 @@ use ink::prelude::vec::Vec;
 use ink::storage::Mapping;
 use openbrush::{
     contracts::psp34::{Id, PSP34Error},
-    storage::{MultiMapping, TypeGuard, ValueGuard},
-    traits::{AccountId, Balance, String, ZERO_ADDRESS},
+    storage::{MultiMapping, ValueGuard},
+    traits::{AccountId, Balance, String, ZERO_ADDRESS, Timestamp},
 };
 
 pub const STORAGE_KEY: u32 = openbrush::storage_unique_key!(Data);
@@ -21,12 +21,10 @@ pub struct Data {
     pub limit_unstaking_time: u64, // minutes
     pub amount_of_eggs_token_earn_per_day: Balance,
     pub is_claimed: Mapping<AccountId, bool>,
-    pub staking_start_time: Mapping<(AccountId, Id), u64>,
-    pub request_unstaking_time: Mapping<(AccountId, Id), u64>,
-    pub unstaking_time: Mapping<(AccountId, Id), u64>,
+    pub staking_start_time: Mapping<(AccountId, Id), Timestamp>,
+    pub request_unstaking_time: Mapping<(AccountId, Id), Timestamp>,
+    pub unstaking_time: Mapping<(AccountId, Id), Timestamp>,
     pub nft_staking_days: Mapping<(AccountId, Id), u64>,
-    pub reward_pool: Balance,
-    pub claimable_reward: Balance,
     pub salt: u64,
     pub _reserved: Option<()>,
 }
@@ -47,9 +45,7 @@ impl Default for Data {
             request_unstaking_time: Default::default(),
             staking_start_time: Default::default(),
             unstaking_time: Default::default(),
-            reward_pool: Default::default(),
             nft_staking_days: Default::default(),
-            claimable_reward: Default::default(),
             salt: Default::default(),
             _reserved: Default::default(),
         }
@@ -79,7 +75,9 @@ pub enum StakingError {
     FailToDecreaseClaimableReward,
     FailedToCalculateReward,
     CantStakeFoxesToken,
-    RandomFoxesNFTNotFound
+    RandomFoxesNFTNotFound,
+    NotContractOwner,
+    InvalidAccount
 }
 
 impl StakingError {
@@ -98,6 +96,8 @@ impl StakingError {
             StakingError::InvalidUserStake => String::from("InvalidUserStake"),
             StakingError::InvalidRewardPool => String::from("InvalidRewardPool"),
             StakingError::NotEnoughBalance => String::from("NotEnoughBalance"),
+            StakingError::NotContractOwner => String::from("NotContractOwner"),
+            StakingError::InvalidAccount => String::from("InvalidAccount"),
             StakingError::FailToDecreaseClaimableReward => {
                 String::from("FailToDecreaseClaimableReward")
             }
@@ -126,8 +126,3 @@ impl From<PSP34Error> for StakingError {
     }
 }
 
-pub struct RequestUnstakingTimeKey;
-
-impl<'a> TypeGuard<'a> for RequestUnstakingTimeKey {
-    type Type = &'a (&'a AccountId, &'a u64);
-}

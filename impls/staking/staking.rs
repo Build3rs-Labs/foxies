@@ -1,13 +1,15 @@
+use crate::ensure;
+use crate::impls::staking::types::Data;
 pub use crate::traits::staking::Staking;
-use crate::{impls::staking::types::Data, traits::staking};
 use ink::env::hash;
-use ink::prelude::vec;
-use ink::{env::CallFlags, prelude::vec::Vec};
+use ink::{env::CallFlags, prelude::vec, prelude::vec::Vec};
+use openbrush::traits::AccountIdExt;
 use openbrush::{
     contracts::{
         psp22::*,
         psp34::{Id, *},
     },
+    modifier_definition, modifiers,
     traits::{AccountId, Balance, Storage},
 };
 
@@ -20,18 +22,16 @@ where
     default fn stake(&mut self, token_ids: Vec<Id>) -> Result<(), StakingError> {
         let caller = Self::env().caller();
         let leng = token_ids.len();
-        let start_time = Self::env().block_timestamp();
 
-        // `checked_add` Checked integer addition. Computes self + rhs, returning None if overflow occurred.
         if let Some(total_staked) = self.data::<Data>().total_staked.checked_add(leng as u64) {
-            // Update `total_staked` in contract storage
             self.data::<Data>().total_staked = total_staked;
 
             for item in token_ids.iter() {
-                // Step 0 - Check if token is chicken token
+                // Step 0 - Check if token is chicken token or not
                 if *item < Id::U64(1499) {
                     return Err(StakingError::CantStakeFoxesToken);
                 }
+
                 // Step 1 - Check if the token is belong to caller
                 if let Some(token_owner) =
                     PSP34Ref::owner_of(&self.data::<Data>().nft_contract_address, item.clone())
@@ -52,10 +52,10 @@ where
                         return Err(StakingError::NotApproved);
                     }
 
-                    // Insert staking item in mapping with respect to caller
+                    // Insert stake item inside mapping `staking_list` (key -> caller, value -> item)
                     self.data::<Data>().staking_list.insert(caller, item);
 
-                    // Step 3 - Transfer Token from Caller to staking contract
+                    // Step 3 - Transfer Token from caller to staking contract
                     let builder = PSP34Ref::transfer_builder(
                         &self.data::<Data>().nft_contract_address,
                         Self::env().account_id(),
@@ -77,7 +77,9 @@ where
                             self.data::<Data>().is_claimed.insert(&caller, &false);
                         }
 
-                        // Update staking start time of caller's token id
+                        // Update stake start time of caller's token ids inside `staking_start_time` mapping
+                        let start_time = Self::env().block_timestamp();
+
                         self.data::<Data>()
                             .staking_start_time
                             .insert(&(caller, item.clone()), &start_time);
@@ -108,7 +110,7 @@ where
         let leng = token_ids.len();
 
         for item in token_ids.iter() {
-            // Step 1 - Check owner token is Contract Staking
+            // Step 1 - Check token owner is contract staking
             if let Some(token_owner) =
                 PSP34Ref::owner_of(&self.data::<Data>().nft_contract_address, item.clone())
             {
@@ -116,7 +118,7 @@ where
                     return Err(StakingError::InvalidCaller);
                 }
 
-                // Step 2 - Check staker stake token
+                // Step 2 - Check staker (i.e. caller) stake token
                 if !self
                     .data::<Data>()
                     .staking_list
@@ -125,18 +127,19 @@ where
                     return Err(StakingError::InvalidInput);
                 }
 
-                // Step 3 - Remove token from `staking_list`
+                // Step 4 - Remove token from `staking_list`
                 self.data::<Data>()
                     .staking_list
                     .remove_value(caller, &item.clone());
 
-                // Step 4 - Update `request_unstaking_time` to current time
+                // Step 5 - Update `request_unstaking_time` to current time
                 let current_time = Self::env().block_timestamp();
+
                 self.data::<Data>()
                     .request_unstaking_time
                     .insert(&(caller, item.clone()), &current_time);
 
-                // Step 5 - Add token to pending unstaking list
+                // Step 6 - Add token to pending unstaking list
                 self.data::<Data>()
                     .pending_unstaking_list
                     .insert(caller, &item.clone());
@@ -302,7 +305,11 @@ where
                         .unwrap_or_default();
 
                     // Convert the time difference to the number of days
-                    let days_staked = time_difference.checked_div(86400).unwrap_or_default();
+                    // convert the time difference to the number of days
+                    // https://www.unixtimestamp.com
+                    // 7 days = 604800000 in Unix time
+                    let day = 86400000;
+                    let days_staked = time_difference.checked_div(day).unwrap_or_default();
 
                     // Add nft staking days
                     self.data::<Data>()
@@ -347,7 +354,7 @@ where
                     self.data::<Data>().amount_of_eggs_token_earn_per_day;
 
                 // number of $Eggs token earn by account as per staking days
-                let earn_by_staking = days as u128 * amount_of_eggs_token_earn_per_day; // TODO: need to update how much eggs token earn per day
+                let earn_by_staking = days as u128 * amount_of_eggs_token_earn_per_day;
 
                 // Stealing mechanism : We define the stealing mechanism function. When a chicken tries to claim their $EGGS,
                 // there should be a chance that a fox can steal some or all of it.
@@ -408,6 +415,7 @@ where
         }
     }
 
+    #[modifiers(contract_owner)]
     default fn set_token_earn_per_day(
         &mut self,
         amount_of_eggs_token_earn_per_day: Balance,
@@ -416,11 +424,13 @@ where
         Ok(())
     }
 
+    #[modifiers(contract_owner)]
     default fn set_claimed_status(&mut self, staker: AccountId) -> Result<(), StakingError> {
         self.data::<Data>().is_claimed.insert(&staker, &false); // Can only claim once
         Ok(())
     }
 
+    #[modifiers(contract_owner)]
     default fn set_limit_unstaking_time(
         &mut self,
         limit_unstaking_time: u64,
@@ -509,4 +519,21 @@ where
     default fn emit_cancel_request_unstake_token_event(&self, owner: AccountId, item_id: Id) {}
     default fn emit_unstake_token_event(&self, owner: AccountId, item_id: Id) {}
     default fn claim_request_event(&self, owner: AccountId, reward: u64) {}
+}
+
+#[modifier_definition]
+pub fn contract_owner<T, F, R, E>(instance: &mut T, body: F) -> Result<R, E>
+where
+    T: Storage<Data>,
+    F: FnOnce(&mut T) -> Result<R, E>,
+    E: From<StakingError>,
+{
+    // AccountId mustn't be zero
+    ensure!(!T::env().caller().is_zero(), StakingError::InvalidAccount);
+    // Only contract owner can call
+    ensure!(
+        T::env().caller() != instance.data().admin_address,
+        StakingError::NotContractOwner
+    );
+    body(instance)
 }

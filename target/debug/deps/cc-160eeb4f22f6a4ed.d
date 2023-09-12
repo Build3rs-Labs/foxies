@@ -1,0 +1,8 @@
+/Users/ganesholi/Developer/foxies/target/debug/deps/cc-160eeb4f22f6a4ed.rmeta: /Users/ganesholi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cc-1.0.79/src/lib.rs /Users/ganesholi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cc-1.0.79/src/windows_registry.rs
+
+/Users/ganesholi/Developer/foxies/target/debug/deps/libcc-160eeb4f22f6a4ed.rlib: /Users/ganesholi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cc-1.0.79/src/lib.rs /Users/ganesholi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cc-1.0.79/src/windows_registry.rs
+
+/Users/ganesholi/Developer/foxies/target/debug/deps/cc-160eeb4f22f6a4ed.d: /Users/ganesholi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cc-1.0.79/src/lib.rs /Users/ganesholi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cc-1.0.79/src/windows_registry.rs
+
+/Users/ganesholi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cc-1.0.79/src/lib.rs:
+/Users/ganesholi/.cargo/registry/src/index.crates.io-6f17d22bba15001f/cc-1.0.79/src/windows_registry.rs:
