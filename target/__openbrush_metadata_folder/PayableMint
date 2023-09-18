@@ -1,0 +1,1 @@
+"pub trait PayableMint\n{\n    #[doc = \" Mint chickens or foxes tokens\"] #[ink(message, payable)]\n    #[ink(selector = 802303159u32)] fn mint_token(& mut self) -> Result < (),\n    PSP34Error > ; #[doc = \" Get random number in vector\"] #[ink(message)]\n    #[ink(selector = 3437905187u32)] fn get_random_numbers_vector(& self) ->\n    Vec < u64 > ;\n}"
