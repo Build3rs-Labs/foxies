@@ -23,3 +23,15 @@ There are 2 types of playable characters :
   Chickens NFTs can be staked to generate $EGGS each day, but when they try to sell their $EGGS, there is a 50% chance that the accumulated $EGGS gets stolen by a Wolf.
   Additionally, a 20% tax is charged on sold $EGGS and distributed to the foxes NFTs holders.
   Foxes automatically earn 20% of all the $EGGS sold by the chickens and also have a 10% chance of stealing new mints. The rarity of the fox increases the holder's chance of stealing a new mint.
+
+# EGGS CONTRACT ADDRESS
+
+5HYDZ3cWLsY7Xezn8xRGx8WdP3cyg9Zi3QHjkiG3wFCybG3G
+
+# NFT CONTRACT ADDRESS
+
+5HSkTsVi5PWAVrLMgyKGzWAo6yY2aJuVrr5zm2QvGbBVSWJp
+
+# STAKING CONTRACT ADDRESS
+
+5Gr8T6E8uiGH9i49pSz8DSQasZ1amJHi5eyu5bGpRZKJE8aP
