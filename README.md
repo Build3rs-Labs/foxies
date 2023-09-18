@@ -24,14 +24,11 @@ There are 2 types of playable characters :
   Additionally, a 20% tax is charged on sold $EGGS and distributed to the foxes NFTs holders.
   Foxes automatically earn 20% of all the $EGGS sold by the chickens and also have a 10% chance of stealing new mints. The rarity of the fox increases the holder's chance of stealing a new mint.
 
-# EGGS CONTRACT ADDRESS
-
+- EGGS CONTRACT ADDRESS
 5HYDZ3cWLsY7Xezn8xRGx8WdP3cyg9Zi3QHjkiG3wFCybG3G
 
-# NFT CONTRACT ADDRESS
-
+- NFT CONTRACT ADDRESS
 5HSkTsVi5PWAVrLMgyKGzWAo6yY2aJuVrr5zm2QvGbBVSWJp
 
-# STAKING CONTRACT ADDRESS
-
+- STAKING CONTRACT ADDRESS
 5Gr8T6E8uiGH9i49pSz8DSQasZ1amJHi5eyu5bGpRZKJE8aP
