@@ -1,17 +1,16 @@
-"use client";
+// Add appropriate import statements here
+import { NextPage } from "next";
 import Head from "next/head";
-import styles from "@/styles/Home.module.css";
-import Header from "@/components/Header";
+import Header from "../components/Header";
 import Image from "next/image";
 import Link from "next/link";
 
-export default function Home() {
-  const backgroundStyle = {
+const Home: NextPage = () => {
+  const backgroundStyle: React.CSSProperties = {
     backgroundSize: "cover",
     backgroundPosition: "center center",
     backgroundAttachment: "fixed",
     backgroundImage: 'url("/home.jpg")', // Replace with the actual image path
-
     minHeight: "100vh",
   };
 
@@ -32,6 +31,7 @@ export default function Home() {
           <div className="w-full h-full flex items-center justify-center flex-col ">
             <Image
               src="/Foxies.png"
+              alt="image"
               width={600}
               height={600}
               className="mx-10 px-10"
@@ -40,16 +40,18 @@ export default function Home() {
               First idle-stacking Play-to-earn on Aleph Zero
             </h1>
             <Link href="/mint">
-            <button class="relative bottom-10 border-[6px] border-black bg-white rounded-full text-4xl sm:text-6xl text-black px-12 flex items-center">
-              <span class="relative font-VT323">Start</span>
-              <span class="absolute top-1/2 right-4 transform -translate-y-1/2 text-4xl font-bold">
-                &gt;
-              </span>
-            </button>
+              <button className="relative bottom-10 border-[6px] border-black bg-white rounded-full text-4xl sm:text-6xl text-black px-12 flex items-center">
+                <span className="relative font-VT323">Start</span>
+                <span className="absolute top-1/2 right-4 transform -translate-y-1/2 text-4xl font-bold">
+                  &gt;
+                </span>
+              </button>
             </Link>
           </div>
         </div>
       </div>
     </>
   );
-}
+};
+
+export default Home;

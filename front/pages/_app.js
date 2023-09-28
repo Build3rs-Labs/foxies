@@ -1,6 +1,5 @@
-'use client'
 
-import '@/styles/globals.css'
+import '/styles/globals.css'
 import { UseInkProvider } from 'useink';
 import { RococoContractsTestnet, ShibuyaTestnet } from 'useink/chains';
 
@@ -8,7 +7,7 @@ export default function App({ Component, pageProps }) {
   return (
     <UseInkProvider 
       config={{ 
-        dappName: 'Flipper', 
+        dappName: 'Foxies', 
         chains: [RococoContractsTestnet, ShibuyaTestnet] ,
       }}
     >

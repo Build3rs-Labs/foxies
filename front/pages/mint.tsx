@@ -1,6 +1,16 @@
 import Head from "next/head";
 import styles from "@/styles/Home.module.css";
-import Header2 from "@/components/Header2";
+import Header2 from "../components/Header2";
+import { useTx, useContract, shouldDisable } from "useink";
+import { pickDecoded } from "useink/utils";
+import { useWallet, useAllWallets } from "useink";
+
+import metadata from "../metadata/nft_contract.json";
+
+interface Result {
+  color: string;
+}
+
 
 export default function Mint() {
   const backgroundStyle = {
@@ -11,6 +21,11 @@ export default function Mint() {
 
     minHeight: "100vh",
   };
+
+  const { account, connect, disconnect } = useWallet();
+  const contract = useContract("..address", metadata);
+  const setColor = useTx<Result>(contract, "setColor");
+  const args = ["blue"];
 
   return (
     <>
@@ -36,11 +51,18 @@ export default function Mint() {
             </div>
             <div className=" p-4 text-center	">
               In this wonderful game, you'll be able to play 2 characters :
-              <button class="relative mx-auto mt-8 border-4  border-black bg-white rounded-full text-4xl sm:text-6xl text-black px-12 flex items-center">
-                <span class="relative font-VT323">Mint</span>
-                <span class="absolute top-1/2 right-4 transform -translate-y-1/2 text-4xl font-bold font-mono">
+              <button className="relative mx-auto mt-8 border-4  border-black bg-white rounded-full text-4xl sm:text-6xl text-black px-12 flex items-center">
+                <span className="relative font-VT323">Mint</span>
+                <span className="absolute top-1/2 right-4 transform -translate-y-1/2 text-4xl font-bold font-mono">
                   &gt;
                 </span>
+              </button>
+              { account ? (<h1>oui</h1> ) : ( <h1>non</h1>)}
+              <button
+                onClick={() => setColor.signAndSend(args)}
+                
+              >
+                test
               </button>
             </div>
             <div className="p-4 text-right">
