@@ -1,31 +1,79 @@
 import Head from "next/head";
 import styles from "@/styles/Home.module.css";
 import Header2 from "../components/Header2";
-import { useTx, useContract, shouldDisable } from "useink";
-import { pickDecoded } from "useink/utils";
-import { useWallet, useAllWallets } from "useink";
-
+import Image from "next/image";
 import metadata from "../metadata/nft_contract.json";
+import { ContractPromise } from "@polkadot/api-contract";
+import { ApiPromise, WsProvider } from "@polkadot/api";
+import { InjectedAccountWithMeta } from "@polkadot/extension-inject/types";
+import { useEffect, useState } from "react";
 
-interface Result {
-  color: string;
-}
-
+const Name = "Foxies";
 
 export default function Mint() {
   const backgroundStyle = {
     backgroundSize: "cover",
     backgroundPosition: "center center",
     backgroundAttachment: "fixed",
-    backgroundImage: 'url("/mint.jpg")', // Replace with the actual image path
-
+    backgroundImage: 'url("/mint.jpg")',
     minHeight: "100vh",
   };
 
-  const { account, connect, disconnect } = useWallet();
-  const contract = useContract("..address", metadata);
-  const setColor = useTx<Result>(contract, "setColor");
-  const args = ["blue"];
+  const [data, setData] = useState<ApiPromise>();
+  const [accounts, setAccounts] = useState<InjectedAccountWithMeta[]>([]);
+  const [selectedAccount, setSelectedAccount] =
+    useState<InjectedAccountWithMeta>();
+
+  const connectToParachain = async () => {
+    const wsProvider = new WsProvider("wss://ws.test.azero.dev");
+    const api = await ApiPromise.create({ provider: wsProvider });
+    setData(api);
+  };
+
+  const handleConnection = async () => {
+    const { web3Accounts, web3Enable, web3FromAddress } = await import(
+      "@polkadot/extension-dapp"
+    );
+    const extensions = await web3Enable(Name);
+    if (!extensions) {
+      throw Error("NO_EXTENSION");
+    }
+
+    const allAccounts = await web3Accounts();
+    setAccounts(allAccounts);
+
+    if (allAccounts.length === 1) {
+      setSelectedAccount(allAccounts[0]);
+    }
+  };
+  const handleMint = async () => {
+    const { web3Accounts, web3Enable, web3FromAddress } = await import(
+      "@polkadot/extension-dapp"
+    );
+    if (!data) return;
+
+    if (!selectedAccount) return;
+
+    const injector = await web3FromAddress(selectedAccount.address);
+    await data.tx.payableMint
+      .mintToken(1, "TZERO")
+      .signAndSend(selectedAccount.address, {
+        signer: injector.signer,
+      });
+  };
+
+  useEffect(() => {
+    connectToParachain();
+  }, []);
+
+  useEffect(() => {
+    if (!data) return;
+
+    async () => {
+      const time = await data.query.timestamp.now();
+      console.log(time);
+    };
+  }, [data]);
 
   return (
     <>
@@ -57,13 +105,9 @@ export default function Mint() {
                   &gt;
                 </span>
               </button>
-              { account ? (<h1>oui</h1> ) : ( <h1>non</h1>)}
-              <button
-                onClick={() => setColor.signAndSend(args)}
-                
-              >
-                test
-              </button>
+              {accounts ? <h1>oui</h1> : <h1>non</h1>}
+              <button>testConnect</button>
+              <button onClick={handleMint}>testConnect</button>
             </div>
             <div className="p-4 text-right">
               Foxes love $EGGS and they are eager to steal them from chickens...

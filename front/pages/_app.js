@@ -1,18 +1,16 @@
-
-import '/styles/globals.css'
-import { UseInkProvider } from 'useink';
-import { RococoContractsTestnet, ShibuyaTestnet } from 'useink/chains';
+import "/styles/globals.css";
+import { UseInkProvider } from "useink";
+import { AlephTestnet } from "useink/chains";
 
 export default function App({ Component, pageProps }) {
   return (
-    <UseInkProvider 
-      config={{ 
-        dappName: 'Foxies', 
-        chains: [RococoContractsTestnet, ShibuyaTestnet] ,
+    <UseInkProvider
+      config={{
+        dappName: "Foxies",
+        chains: [AlephTestnet],
       }}
     >
-     <Component {...pageProps} />
+      <Component {...pageProps} />
     </UseInkProvider>
   );
 }
-

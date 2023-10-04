@@ -2,13 +2,15 @@ import Head from "next/head";
 import styles from "@/styles/Home.module.css";
 import Header2 from "../components/Header2";
 import Image from "next/image";
+import metadata from "../metadata/nft_contract.json";
+import { ContractPromise } from "@polkadot/api-contract";
+import { ApiPromise, WsProvider } from "@polkadot/api";
 import { useTx, useContract, shouldDisable } from "useink";
 import { pickDecoded } from "useink/utils";
- // import metadata from "./metadata.json";
+import { InjectedAccountWithMeta } from "@polkadot/extension-inject/types";
+import { useEffect, useState } from "react";
 
-interface Result {
-  color: string;
-}
+const Name = "Foxies";
 
 export default function Coop() {
   const backgroundStyle = {
@@ -19,9 +21,70 @@ export default function Coop() {
     minHeight: "100vh",
   };
 
-  const contract = useContract("..address", metadata);
-  const setColor = useTx<Result>(contract, "setColor");
-  const args = ["blue"];
+  const [data, setData] = useState<ApiPromise>();
+  const [accounts, setAccounts] = useState<InjectedAccountWithMeta[]>([]);
+  const [selectedAccount, setSelectedAccount] =
+    useState<InjectedAccountWithMeta>();
+  const contract = useContract(
+    "5HSkTsVi5PWAVrLMgyKGzWAo6yY2aJuVrr5zm2QvGbBVSWJp",
+    metadata
+  );
+  const sendTransaction = useTx(contract, "payableMint::mintToken");
+
+  const connectToParachain = async () => {
+    const wsProvider = new WsProvider("wss://ws.test.azero.dev");
+    const api = await ApiPromise.create({ provider: wsProvider });
+    setData(api);
+  };
+  const args = ["1"];
+
+  const handleConnection = async () => {
+    const { web3Accounts, web3Enable } = await import(
+      "@polkadot/extension-dapp"
+    );
+    const extensions = await web3Enable(Name);
+    if (!extensions) {
+      throw Error("NO_EXTENSION");
+    }
+
+    const allAccounts = await web3Accounts();
+    setAccounts(allAccounts);
+
+    if (allAccounts.length === 1) {
+      setSelectedAccount(allAccounts[0]);
+    }
+  };
+  const handleMint = async () => {
+    {
+      /*    const { web3Accounts, web3Enable, web3FromAddress } = await import(
+      "@polkadot/extension-dapp"
+    );
+    if (!data) return;
+
+    if (!selectedAccount) return;
+
+    const contract =  new ContractPromise(data, metadata, '5HSkTsVi5PWAVrLMgyKGzWAo6yY2aJuVrr5zm2QvGbBVSWJp');
+   
+    console.log(contract);
+    await contract.tx.payableMint.mint_token(1, "TZERO").signAndSend(selectedAccount.address, {
+        signer: injector.signer,
+      });
+      */
+    }
+  };
+
+  useEffect(() => {
+    connectToParachain();
+  }, []);
+
+  useEffect(() => {
+    if (!data) return;
+
+    async () => {
+      const time = await data.query.timestamp.now();
+      console.log(time);
+    };
+  }, [data]);
 
   return (
     <>
@@ -56,19 +119,21 @@ export default function Coop() {
               </button> */}
             </div>
             <div className="p-4 text-center">
-              <button
-                onClick={() => setColor.signAndSend(args)}
-                disable={shouldDisable(setColor)}
-              >
-                {shouldDisable(setColor) ? "Changing Color..." : "Change Color"}
-              </button>
-              <h2>
-                Get the result the hard way:{" "}
-                {setColor.result.ok
-                  ? setColor.result.value.decoded.color
-                  : "--"}
-              </h2>
-              <h2>Or the easy way: {pickDecoded(get.result)?.color || "--"}</h2>
+              {accounts.length === 0 ? (
+                <button
+                  onClick={handleConnection}
+                  className="border-2	border-white	rounded-full font-VT323 text-2xl text-white px-4 py-1"
+                >
+                  Connect Wallet
+                </button>
+              ) : (
+                <button
+                  onClick={() => sendTransaction.signAndSend()}
+                  className="border-2	border-white	rounded-full font-VT323 text-2xl text-white px-4 py-1"
+                >
+                  MINT
+                </button>
+              )}
               Must read before staking !
               <Image
                 className="mx-auto"

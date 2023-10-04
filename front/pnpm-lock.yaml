@@ -1,9 +1,5 @@
 lockfileVersion: '6.0'
 
-settings:
-  autoInstallPeers: true
-  excludeLinksFromLockfile: false
-
 dependencies:
   '@next/font':
     specifier: 13.1.3
@@ -14,6 +10,15 @@ dependencies:
   '@polkadot/api-contract':
     specifier: ^10.9.1
     version: 10.9.1
+  '@polkadot/extension-dapp':
+    specifier: ^0.46.5
+    version: 0.46.5(@polkadot/api@10.9.1)
+  '@polkadot/extension-inject':
+    specifier: ^0.46.5
+    version: 0.46.5(@polkadot/api@10.9.1)
+  bn.js:
+    specifier: ^5.2.1
+    version: 5.2.1
   next:
     specifier: 13.1.3
     version: 13.1.3(react-dom@18.2.0)(react@18.2.0)
@@ -25,7 +30,10 @@ dependencies:
     version: 18.2.0(react@18.2.0)
   useink:
     specifier: ^1.14.1
-    version: 1.14.1(react@18.2.0)(ws@8.14.1)
+    version: 1.14.1(react@18.2.0)(ws@8.14.2)
+  ws:
+    specifier: ^8.14.2
+    version: 8.14.2
 
 devDependencies:
   '@types/node':
@@ -283,7 +291,7 @@ packages:
       '@polkadot/types-codec': 10.9.1
       '@polkadot/types-create': 10.9.1
       '@polkadot/util': 12.4.2
-      '@polkadot/util-crypto': 12.4.2(@polkadot/util@12.4.2)
+      '@polkadot/util-crypto': 12.4.2
       rxjs: 7.8.1
       tslib: 2.6.2
     transitivePeerDependencies:
@@ -303,7 +311,7 @@ packages:
       '@polkadot/types': 10.9.1
       '@polkadot/types-codec': 10.9.1
       '@polkadot/util': 12.4.2
-      '@polkadot/util-crypto': 12.4.2(@polkadot/util@12.4.2)
+      '@polkadot/util-crypto': 12.4.2
       rxjs: 7.8.1
       tslib: 2.6.2
     transitivePeerDependencies:
@@ -319,7 +327,7 @@ packages:
       '@polkadot/api-augment': 10.9.1
       '@polkadot/api-base': 10.9.1
       '@polkadot/api-derive': 10.9.1
-      '@polkadot/keyring': 12.4.2(@polkadot/util-crypto@12.4.2)(@polkadot/util@12.4.2)
+      '@polkadot/keyring': 12.4.2
       '@polkadot/rpc-augment': 10.9.1
       '@polkadot/rpc-core': 10.9.1
       '@polkadot/rpc-provider': 10.9.1
@@ -329,7 +337,7 @@ packages:
       '@polkadot/types-create': 10.9.1
       '@polkadot/types-known': 10.9.1
       '@polkadot/util': 12.4.2
-      '@polkadot/util-crypto': 12.4.2(@polkadot/util@12.4.2)
+      '@polkadot/util-crypto': 12.4.2
       eventemitter3: 5.0.1
       rxjs: 7.8.1
       tslib: 2.6.2
@@ -339,15 +347,48 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@polkadot/keyring@12.4.2(@polkadot/util-crypto@12.4.2)(@polkadot/util@12.4.2):
-    resolution: {integrity: sha512-VH91feSL6GiVVLcJ6V8h6jIAuq62bfvhM75AMcjTFol6MDqFl25jdjkHfZ2bQhig330LIhLw89nKdYr2/OfwjA==}
+  /@polkadot/extension-dapp@0.46.5(@polkadot/api@10.9.1):
+    resolution: {integrity: sha512-9Efm3oorx6orq1eue+tTk5rxuGFFCUdRxiZbdQMKiVl3lZnwBn0M61ceE3xXcf/oIwAm8RhUpQdwcbZfupJRgw==}
     engines: {node: '>=16'}
     peerDependencies:
+      '@polkadot/api': '*'
+    dependencies:
+      '@polkadot/api': 10.9.1
+      '@polkadot/extension-inject': 0.46.5(@polkadot/api@10.9.1)
       '@polkadot/util': 12.4.2
       '@polkadot/util-crypto': 12.4.2
+      tslib: 2.6.2
+    transitivePeerDependencies:
+      - bufferutil
+      - supports-color
+      - utf-8-validate
+    dev: false
+
+  /@polkadot/extension-inject@0.46.5(@polkadot/api@10.9.1):
+    resolution: {integrity: sha512-QcpkCMuv7iFbWjufkw14JRozpEYFyjP0H8KOJ8IsHGfPd2DPiismQ0NXr+AS7f6U+0I+Rhv9E4dnXxtJPROVMQ==}
+    engines: {node: '>=16'}
+    peerDependencies:
+      '@polkadot/api': '*'
+    dependencies:
+      '@polkadot/api': 10.9.1
+      '@polkadot/rpc-provider': 10.9.1
+      '@polkadot/types': 10.9.1
+      '@polkadot/util': 12.4.2
+      '@polkadot/util-crypto': 12.4.2
+      '@polkadot/x-global': 12.4.2
+      tslib: 2.6.2
+    transitivePeerDependencies:
+      - bufferutil
+      - supports-color
+      - utf-8-validate
+    dev: false
+
+  /@polkadot/keyring@12.4.2:
+    resolution: {integrity: sha512-VH91feSL6GiVVLcJ6V8h6jIAuq62bfvhM75AMcjTFol6MDqFl25jdjkHfZ2bQhig330LIhLw89nKdYr2/OfwjA==}
+    engines: {node: '>=16'}
     dependencies:
       '@polkadot/util': 12.4.2
-      '@polkadot/util-crypto': 12.4.2(@polkadot/util@12.4.2)
+      '@polkadot/util-crypto': 12.4.2
       tslib: 2.6.2
     dev: false
 
@@ -395,11 +436,11 @@ packages:
     resolution: {integrity: sha512-4QzT2QzD+320+eT6b79sGAA85Tt3Bb8fQvse4r5Mom2iiBd2SO81vOhxSAOaIe4GUsw25VzFJmsbe7+OObItdg==}
     engines: {node: '>=16'}
     dependencies:
-      '@polkadot/keyring': 12.4.2(@polkadot/util-crypto@12.4.2)(@polkadot/util@12.4.2)
+      '@polkadot/keyring': 12.4.2
       '@polkadot/types': 10.9.1
       '@polkadot/types-support': 10.9.1
       '@polkadot/util': 12.4.2
-      '@polkadot/util-crypto': 12.4.2(@polkadot/util@12.4.2)
+      '@polkadot/util-crypto': 12.4.2
       '@polkadot/x-fetch': 12.4.2
       '@polkadot/x-global': 12.4.2
       '@polkadot/x-ws': 12.4.2
@@ -467,21 +508,19 @@ packages:
     resolution: {integrity: sha512-AG33i2ZGGfq7u+5rkAdGrXAQHHl844/Yv+junH5ZzX69xiCoWO1bH/yzDUNBdpki2GlACWvF9nLYh3F2tVF93w==}
     engines: {node: '>=16'}
     dependencies:
-      '@polkadot/keyring': 12.4.2(@polkadot/util-crypto@12.4.2)(@polkadot/util@12.4.2)
+      '@polkadot/keyring': 12.4.2
       '@polkadot/types-augment': 10.9.1
       '@polkadot/types-codec': 10.9.1
       '@polkadot/types-create': 10.9.1
       '@polkadot/util': 12.4.2
-      '@polkadot/util-crypto': 12.4.2(@polkadot/util@12.4.2)
+      '@polkadot/util-crypto': 12.4.2
       rxjs: 7.8.1
       tslib: 2.6.2
     dev: false
 
-  /@polkadot/util-crypto@12.4.2(@polkadot/util@12.4.2):
+  /@polkadot/util-crypto@12.4.2:
     resolution: {integrity: sha512-JP7OrEKYx35P3wWc2Iu9F6BfYMIkywXik908zQqPxwoQhr8uDLP1Qoyu9Sws+hE97Yz1O4jBVvryS2le0yusog==}
     engines: {node: '>=16'}
-    peerDependencies:
-      '@polkadot/util': 12.4.2
     dependencies:
       '@noble/curves': 1.1.0
       '@noble/hashes': 1.3.1
@@ -644,7 +683,7 @@ packages:
     dependencies:
       '@polkadot/x-global': 12.4.2
       tslib: 2.6.2
-      ws: 8.14.1
+      ws: 8.14.2
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -1362,7 +1401,7 @@ packages:
     requiresBuild: true
     dependencies:
       pako: 2.1.0
-      ws: 8.14.1
+      ws: 8.14.2
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -1485,7 +1524,7 @@ packages:
       picocolors: 1.0.0
     dev: true
 
-  /useink@1.14.1(react@18.2.0)(ws@8.14.1):
+  /useink@1.14.1(react@18.2.0)(ws@8.14.2):
     resolution: {integrity: sha512-ecCwowOaBUmeIiEmTHw84SD3mM07CafWqGyXIOGEkX/19klC/pCAdDDHP2IM1yPlCTbNVDiWd564SqAu33tDPQ==}
     peerDependencies:
       react: ^18.0.0
@@ -1493,7 +1532,7 @@ packages:
     dependencies:
       nanoid: 3.3.6
       react: 18.2.0
-      ws: 8.14.1
+      ws: 8.14.2
     dev: false
 
   /util-deprecate@1.0.2:
@@ -1509,8 +1548,8 @@ packages:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
     dev: true
 
-  /ws@8.14.1:
-    resolution: {integrity: sha512-4OOseMUq8AzRBI/7SLMUwO+FEDnguetSk7KMb1sHwvF2w2Wv5Hoj0nlifx8vtGsftE/jWHojPy8sMMzYLJ2G/A==}
+  /ws@8.14.2:
+    resolution: {integrity: sha512-wEBG1ftX4jcglPxgFCMJmZ2PLtSbJ2Peg6TmpJFTbe9GZYOQCDPdMYu/Tm0/bGZkw8paZnJY45J4K2PZrLYq8g==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -1526,3 +1565,7 @@ packages:
     resolution: {integrity: sha512-N/lyzTPaJasoDmfV7YTrYCI0G/3ivm/9wdG0aHuheKowWQwGTsK0Eoiw6utmzAnI6pkJa0DUVygvp3spqqEKXg==}
     engines: {node: '>= 14'}
     dev: true
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
