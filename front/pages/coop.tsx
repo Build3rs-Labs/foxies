@@ -10,6 +10,7 @@ import { pickDecoded } from "useink/utils";
 import { InjectedAccountWithMeta } from "@polkadot/extension-inject/types";
 import { useEffect, useState } from "react";
 
+
 const Name = "Foxies";
 
 export default function Coop() {
@@ -23,20 +24,24 @@ export default function Coop() {
 
   const [data, setData] = useState<ApiPromise>();
   const [accounts, setAccounts] = useState<InjectedAccountWithMeta[]>([]);
-  const [selectedAccount, setSelectedAccount] =
-    useState<InjectedAccountWithMeta>();
+  const [selectedAccount, setSelectedAccount] = useState<InjectedAccountWithMeta>();
+
   const contract = useContract(
     "5HSkTsVi5PWAVrLMgyKGzWAo6yY2aJuVrr5zm2QvGbBVSWJp",
     metadata
   );
   const sendTransaction = useTx(contract, "payableMint::mintToken");
 
+  const handleTransactionResult = (result) => {
+    console.log("Transaction result:", result);
+  };
+
   const connectToParachain = async () => {
     const wsProvider = new WsProvider("wss://ws.test.azero.dev");
     const api = await ApiPromise.create({ provider: wsProvider });
     setData(api);
   };
-  const args = ["1"];
+ 
 
   const handleConnection = async () => {
     const { web3Accounts, web3Enable } = await import(
@@ -128,7 +133,7 @@ export default function Coop() {
                 </button>
               ) : (
                 <button
-                  onClick={() => sendTransaction.signAndSend()}
+                onClick={() => sendTransaction.signAndSend()}
                   className="border-2	border-white	rounded-full font-VT323 text-2xl text-white px-4 py-1"
                 >
                   MINT
