@@ -23,11 +23,44 @@ There are 2 types of playable characters :
 - Additionally, a 20% tax is charged on sold $EGGS and distributed to the foxes NFTs holders.
   Foxes automatically earn 20% of all the $EGGS sold by the chickens and also have a 10% chance of stealing new mints. The rarity of the fox increases the holder's chance of stealing a new mint.
 
-- EGGS CONTRACT ADDRESS
-  5HYDZ3cWLsY7Xezn8xRGx8WdP3cyg9Zi3QHjkiG3wFCybG3G
+## Contracts
 
-- NFT CONTRACT ADDRESS
-  5HSkTsVi5PWAVrLMgyKGzWAo6yY2aJuVrr5zm2QvGbBVSWJp
+The main implementation of Foxes smart contract are in /contracts folder and the traits and implementation of traits locate in impls and traits folders and contains following contracts:
 
-- STAKING CONTRACT ADDRESS
-  5Gr8T6E8uiGH9i49pSz8DSQasZ1amJHi5eyu5bGpRZKJE8aP
+- Eggs_Contract
+- Nft_Contract
+- Staking_Contract
+
+## Code standar
+
+ink! is an EDSL based on Rust, therefore, we use clippy and rustfmt to make sure code is in compliance with Rust idioms.
+
+```
+rustup component add rustfmt --toolchain nightly
+cargo +nightly fmt
+cargo clippy
+```
+
+## Contract Build and Deploy Instructions
+
+Before building smart contract, you will first need to install some development tools. The comprehensive guide can be found at: https://docs.alephzero.org/aleph-zero/build/installing-required-tools
+
+Go to the contract folder you want to build under **contracts** and run
+
+```
+cargo contract build --release
+```
+
+After the contract is built successfully, you will see under contracts/<contract_name>/target/ink 3 files:
+. contract_name.wasam
+. contract_name.contract
+. contract_name.json
+
+Follow this instruction to deploy the contract:
+https://docs.alephzero.org/aleph-zero/build/deploying-your-contract-to-aleph-zero-testnet
+
+## Contract Deployment Steps
+
+1. Deploy Eggs Contract
+2. Deploy NFT Contract
+3. Deploy Staking Contract make sure select **eggs_contract** and **nft_contract** while deploying **staking_contract**
