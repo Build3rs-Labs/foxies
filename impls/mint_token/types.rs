@@ -1,7 +1,12 @@
 use ink::prelude::vec::Vec;
 use openbrush::{
     contracts::psp34::PSP34Error,
-    traits::{AccountId, Balance, String, ZERO_ADDRESS},
+    traits::{
+        AccountId,
+        Balance,
+        String,
+        ZERO_ADDRESS,
+    },
 };
 
 pub const STORAGE_KEY: u32 = openbrush::storage_unique_key!(Data);
@@ -44,23 +49,10 @@ pub enum MintTokenError {
     OwnerCantMint,
 }
 
-// impl MintTokenError {
-//     pub fn as_str(&self) -> String {
-//         match self {
-//             MintTokenError::RepetativeRandomNumber => String::from("RepetativeRandomNumber"),
-//             MintTokenError::BadMintValue => String::from("BadMintValue"),
-//             MintTokenError::InvalidAccount => String::from("InvalidAccount"),
-//             MintTokenError::OwnerCantMint => String::from("OwnerCantMint"),
-//         }
-//     }
-// }
-
 impl From<MintTokenError> for PSP34Error {
     fn from(value: MintTokenError) -> Self {
         match value {
-            MintTokenError::RepetativeRandomNumber => {
-                PSP34Error::Custom(String::from("RepetativeRandomNumber"))
-            }
+            MintTokenError::RepetativeRandomNumber => PSP34Error::Custom(String::from("RepetativeRandomNumber")),
             MintTokenError::BadMintValue => PSP34Error::Custom(String::from("BadMintValue")),
             MintTokenError::InvalidAccount => PSP34Error::Custom(String::from("InvalidAccount")),
             MintTokenError::OwnerCantMint => PSP34Error::Custom(String::from("OwnerCantMint")),

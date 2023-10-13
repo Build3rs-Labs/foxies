@@ -1,9 +1,20 @@
-use ink::prelude::vec::Vec;
 use ink::storage::Mapping;
 use openbrush::{
-    contracts::psp34::{Id, PSP34Error},
-    storage::{MultiMapping, ValueGuard},
-    traits::{AccountId, Balance, String, ZERO_ADDRESS, Timestamp},
+    contracts::psp34::{
+        Id,
+        PSP34Error,
+    },
+    storage::{
+        MultiMapping,
+        ValueGuard,
+    },
+    traits::{
+        AccountId,
+        Balance,
+        String,
+        Timestamp,
+        ZERO_ADDRESS,
+    },
 };
 
 pub const STORAGE_KEY: u32 = openbrush::storage_unique_key!(Data);
@@ -14,16 +25,11 @@ pub struct Data {
     pub admin_address: AccountId,
     pub nft_contract_address: AccountId,
     pub eggs_token_address: AccountId,
-    pub staked_accounts: MultiMapping<u8, AccountId, ValueGuard<u8>>, // 0 is staked status, 1 is request unstake status
+    pub staked_accounts: MultiMapping<u8, AccountId, ValueGuard<u8>>, /* 0 is staked status, 1 is request unstake status */
     pub total_staked: u64,
     pub staking_list: MultiMapping<AccountId, Id, ValueGuard<AccountId>>,
-    pub pending_unstaking_list: MultiMapping<AccountId, Id, ValueGuard<AccountId>>,
-    pub limit_unstaking_time: u64, // minutes
     pub amount_of_eggs_token_earn_per_day: Balance,
-    pub is_claimed: Mapping<AccountId, bool>,
     pub staking_start_time: Mapping<(AccountId, Id), Timestamp>,
-    pub request_unstaking_time: Mapping<(AccountId, Id), Timestamp>,
-    pub unstaking_time: Mapping<(AccountId, Id), Timestamp>,
     pub nft_staking_days: Mapping<(AccountId, Id), u64>,
     pub salt: u64,
     pub _reserved: Option<()>,
@@ -38,13 +44,8 @@ impl Default for Data {
             staked_accounts: Default::default(),
             staking_list: Default::default(),
             total_staked: Default::default(),
-            pending_unstaking_list: Default::default(),
-            limit_unstaking_time: Default::default(),
             amount_of_eggs_token_earn_per_day: Default::default(),
-            is_claimed: Default::default(),
-            request_unstaking_time: Default::default(),
             staking_start_time: Default::default(),
-            unstaking_time: Default::default(),
             nft_staking_days: Default::default(),
             salt: Default::default(),
             _reserved: Default::default(),
@@ -77,7 +78,7 @@ pub enum StakingError {
     CantStakeFoxesToken,
     RandomFoxesNFTNotFound,
     NotContractOwner,
-    InvalidAccount
+    InvalidAccount,
 }
 
 impl StakingError {
@@ -98,23 +99,13 @@ impl StakingError {
             StakingError::NotEnoughBalance => String::from("NotEnoughBalance"),
             StakingError::NotContractOwner => String::from("NotContractOwner"),
             StakingError::InvalidAccount => String::from("InvalidAccount"),
-            StakingError::FailToDecreaseClaimableReward => {
-                String::from("FailToDecreaseClaimableReward")
-            }
+            StakingError::FailToDecreaseClaimableReward => String::from("FailToDecreaseClaimableReward"),
             StakingError::FailedToCalculateReward => String::from("FailedToCalculateReward"),
-            StakingError::FailedToCalculateTimeRequstUnstake => {
-                String::from("FailedToCalculateTimeRequstUnstake")
-            }
+            StakingError::FailedToCalculateTimeRequstUnstake => String::from("FailedToCalculateTimeRequstUnstake"),
             StakingError::InvalidCaller => String::from("InvalidCaller"),
-            StakingError::NotEnoughtTimeToRequestUnstake => {
-                String::from("NotEnoughtTimeToRequestUnstake")
-            }
-            StakingError::FailedToIncreaseTotalStaked => {
-                String::from("FailedToIncreaseTotalStaked")
-            }
-            StakingError::FailedToDescreaseTotalStaked => {
-                String::from("FailedToDescreaseTotalStaked")
-            }
+            StakingError::NotEnoughtTimeToRequestUnstake => String::from("NotEnoughtTimeToRequestUnstake"),
+            StakingError::FailedToIncreaseTotalStaked => String::from("FailedToIncreaseTotalStaked"),
+            StakingError::FailedToDescreaseTotalStaked => String::from("FailedToDescreaseTotalStaked"),
             StakingError::PSP34Error(_) => todo!(),
         }
     }
@@ -125,4 +116,3 @@ impl From<PSP34Error> for StakingError {
         StakingError::PSP34Error(error)
     }
 }
-

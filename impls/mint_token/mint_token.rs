@@ -1,14 +1,29 @@
 pub use crate::traits::mint_token::PayableMint;
 use crate::{
     ensure,
-    impls::mint_token::types::{Data, MintTokenError},
+    impls::mint_token::types::{
+        Data,
+        MintTokenError,
+    },
 };
-use ink::env::hash;
-use ink::prelude::vec::Vec;
+use ink::{
+    env::hash,
+    prelude::vec::Vec,
+};
 use openbrush::{
-    contracts::psp34::{extensions::enumerable::*, Id, PSP34Error},
-    modifier_definition, modifiers,
-    traits::{AccountId, AccountIdExt, Storage, String},
+    contracts::psp34::{
+        extensions::enumerable::*,
+        Id,
+        PSP34Error,
+    },
+    modifier_definition,
+    modifiers,
+    traits::{
+        AccountId,
+        AccountIdExt,
+        Storage,
+        String,
+    },
 };
 impl<T> PayableMint for T
 where
@@ -28,11 +43,7 @@ where
         if random_number < 1500 {
             self.emit_mint_foxes_token_event(caller, random_number, String::from("Foxes Token"));
         } else {
-            self.emit_mint_chicken_token_event(
-                caller,
-                random_number,
-                String::from("Chicken Token"),
-            );
+            self.emit_mint_chicken_token_event(caller, random_number, String::from("Chicken Token"));
         }
         Ok(())
     }
@@ -93,18 +104,14 @@ where
         Ok(random_number)
     }
 
-    default fn check_value(
-        &self,
-        transferred_value: u128,
-        mint_amount: u64,
-    ) -> Result<(), MintTokenError> {
+    default fn check_value(&self, transferred_value: u128, mint_amount: u64) -> Result<(), MintTokenError> {
         if let Some(value) = (mint_amount as u128).checked_mul(self.data::<Data>().price_per_mint) {
             if transferred_value == value {
                 // TODO: need to transfer the value to owner account
-                return Ok(());
+                return Ok(())
             }
         }
-        return Err(MintTokenError::BadMintValue);
+        return Err(MintTokenError::BadMintValue)
     }
 }
 
@@ -118,20 +125,8 @@ impl<T> TokenMintingEvents for T
 where
     T: Storage<Data>,
 {
-    default fn emit_mint_foxes_token_event(
-        &self,
-        owner: AccountId,
-        item_id: u64,
-        token_name: String,
-    ) {
-    }
-    default fn emit_mint_chicken_token_event(
-        &self,
-        owner: AccountId,
-        item_id: u64,
-        token_name: String,
-    ) {
-    }
+    default fn emit_mint_foxes_token_event(&self, _owner: AccountId, _item_id: u64, _token_name: String) {}
+    default fn emit_mint_chicken_token_event(&self, _owner: AccountId, _item_id: u64, _token_name: String) {}
 }
 
 #[modifier_definition]
