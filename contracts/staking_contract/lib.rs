@@ -4,11 +4,21 @@
 
 #[openbrush::contract]
 pub mod staking_contract {
-    use foxies::impls::staking::staking::TokenStakingEvents;
-    use foxies::{impls::staking::*, traits::staking::*};
-    use ink::codegen::EmitEvent;
-    use ink::codegen::Env;
-    use openbrush::{contracts::psp34::Id, traits::Storage};
+    use foxies::{
+        impls::staking::{
+            staking::TokenStakingEvents,
+            *,
+        },
+        traits::staking::*,
+    };
+    use ink::codegen::{
+        EmitEvent,
+        Env,
+    };
+    use openbrush::{
+        contracts::psp34::Id,
+        traits::Storage,
+    };
     #[ink(storage)]
     #[derive(Default, Storage)]
     pub struct StakingContract {
@@ -32,6 +42,18 @@ pub mod staking_contract {
             instance.foxies.eggs_token_address = eggs_token_address;
             instance.foxies.amount_of_eggs_token_earn_per_day = amount_of_eggs_token_earn_per_day;
             instance
+        }
+    }
+
+    #[cfg(all(test, feature = "e2e-tests"))]
+    mod e2e_tests {
+        use super::*;
+
+        type E2EResult<T> = std::result::Result<T, Box<dyn std::error::Error>>;
+
+        #[ink_e2e::test]
+        async fn e2e_sending_value_to_give_me_must_fail<Client: E2EBackend>(mut client: Client) -> E2EResult<()> {
+            Ok(())
         }
     }
 
@@ -80,12 +102,10 @@ pub mod staking_contract {
             self.env().emit_event(StakeEvent { owner, item_id });
         }
         fn emit_request_unstake_token_event(&self, owner: AccountId, item_id: Id) {
-            self.env()
-                .emit_event(RequestUnStakeEvent { owner, item_id });
+            self.env().emit_event(RequestUnStakeEvent { owner, item_id });
         }
         fn emit_cancel_request_unstake_token_event(&self, owner: AccountId, item_id: Id) {
-            self.env()
-                .emit_event(CancelRequestUnStakeEvent { owner, item_id });
+            self.env().emit_event(CancelRequestUnStakeEvent { owner, item_id });
         }
         fn emit_unstake_token_event(&self, owner: AccountId, item_id: Id) {
             self.env().emit_event(UnStakeEvent { owner, item_id });
