@@ -1,1 +1,0 @@
-MultiMapping<ink::ink_primitives::AccountId, openbrush::openbrush_contracts::psp34::Id, ValueGuard<ink::ink_primitives::AccountId>, ValueGuard<openbrush::openbrush_contracts::psp34::Id>, ResolverKey<AutoKey, ManualKey<1875497553, ManualKey<1648493478>>>>

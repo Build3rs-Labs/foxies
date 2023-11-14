@@ -25,11 +25,13 @@ There are 2 types of playable characters :
 
 ## Contracts
 
-The main implementation of Foxes smart contract are in /contracts folder and the traits and implementation of traits locate in impls and traits folders and contains following contracts:
+The following contracts exist within this project:
 
 - Eggs_Contract
-- Nft_Contract
+- Chickens Contract
+- Foxes Contract
 - Staking_Contract
+- Factory Contract
 
 ## Code standar
 
@@ -45,14 +47,25 @@ cargo clippy
 
 Before building smart contract, you will first need to install some development tools. The comprehensive guide can be found at: https://docs.alephzero.org/aleph-zero/build/installing-required-tools
 
-Go to the contract folder you want to build under **contracts** and run
+Go to the contract folder you want to build and run:
 
 ```
 cargo contract build --release
 ```
 
-After the contract is built successfully, you will see under contracts/<contract_name>/target/ink 3 files:
-. contract_name.wasam
+for ./factory and ./staking
+
+Then run:
+
+```
+cargo contract build --release --feature "contract"
+```
+
+for ./eggs, ./chickens, and ./foxes (PSP22S and PSP34s)
+
+
+After the contract is built successfully, you will see under ./<contract_name>/target/ink 3 files:
+. contract_name.wasm
 . contract_name.contract
 . contract_name.json
 
@@ -61,6 +74,20 @@ https://docs.alephzero.org/aleph-zero/build/deploying-your-contract-to-aleph-zer
 
 ## Contract Deployment Steps
 
-1. Deploy Eggs Contract
-2. Deploy NFT Contract
-3. Deploy Staking Contract make sure select **eggs_contract** and **nft_contract** while deploying **staking_contract**
+1. Deploy the Factory contract first.
+
+2. Deploy Chickens contract, while providing the deployed factory contract address as one of the required call arguments. (13,500 supply)
+
+3. Deploy Foxes contract, while providing the deployed factory contract address as one of the required call arguments. (1,500 supply)
+
+Careful of your input into the u128 fields for max supply for both contracts, knowing it is going to multiply by 10 to the power of 12.
+
+4. Set the address of the chickens and foxes contracts within the Factory using the set_chickens_nft_address() and set_foxes_nft_address() methods respectively.
+
+5. Deploy the Staking contract, providing useful fields.
+
+6. Deploy the Eggs contract, while providing deployed staking contract address as one of the required call arguments. (Name: Eggs, Symbol: EGGS, decimals: 6).
+
+7. Set the address of $EGGS contract within the staking contract using the set_eggs_address() method.
+
+8. Voila! Deployment done! Make sure to provide all other arguments appropriately.
