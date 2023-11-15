@@ -47,7 +47,7 @@ cargo clippy
 
 Before building smart contract, you will first need to install some development tools. The comprehensive guide can be found at: https://docs.alephzero.org/aleph-zero/build/installing-required-tools
 
-Go to the contract folder you want to build and run:
+Go to the contract folder you want to build within the ./contracts folder and run:
 
 ```
 cargo contract build --release
@@ -64,7 +64,7 @@ cargo contract build --release --features "contract"
 for ./eggs, ./chickens, and ./foxes (PSP22 and PSP34s)
 
 
-After the contract is built successfully, you will see under ./<contract_name>/target/ink 3 files:
+After the contract is built successfully, you will see under ./contracts/<contract_name>/target/ink 3 files:
 
 - contract_name.wasm
 - contract_name.contract
