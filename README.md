@@ -21,7 +21,7 @@ There are 2 types of playable characters :
 - The game dynamics are based on the interactions between the foxes and the chickens.
 - Chickens NFTs can be staked to generate $EGGS each day, but when they try to sell their $EGGS, there is a 50% chance that the accumulated $EGGS gets stolen by a Wolf.
 - Additionally, a 20% tax is charged on sold $EGGS and distributed to the foxes NFTs holders.
-  Foxes automatically earn 20% of all the $EGGS sold by the chickens. The rarity of the fox increases the holder's chance of stealing a new mint.
+  Foxes automatically earn 20% of all the $EGGS sold by the chickens.
 
 ## Contracts
 
@@ -58,16 +58,17 @@ for ./factory and ./staking
 Then run:
 
 ```
-cargo contract build --release --feature "contract"
+cargo contract build --release --features "contract"
 ```
 
-for ./eggs, ./chickens, and ./foxes (PSP22S and PSP34s)
+for ./eggs, ./chickens, and ./foxes (PSP22 and PSP34s)
 
 
 After the contract is built successfully, you will see under ./<contract_name>/target/ink 3 files:
-. contract_name.wasm
-. contract_name.contract
-. contract_name.json
+
+- contract_name.wasm
+- contract_name.contract
+- contract_name.json
 
 Follow this instruction to deploy the contract:
 https://docs.alephzero.org/aleph-zero/build/deploying-your-contract-to-aleph-zero-testnet

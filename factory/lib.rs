@@ -49,7 +49,9 @@ mod factory {
         // Address of the manager
         owner: Option<AccountId>,
         // Represents if it was a fox or a chicken last minted by a given account. 0 for chicken, 1 for fox
-        last_mint: Mapping<AccountId, u8>
+        last_mint: Mapping<AccountId, Option<(u8, u128)>>,
+        // Count of chickens minted
+        chickens_minted: u128
     }
 
     impl Factory {
@@ -63,7 +65,8 @@ mod factory {
                 chickens_nft_address: None,
                 foxes_nft_address: None,
                 owner: Some(caller),
-                last_mint: Mapping::default()
+                last_mint: Mapping::default(),
+                chickens_minted: 0
             }
         }
 
@@ -100,17 +103,19 @@ mod factory {
             // Generates a random number and places chances for 80% against 20%
             if random_number >= 1 && random_number < 8000 {
                 // 1 to 8000 range targets chicken
-                if self.mint_chicken(caller).is_err() {
+                let mint = self.mint_chicken(caller);
+                if mint.is_err() {
                     return Err(FactoryError::FailedMint);
                 }
-                self.last_mint.insert(caller, &0);
+                self.last_mint.insert(caller, &Some((0, mint.unwrap())));
             }
             else {
                 // 8000 to 10000 range targets fox
-                if self.mint_fox(caller).is_err() {
+                let mint = self.mint_fox(caller);
+                if mint.is_err() {
                     return Err(FactoryError::FailedMint);
                 }
-                self.last_mint.insert(caller, &1);
+                self.last_mint.insert(caller, &Some((1, mint.unwrap())));
             }
             Ok(())
         }
@@ -169,6 +174,17 @@ mod factory {
             // Return the owner address of the indexed NFT Id
             nft.owner_of(Id::U128(nft_id)).unwrap()
 
+        }
+
+        // Gets the last minted NFT from the NFT collection
+        #[ink(message)]
+        pub fn get_last_mint_by_account(&self, account: AccountId) -> Option<(u8, u128)> {
+            self.last_mint.get(account).unwrap_or(None)
+        }
+
+        // Gets the total number of NFTs minted: Chickens and Foxes. Returns (chickens count, foxes count)
+        pub fn get_minted_nft_count(&self) -> (u128, u128) {
+            (self.chickens_minted, self.nfts.len().try_into().unwrap())
         }
 
         // Generate a random rarity value more inclined to higher rarity values
@@ -245,7 +261,7 @@ mod factory {
 
         // Mints a fox to 'account'
         #[inline]
-        pub fn mint_fox(&mut self, account: AccountId) -> Result<(), PSP34Error> {
+        pub fn mint_fox(&mut self, account: AccountId) -> Result<u128, PSP34Error> {
 
             let index:u128 = (self.nfts.len() + 1).try_into().unwrap();
 
@@ -272,13 +288,13 @@ mod factory {
 
             // Mint the fox with rarity attribute
 
-            Ok(())
+            Ok(index)
 
         }
 
         // Mints a chicken to 'account'
         #[inline]
-        pub fn mint_chicken(&mut self, account: AccountId) -> Result<(), PSP34Error> {
+        pub fn mint_chicken(&mut self, account: AccountId) -> Result<u128, PSP34Error> {
 
             // Ref {} of chickens NFT
             
@@ -287,7 +303,11 @@ mod factory {
             // Mint chicken
             nft.mint(account)?;
 
-            Ok(())
+            let index:u128 = self.chickens_minted + 1;
+
+            self.chickens_minted = index;
+
+            Ok(index)
 
         }
 
