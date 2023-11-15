@@ -10,8 +10,8 @@ document covers gen1 and gen2 features as this is our priority.
 In order to play the game, the player must mint an NFT.
 There are 2 types of playable characters :
 
-- Chickens (90% chance to mint)
-- Foxes (10% chance to mint)
+- Chickens (80% chance to mint)
+- Foxes (20% chance to mint)
 
 ## On gen1, the supply is 15,000 units :
 
@@ -21,7 +21,7 @@ There are 2 types of playable characters :
 - The game dynamics are based on the interactions between the foxes and the chickens.
 - Chickens NFTs can be staked to generate $EGGS each day, but when they try to sell their $EGGS, there is a 50% chance that the accumulated $EGGS gets stolen by a Wolf.
 - Additionally, a 20% tax is charged on sold $EGGS and distributed to the foxes NFTs holders.
-  Foxes automatically earn 20% of all the $EGGS sold by the chickens and also have a 10% chance of stealing new mints. The rarity of the fox increases the holder's chance of stealing a new mint.
+  Foxes automatically earn 20% of all the $EGGS sold by the chickens. The rarity of the fox increases the holder's chance of stealing a new mint.
 
 ## Contracts
 
