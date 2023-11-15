@@ -1,0 +1,30 @@
+[package]
+name = "chickens"
+version = "0.2.1"
+edition = "2021"
+authors = ["Edinyanga Ottoho", "Build3rs"]
+homepage = "https://github.com/Build3rs-Labs/foxies"
+repository = "https://github.com/Build3rs-Labs/foxies"
+license = "Apache-2.0"
+readme = "README.md"
+description = "Chickens collection"
+exclude = [ ".github/*" ]
+
+[dependencies]
+ink = { version = "4.3.0", default-features = false }
+
+scale = { package = "parity-scale-codec", version = "3", default-features = false, features = ["derive"] }
+scale-info = { version = "2.9", default-features = false, features = ["derive"], optional = true }
+
+[lib]
+path = "lib.rs"
+
+[features]
+default = ["std"]
+contract = []
+std = [
+    "ink/std",
+    "scale/std",
+    "scale-info/std",
+]
+ink-as-dependency = []
