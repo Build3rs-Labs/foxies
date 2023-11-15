@@ -97,16 +97,16 @@ mod factory {
             let mut source = random::default(self.env().block_timestamp());
             let caller = self.env().caller();
             let random_number = source.read::<u64>() % 10000 + 1;
-            // Generates a random number and places chances for 90% against 10%
-            if random_number >= 1 && random_number < 9000 {
-                // 1 to 9000 range targets chicken
+            // Generates a random number and places chances for 80% against 20%
+            if random_number >= 1 && random_number < 8000 {
+                // 1 to 8000 range targets chicken
                 if self.mint_chicken(caller).is_err() {
                     return Err(FactoryError::FailedMint);
                 }
                 self.last_mint.insert(caller, &0);
             }
             else {
-                // 9000 to 10000 range targets fox
+                // 8000 to 10000 range targets fox
                 if self.mint_fox(caller).is_err() {
                     return Err(FactoryError::FailedMint);
                 }

@@ -10,8 +10,8 @@ document covers gen1 and gen2 features as this is our priority.
 In order to play the game, the player must mint an NFT.
 There are 2 types of playable characters :
 
-- Chickens (90% chance to mint)
-- Foxes (10% chance to mint)
+- Chickens (80% chance to mint)
+- Foxes (20% chance to mint)
 
 ## On gen1, the supply is 15,000 units :
 
