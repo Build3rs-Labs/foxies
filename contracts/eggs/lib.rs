@@ -1,18 +1,10 @@
 #![cfg_attr(not(feature = "std"), no_std, no_main)]
 
-mod data;
-mod errors;
-mod traits;
-
-pub use data::{PSP22Data, PSP22Event};
-pub use errors::PSP22Error;
-pub use traits::{PSP22Burnable, PSP22Metadata, PSP22Mintable, PSP22};
-
 #[cfg(feature = "contract")]
 #[ink::contract]
 mod token {
-    use crate::{PSP22Data, PSP22Error, PSP22Event, PSP22Metadata, PSP22, PSP22Mintable};
-    use crate::PSP22Error::Custom;
+    use psp22::{PSP22Data, PSP22Error, PSP22Event, PSP22Metadata, PSP22, PSP22Mintable};
+    use psp22::PSP22Error::Custom;
     use ink::prelude::{string::String, vec::Vec};
 
     #[ink(storage)]
@@ -158,11 +150,11 @@ mod token {
 
     impl PSP22Mintable for Token {
         #[ink(message)]
-        fn mint(&mut self, account: AccountId, amount: Balance) -> Result<(), PSP22Error> {
+        fn mint(&mut self, amount: Balance) -> Result<(), PSP22Error> {
             if self.env().caller() != self.owner.unwrap() {
                 return Err(Custom(String::from("OnlyOwnerAllowed")));
             }
-            let events = self.data.mint(account, amount)?;
+            let events = self.data.mint(self.env().caller(), amount)?;
             self.emit_events(events);
             Ok(())
         }

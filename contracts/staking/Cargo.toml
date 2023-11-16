@@ -18,8 +18,8 @@ scale-info = { version = "2.9", default-features = false, features = ["derive"],
 
 random = { version = "0.14.0" }
 
-foxes = { path = "../foxes", default-features = false }
-eggs = { path = "../eggs", default-features = false }
+psp34 = { git = "https://github.com/just-ape-studios/just-ape-studios-contracts.git", default-features = false }
+psp22 = { git = "https://github.com/Cardinal-Cryptography/PSP22.git", default-features = false }
 
 [lib]
 path = "lib.rs"
@@ -30,5 +30,7 @@ std = [
     "ink/std",
     "scale/std",
     "scale-info/std",
+    "psp34/std",
+    "psp22/std"
 ]
 ink-as-dependency = []

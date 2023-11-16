@@ -22,7 +22,7 @@ mod factory {
 
     use ink::contract_ref;
 
-    use foxes::{
+    use psp34::{
         PSP34Mintable,
         PSP34Error,
         PSP34,
