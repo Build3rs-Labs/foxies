@@ -18,24 +18,22 @@ mod staking {
 
     use ink::{
         env::{
-            call::{build_call, Call, ExecutionInput, Selector},
-            DefaultEnvironment, Error as InkEnvError,
-            CallFlags
-        },
-        LangError,
+            call::{build_call, ExecutionInput, Selector},
+            DefaultEnvironment
+        }
     };
 
     use ink::contract_ref;
 
     use random::Source;
 
-    use foxes::Id;
+    use psp34::Id;
 
-    use foxes::PSP34;
+    use psp34::PSP34;
 
-    use eggs::PSP22;
+    use psp22::PSP22;
 
-    use eggs::PSP22Mintable;
+    use psp22::PSP22Mintable;
 
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
@@ -67,7 +65,9 @@ mod staking {
         /// Thrown when a fox holder doesn't have claimable eggs
         NoClaimableEggs,
         /// Thrown when a failure happens when trying to claim eggs from vault
-        UnableToClaimEggs
+        UnableToClaimEggs,
+        /// Thrown when a mint fails
+        MintFailed
     }
 
     #[ink(storage)]
@@ -233,21 +233,21 @@ mod staking {
             // Get the number of milliseconds past since staking initiation
             let time_past = self.env().block_timestamp() - last_stake_time;
 
-            let mut claimable = 0;
+            let mut _claimable = 0;
 
             let days_past:u128 = (time_past / DAYS).try_into().unwrap();
             // Number of days past -> divide difference by seconds in a day
 
-            claimable = days_past * self.daily_eggs_per_chicken * number_of_stakes;
+            _claimable = days_past * self.daily_eggs_per_chicken * number_of_stakes;
             // Get claimable by multiplying days past by daily eggs supposedly earned by 
             // Number of chickens staked
 
-            if claimable >= self.cap_per_account {
+            if _claimable >= self.cap_per_account {
                 // Claimable rewards must not exceed earning cap per account
-                claimable = self.cap_per_account
+                _claimable = self.cap_per_account
             }
 
-            claimable
+            _claimable
             
         }
 
@@ -272,11 +272,8 @@ mod staking {
                 return Err(StakingError::HasNotStaked);
             }
 
-            // Ref {} of eggs contract
-            let mut eggs: contract_ref!(PSP22Mintable) = self.eggs.unwrap().into();
-
             // Ref {} of chickens NFT contract
-            let mut nft: contract_ref!(PSP34) = self.chickens.unwrap().into();
+            let mut _nft: contract_ref!(PSP34) = self.chickens.unwrap().into();
 
             let mut source = random::default(self.env().block_timestamp());
             let random_number = source.read::<u64>() % 2 + 1; // Random between 1 and 2
@@ -293,20 +290,20 @@ mod staking {
                 let amount_for_account = (80 * claimable) / 100;
 
                 // Mint 80% to caller
-                let _ = eggs.mint(caller, amount_for_account);
+                let _ = self.mint_and_transfer_eggs_to_account(caller, amount_for_account);
                 // Mint 20% to fox eggs vault
-                let _ = eggs.mint(Self::env().account_id(), amount_for_pool);
+                let _ = self.mint_and_transfer_eggs_to_account(Self::env().account_id(), amount_for_pool);
             }
             else { // Instance B
                 // Get random fox by calling factory
                 let random_fox = self.call_factory_for_random_fox_holder();
                 if random_fox == zero_account {
                     // If no fox exists, mint all to fox eggs vault
-                    let _ = eggs.mint(Self::env().account_id(), claimable);
+                    let _ = self.mint_and_transfer_eggs_to_account(Self::env().account_id(), claimable);
                 }
                 else {
                     // If a fox is returned, mint all to selected fox
-                    let _ = eggs.mint(random_fox, claimable);
+                    let _ = self.mint_and_transfer_eggs_to_account(random_fox, claimable);
                 }
             }
 
@@ -316,7 +313,7 @@ mod staking {
 
                 let nft_id = self.staked_chickens.get((caller, u128::from(nfts))).unwrap_or(0);
 
-                if nft.transfer(caller, Id::U128(nft_id), vec![]).is_err() {
+                if _nft.transfer(caller, Id::U128(nft_id), vec![]).is_err() {
                     return Err(StakingError::FailedUnstake);
                 }
 
@@ -396,7 +393,7 @@ mod staking {
             let foxes: contract_ref!(PSP34) = self.foxes.unwrap().into();
 
             // Ref {} eggs contract
-            let mut eggs: contract_ref!(PSP22) = self.foxes.unwrap().into();
+            let mut _eggs: contract_ref!(PSP22) = self.foxes.unwrap().into();
 
             // Balance of caller for foxes NFT
             let holds_fox = foxes.balance_of(account);
@@ -413,7 +410,7 @@ mod staking {
                 return Err(StakingError::NoClaimableEggs);
             }
 
-            if eggs.transfer(account, claimable, vec![]).is_err() {
+            if _eggs.transfer(account, claimable, vec![]).is_err() {
                 // Transfer claimable eggs to fox holder
                 return Err(StakingError::UnableToClaimEggs);
             }
@@ -428,10 +425,32 @@ mod staking {
         #[ink(message)]
         pub fn get_eggs_balance(&mut self, account: AccountId) -> Balance {
 
-            let mut eggs: contract_ref!(PSP22) = self.eggs.unwrap().into(); // Ref {} eggs contract
+            let mut _eggs: contract_ref!(PSP22) = self.eggs.unwrap().into(); // Ref {} eggs contract
 
             // Balance of account $EGGS
-            eggs.balance_of(account)
+            _eggs.balance_of(account)
+
+        }
+
+        #[inline]
+        pub fn mint_and_transfer_eggs_to_account(&mut self, account: AccountId, amount: u128) -> Result<(), StakingError> {
+
+            let mut eggs_mintable: contract_ref!(PSP22Mintable) = self.eggs.unwrap().into(); // Ref {} eggs contract
+
+            let mut eggs_data: contract_ref!(PSP22) = self.eggs.unwrap().into(); // Ref {} eggs contract
+
+            if eggs_mintable.mint(amount).is_err() {
+                return Err(StakingError::MintFailed);
+            }
+            else {
+                if account != Self::env().account_id() {
+                    if eggs_data.transfer(account, amount, vec![]).is_err() {
+                        return Err(StakingError::TransferFailed);
+                    }
+                }
+            }
+
+            Ok(())
 
         }
         

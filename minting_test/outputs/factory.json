@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0x27023a4faaaecd4accc6d2c423e0b4ef02869c5343158f09bf3b44ccf15262dd",
+    "hash": "0x8fdb03588b9c7273168107a5f0c7dc95e846e09d485353440ae979c69b914ac1",
     "language": "ink! 4.3.0",
     "compiler": "rustc 1.75.0-nightly",
     "build_info": {
@@ -61,26 +61,26 @@
         "displayName": [
           "BlockNumber"
         ],
-        "type": 19
+        "type": 20
       },
       "chainExtension": {
         "displayName": [
           "ChainExtension"
         ],
-        "type": 20
+        "type": 21
       },
       "hash": {
         "displayName": [
           "Hash"
         ],
-        "type": 17
+        "type": 18
       },
       "maxEventTopics": 4,
       "timestamp": {
         "displayName": [
           "Timestamp"
         ],
-        "type": 18
+        "type": 19
       }
     },
     "events": [],
@@ -161,10 +161,20 @@
         "selector": "0x210e80e5"
       },
       {
-        "args": [],
+        "args": [
+          {
+            "label": "amount",
+            "type": {
+              "displayName": [
+                "u128"
+              ],
+              "type": 1
+            }
+          }
+        ],
         "default": false,
         "docs": [],
-        "label": "generate_random_nft",
+        "label": "set_azero_for_direct_fox_mints",
         "mutates": true,
         "payable": false,
         "returnType": {
@@ -174,7 +184,49 @@
           ],
           "type": 9
         },
-        "selector": "0x6cbaebae"
+        "selector": "0x864d61c0"
+      },
+      {
+        "args": [
+          {
+            "label": "amount",
+            "type": {
+              "displayName": [
+                "u128"
+              ],
+              "type": 1
+            }
+          }
+        ],
+        "default": false,
+        "docs": [],
+        "label": "set_azero_for_random_mints",
+        "mutates": true,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 9
+        },
+        "selector": "0xb3247578"
+      },
+      {
+        "args": [],
+        "default": false,
+        "docs": [],
+        "label": "mint_nft",
+        "mutates": true,
+        "payable": true,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 9
+        },
+        "selector": "0x219a113e"
       },
       {
         "args": [],
@@ -221,6 +273,32 @@
       {
         "args": [
           {
+            "label": "account",
+            "type": {
+              "displayName": [
+                "AccountId"
+              ],
+              "type": 2
+            }
+          }
+        ],
+        "default": false,
+        "docs": [],
+        "label": "get_direct_fox_mints",
+        "mutates": false,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 16
+        },
+        "selector": "0x81ce1659"
+      },
+      {
+        "args": [
+          {
             "label": "index",
             "type": {
               "displayName": [
@@ -240,7 +318,7 @@
             "ink",
             "MessageResult"
           ],
-          "type": 16
+          "type": 17
         },
         "selector": "0x9f060b73"
       }
@@ -436,6 +514,38 @@
                 }
               },
               "name": "chickens_minted"
+            },
+            {
+              "layout": {
+                "root": {
+                  "layout": {
+                    "leaf": {
+                      "key": "0x3f710c0b",
+                      "ty": 4
+                    }
+                  },
+                  "root_key": "0x3f710c0b"
+                }
+              },
+              "name": "direct_fox_mints"
+            },
+            {
+              "layout": {
+                "leaf": {
+                  "key": "0x00000000",
+                  "ty": 1
+                }
+              },
+              "name": "azero_for_direct_fox_mints"
+            },
+            {
+              "layout": {
+                "leaf": {
+                  "key": "0x00000000",
+                  "ty": 1
+                }
+              },
+              "name": "azero_for_random_mints"
             }
           ],
           "name": "Factory"
@@ -720,6 +830,14 @@
               {
                 "index": 2,
                 "name": "OnlyOwnerAllowed"
+              },
+              {
+                "index": 3,
+                "name": "InvalidMintPayment"
+              },
+              {
+                "index": 4,
+                "name": "ExceededDirectFoxMintAllowance"
               }
             ]
           }
@@ -834,6 +952,48 @@
               {
                 "fields": [
                   {
+                    "type": 4
+                  }
+                ],
+                "index": 0,
+                "name": "Ok"
+              },
+              {
+                "fields": [
+                  {
+                    "type": 7
+                  }
+                ],
+                "index": 1,
+                "name": "Err"
+              }
+            ]
+          }
+        },
+        "params": [
+          {
+            "name": "T",
+            "type": 4
+          },
+          {
+            "name": "E",
+            "type": 7
+          }
+        ],
+        "path": [
+          "Result"
+        ]
+      }
+    },
+    {
+      "id": 17,
+      "type": {
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "fields": [
+                  {
                     "type": 1
                   }
                 ],
@@ -868,7 +1028,7 @@
       }
     },
     {
-      "id": 17,
+      "id": 18,
       "type": {
         "def": {
           "composite": {
@@ -888,7 +1048,7 @@
       }
     },
     {
-      "id": 18,
+      "id": 19,
       "type": {
         "def": {
           "primitive": "u64"
@@ -896,7 +1056,7 @@
       }
     },
     {
-      "id": 19,
+      "id": 20,
       "type": {
         "def": {
           "primitive": "u32"
@@ -904,7 +1064,7 @@
       }
     },
     {
-      "id": 20,
+      "id": 21,
       "type": {
         "def": {
           "variant": {}

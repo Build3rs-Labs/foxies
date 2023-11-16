@@ -16,6 +16,8 @@ ink = { version = "4.3.0", default-features = false }
 scale = { package = "parity-scale-codec", version = "3", default-features = false, features = ["derive"] }
 scale-info = { version = "2.9", default-features = false, features = ["derive"], optional = true }
 
+psp34 = { git = "https://github.com/just-ape-studios/just-ape-studios-contracts.git", default-features = false }
+
 [lib]
 path = "lib.rs"
 
@@ -26,5 +28,6 @@ std = [
     "ink/std",
     "scale/std",
     "scale-info/std",
+    "psp34/std"
 ]
 ink-as-dependency = []

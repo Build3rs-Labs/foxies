@@ -44,9 +44,12 @@ const doTxn = async ()=> {
 }
 
 const distribute = async ()=> {
+
+    let mint_amount = 6; //6 AZERO or 100 AZERO acceptable
+    let amount = api.createType("Balance", (mint_amount * (10 ** 12)).toLocaleString("fullwide", {useGrouping: false});
     
     for (let i = 0; i < 1000; i++) {
-        let unsub = await contract.tx["generateRandomNft"](callOptions).signAndSend(account, 
+        let unsub = await contract.tx["mintNft"](callOptions).signAndSend(account, 
             ({ events = [], status }) => {
                 if (status.isInBlock) {
                     console.log(`pending mint`);

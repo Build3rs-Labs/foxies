@@ -1,5 +1,8 @@
 #![cfg_attr(not(feature = "std"), no_std, no_main)]
 
+const AZERO_FOR_RANDOM:u128 = 6 * 10u128.pow(12); // 6 AZERO for random
+const AZERO_FOR_DIRECT_FOX_MINT:u128 = 100 * 10u128.pow(12); // 100 AZERO for defined fox mint
+
 #[ink::contract]
 mod factory {
 
@@ -7,6 +10,9 @@ mod factory {
         vec::Vec,
         string::String
     };
+
+    use crate::AZERO_FOR_RANDOM;
+    use crate::AZERO_FOR_DIRECT_FOX_MINT;
 
     use random::Source;
 
@@ -16,7 +22,7 @@ mod factory {
 
     use ink::contract_ref;
 
-    use foxes::{
+    use psp34::{
         PSP34Mintable,
         PSP34Error,
         PSP34,
@@ -31,7 +37,11 @@ mod factory {
         /// Returned when mint has failed (maybe total supply netted)
         FailedMint,
         /// Returned when caller is not owner for owner-only methods
-        OnlyOwnerAllowed
+        OnlyOwnerAllowed,
+        /// Returned when amount sent is not valid payment
+        InvalidMintPayment,
+        /// Returned when a user has exceeded their max direct fox mints
+        ExceededDirectFoxMintAllowance
     }
 
     #[ink(storage)]
@@ -51,7 +61,13 @@ mod factory {
         // Represents if it was a fox or a chicken last minted by a given account. 0 for chicken, 1 for fox
         last_mint: Mapping<AccountId, Option<(u8, u128)>>,
         // Count of chickens minted
-        chickens_minted: u128
+        chickens_minted: u128,
+        // Count of direct fox mints done by user
+        direct_fox_mints: Mapping<AccountId, u8>,
+        // AZERO for direct fox mints: Mutable
+        azero_for_direct_fox_mints: u128,
+        // AZERO for random mints: Mutable
+        azero_for_random_mints: u128
     }
 
     impl Factory {
@@ -66,7 +82,10 @@ mod factory {
                 foxes_nft_address: None,
                 owner: Some(caller),
                 last_mint: Mapping::default(),
-                chickens_minted: 0
+                chickens_minted: 0,
+                direct_fox_mints: Mapping::default(),
+                azero_for_direct_fox_mints: AZERO_FOR_DIRECT_FOX_MINT,
+                azero_for_random_mints: AZERO_FOR_RANDOM
             }
         }
 
@@ -95,29 +114,81 @@ mod factory {
             Ok(())
         }
 
+        // Set the amount of AZERO for direct fox mints: Only manager can call this method
         #[ink(message)]
-        pub fn generate_random_nft(&mut self)-> Result<(), FactoryError> {
-            let mut source = random::default(self.env().block_timestamp());
+        pub fn set_azero_for_direct_fox_mints(&mut self, amount: u128) -> Result<(), FactoryError> {
+            if self.env().caller() != self.owner.unwrap() {
+                return Err(FactoryError::OnlyOwnerAllowed);
+            }
+            self.azero_for_direct_fox_mints = amount;
+            Ok(())
+        }
+
+        // Set the amount of AZERO for random mints: Only manager can call this method
+        #[ink(message)]
+        pub fn set_azero_for_random_mints(&mut self, amount: u128) -> Result<(), FactoryError> {
+            if self.env().caller() != self.owner.unwrap() {
+                return Err(FactoryError::OnlyOwnerAllowed);
+            }
+            self.azero_for_random_mints = amount;
+            Ok(())
+        }
+
+        #[ink(message, payable)]
+        pub fn mint_nft(&mut self)-> Result<(), FactoryError> {
+
+            let azero_sent = self.env().transferred_value();
+
+            if azero_sent != self.azero_for_random_mints && azero_sent != self.azero_for_direct_fox_mints {
+                return Err(FactoryError::InvalidMintPayment);
+            }
+
             let caller = self.env().caller();
-            let random_number = source.read::<u64>() % 10000 + 1;
-            // Generates a random number and places chances for 80% against 20%
-            if random_number >= 1 && random_number < 8000 {
-                // 1 to 8000 range targets chicken
-                let mint = self.mint_chicken(caller);
-                if mint.is_err() {
-                    return Err(FactoryError::FailedMint);
+
+            // Random mint pays AZERO_FOR_RANDOM
+
+            if azero_sent == self.azero_for_random_mints {
+                let random_number = self.random_int_from_range(1, 10000);
+                // Generates a random number and places chances for 80% against 20%
+                if random_number >= 1 && random_number < 8000 {
+                    // 1 to 8000 range targets chicken
+                    let mint = self.mint_chicken(caller);
+                    if mint.is_err() {
+                        return Err(FactoryError::FailedMint);
+                    }
+                    // Record last mint for account as chicken
+                    self.last_mint.insert(caller, &Some((0, mint.unwrap())));
                 }
-                self.last_mint.insert(caller, &Some((0, mint.unwrap())));
+                else {
+                    // 8000 to 10000 range targets fox
+                    let mint = self.mint_fox(caller);
+                    if mint.is_err() {
+                        return Err(FactoryError::FailedMint);
+                    }
+                    // Record last mint for account as fox
+                    self.last_mint.insert(caller, &Some((1, mint.unwrap())));
+                }
+                Ok(())
             }
             else {
-                // 8000 to 10000 range targets fox
+                // Get a defined mint for a Fox (Can only be used twice)
+                let direct_fox_mints = self.get_direct_fox_mints(self.env().caller());
+
+                if direct_fox_mints == 2 {
+                    return Err(FactoryError::ExceededDirectFoxMintAllowance);
+                }
+
                 let mint = self.mint_fox(caller);
                 if mint.is_err() {
                     return Err(FactoryError::FailedMint);
                 }
+
+                // Record last mint for account as fox
                 self.last_mint.insert(caller, &Some((1, mint.unwrap())));
+
+                Ok(())
+                
             }
-            Ok(())
         }
 
         #[ink(message)]
@@ -141,12 +212,12 @@ mod factory {
                 // If there is a rarity in mapping with Ids enumerated in it,
                 // get a random Fox NFT Id within the rarity vector.
 
-                let mut source = random::default(self.env().block_timestamp());
-
                 // Length of items (foxes Ids) that bear the generated rarity value
 
                 let length:u64 = (rarities.len() - 1).try_into().unwrap();
-                let random_number:u64 = source.read::<u64>() % length;
+
+                let random_number:u64 = self.random_int_from_range(0, length);
+
                 let index = usize::try_from(random_number).unwrap();
 
                 // Get the NFT Id from the array representing Ids with the
@@ -180,6 +251,12 @@ mod factory {
         #[ink(message)]
         pub fn get_last_mint_by_account(&self, account: AccountId) -> Option<(u8, u128)> {
             self.last_mint.get(account).unwrap_or(None)
+        }
+
+        // Gets the number of direct fox mints done by user
+        #[ink(message)]
+        pub fn get_direct_fox_mints(&self, account: AccountId) -> u8 {
+            self.direct_fox_mints.get(account).unwrap_or(0)
         }
 
         // Gets the total number of NFTs minted: Chickens and Foxes. Returns (chickens count, foxes count)
@@ -220,15 +297,20 @@ mod factory {
             self.nfts_rarity.get(index).unwrap_or(0)
         }
 
+        #[inline]
+        fn random_int_from_range(&self, from: u64, to: u64) -> u64 {
+            let mut source = random::default(self.env().block_timestamp());
+            let rand_int:u64 = source.read::<u64>() % to + from;
+            rand_int
+        }
+
         // Biased random number generator: 1 to 50
         #[inline]
         fn _random(&self) -> u64 {
 
-            let mut source = random::default(self.env().block_timestamp());
-
             // Arithmetic Progression (AP) formula (52 nth term) = a + (n - 1) * n = 2653
 
-            let random_number = source.read::<u64>() % 2653 + 1;
+            let random_number = self.random_int_from_range(1, 2653);
 
             // Using AP, classify values in cluster ranges (larger ranges for smaller values)
             // between 1 and 50.
