@@ -147,7 +147,7 @@ mod factory {
 
             // Random mint pays AZERO_FOR_RANDOM
 
-            if azero_sent == AZERO_FOR_RANDOM {
+            if azero_sent == self.azero_for_random_mints {
                 let random_number = self.random_int_from_range(1, 10000);
                 // Generates a random number and places chances for 80% against 20%
                 if random_number >= 1 && random_number < 8000 {
