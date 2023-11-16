@@ -63,7 +63,11 @@ mod factory {
         // Count of chickens minted
         chickens_minted: u128,
         // Count of direct fox mints done by user
-        direct_fox_mints: Mapping<AccountId, u8>
+        direct_fox_mints: Mapping<AccountId, u8>,
+        // AZERO for direct fox mints: Mutable
+        azero_for_direct_fox_mints: u128,
+        // AZERO for random mints: Mutable
+        azero_for_random_mints: u128
     }
 
     impl Factory {
@@ -79,7 +83,9 @@ mod factory {
                 owner: Some(caller),
                 last_mint: Mapping::default(),
                 chickens_minted: 0,
-                direct_fox_mints: Mapping::default()
+                direct_fox_mints: Mapping::default(),
+                azero_for_direct_fox_mints: AZERO_FOR_DIRECT_FOX_MINT,
+                azero_for_random_mints: AZERO_FOR_RANDOM
             }
         }
 
@@ -108,12 +114,32 @@ mod factory {
             Ok(())
         }
 
+        // Set the amount of AZERO for direct fox mints: Only manager can call this method
+        #[ink(message)]
+        pub fn set_azero_for_direct_fox_mints(&mut self, amount: u128) -> Result<(), FactoryError> {
+            if self.env().caller() != self.owner.unwrap() {
+                return Err(FactoryError::OnlyOwnerAllowed);
+            }
+            self.azero_for_direct_fox_mints = amount;
+            Ok(())
+        }
+
+        // Set the amount of AZERO for random mints: Only manager can call this method
+        #[ink(message)]
+        pub fn set_azero_for_random_mints(&mut self, amount: u128) -> Result<(), FactoryError> {
+            if self.env().caller() != self.owner.unwrap() {
+                return Err(FactoryError::OnlyOwnerAllowed);
+            }
+            self.azero_for_random_mints = amount;
+            Ok(())
+        }
+
         #[ink(message, payable)]
         pub fn generate_random_nft(&mut self)-> Result<(), FactoryError> {
 
             let azero_sent = self.env().transferred_value();
 
-            if azero_sent != AZERO_FOR_RANDOM && azero_sent != AZERO_FOR_DIRECT_FOX_MINT {
+            if azero_sent != self.azero_for_random_mints && azero_sent != self.azero_for_direct_fox_mints {
                 return Err(FactoryError::InvalidMintPayment);
             }
 
@@ -156,7 +182,7 @@ mod factory {
                 if mint.is_err() {
                     return Err(FactoryError::FailedMint);
                 }
-                
+
                 // Record last mint for account as fox
                 self.last_mint.insert(caller, &Some((1, mint.unwrap())));
 
