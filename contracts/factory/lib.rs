@@ -41,7 +41,9 @@ mod factory {
         /// Returned when amount sent is not valid payment
         InvalidMintPayment,
         /// Returned when a user has exceeded their max direct fox mints
-        ExceededDirectFoxMintAllowance
+        ExceededDirectFoxMintAllowance,
+        /// Failed to send AZERO
+        FailedAZEROTransfer
     }
 
     #[ink(storage)]
@@ -67,12 +69,14 @@ mod factory {
         // AZERO for direct fox mints: Mutable
         azero_for_direct_fox_mints: u128,
         // AZERO for random mints: Mutable
-        azero_for_random_mints: u128
+        azero_for_random_mints: u128,
+        // Account for minting fees to be sent to
+        fees_account: Option<AccountId>
     }
 
     impl Factory {
         #[ink(constructor)]
-        pub fn new() -> Self {
+        pub fn new(fees_account: AccountId) -> Self {
             let caller = Self::env().caller();
             Self {
                 rarities: Mapping::default(),
@@ -85,7 +89,8 @@ mod factory {
                 chickens_minted: 0,
                 direct_fox_mints: Mapping::default(),
                 azero_for_direct_fox_mints: AZERO_FOR_DIRECT_FOX_MINT,
-                azero_for_random_mints: AZERO_FOR_RANDOM
+                azero_for_random_mints: AZERO_FOR_RANDOM,
+                fees_account: Some(fees_account)
             }
         }
 
@@ -168,7 +173,6 @@ mod factory {
                     // Record last mint for account as fox
                     self.last_mint.insert(caller, &Some((1, mint.unwrap())));
                 }
-                Ok(())
             }
             else {
                 // Get a defined mint for a Fox (Can only be used twice)
@@ -185,10 +189,16 @@ mod factory {
 
                 // Record last mint for account as fox
                 self.last_mint.insert(caller, &Some((1, mint.unwrap())));
-
-                Ok(())
                 
             }
+
+            // Transfer AZERO to fees account
+
+            if self.env().transfer(self.fees_account.unwrap(), azero_sent).is_err() {
+                return Err(FactoryError::FailedAZEROTransfer);
+            }
+
+            Ok(())
         }
 
         #[ink(message)]
