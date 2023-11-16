@@ -97,9 +97,10 @@ mod factory {
 
         #[ink(message)]
         pub fn generate_random_nft(&mut self)-> Result<(), FactoryError> {
-            let mut source = random::default(self.env().block_timestamp());
+
             let caller = self.env().caller();
-            let random_number = source.read::<u64>() % 10000 + 1;
+            
+            let random_number = self.random_int_from_range(1, 10000);
             // Generates a random number and places chances for 80% against 20%
             if random_number >= 1 && random_number < 8000 {
                 // 1 to 8000 range targets chicken
@@ -141,12 +142,12 @@ mod factory {
                 // If there is a rarity in mapping with Ids enumerated in it,
                 // get a random Fox NFT Id within the rarity vector.
 
-                let mut source = random::default(self.env().block_timestamp());
-
                 // Length of items (foxes Ids) that bear the generated rarity value
 
                 let length:u64 = (rarities.len() - 1).try_into().unwrap();
-                let random_number:u64 = source.read::<u64>() % length;
+
+                let random_number:u64 = self.random_int_from_range(0, length);
+
                 let index = usize::try_from(random_number).unwrap();
 
                 // Get the NFT Id from the array representing Ids with the
@@ -220,15 +221,20 @@ mod factory {
             self.nfts_rarity.get(index).unwrap_or(0)
         }
 
+        #[inline]
+        fn random_int_from_range(&self, from: u64, to: u64) -> u64 {
+            let mut source = random::default(self.env().block_timestamp());
+            let rand_int:u64 = source.read::<u64>() % to + from;
+            rand_int
+        }
+
         // Biased random number generator: 1 to 50
         #[inline]
         fn _random(&self) -> u64 {
 
-            let mut source = random::default(self.env().block_timestamp());
-
             // Arithmetic Progression (AP) formula (52 nth term) = a + (n - 1) * n = 2653
 
-            let random_number = source.read::<u64>() % 2653 + 1;
+            let random_number = self.random_int_from_range(1, 2653);
 
             // Using AP, classify values in cluster ranges (larger ranges for smaller values)
             // between 1 and 50.
