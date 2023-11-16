@@ -1,5 +1,8 @@
 #![cfg_attr(not(feature = "std"), no_std, no_main)]
 
+const AZERO_FOR_RANDOM:u128 = 6 * 10u128.pow(12); // 6 AZERO for random
+const AZERO_FOR_DIRECT_FOX_MINT:u128 = 100 * 10u128.pow(12); // 100 AZERO for defined fox mint
+
 #[ink::contract]
 mod factory {
 
@@ -7,6 +10,9 @@ mod factory {
         vec::Vec,
         string::String
     };
+
+    use crate::AZERO_FOR_RANDOM;
+    use crate::AZERO_FOR_DIRECT_FOX_MINT;
 
     use random::Source;
 
@@ -31,7 +37,11 @@ mod factory {
         /// Returned when mint has failed (maybe total supply netted)
         FailedMint,
         /// Returned when caller is not owner for owner-only methods
-        OnlyOwnerAllowed
+        OnlyOwnerAllowed,
+        /// Returned when amount sent is not valid payment
+        InvalidMintPayment,
+        /// Returned when a user has exceeded their max direct fox mints
+        ExceededDirectFoxMintAllowance
     }
 
     #[ink(storage)]
@@ -51,7 +61,9 @@ mod factory {
         // Represents if it was a fox or a chicken last minted by a given account. 0 for chicken, 1 for fox
         last_mint: Mapping<AccountId, Option<(u8, u128)>>,
         // Count of chickens minted
-        chickens_minted: u128
+        chickens_minted: u128,
+        // Count of direct fox mints done by user
+        direct_fox_mints: Mapping<AccountId, u8>
     }
 
     impl Factory {
@@ -66,7 +78,8 @@ mod factory {
                 foxes_nft_address: None,
                 owner: Some(caller),
                 last_mint: Mapping::default(),
-                chickens_minted: 0
+                chickens_minted: 0,
+                direct_fox_mints: Mapping::default()
             }
         }
 
@@ -95,30 +108,61 @@ mod factory {
             Ok(())
         }
 
-        #[ink(message)]
+        #[ink(message, payable)]
         pub fn generate_random_nft(&mut self)-> Result<(), FactoryError> {
 
+            let azero_sent = self.env().transferred_value();
+
+            if azero_sent != AZERO_FOR_RANDOM && azero_sent != AZERO_FOR_DIRECT_FOX_MINT {
+                return Err(FactoryError::InvalidMintPayment);
+            }
+
             let caller = self.env().caller();
-            
-            let random_number = self.random_int_from_range(1, 10000);
-            // Generates a random number and places chances for 80% against 20%
-            if random_number >= 1 && random_number < 8000 {
-                // 1 to 8000 range targets chicken
-                let mint = self.mint_chicken(caller);
-                if mint.is_err() {
-                    return Err(FactoryError::FailedMint);
+
+            // Random mint pays AZERO_FOR_RANDOM
+
+            if azero_sent == AZERO_FOR_RANDOM {
+                let random_number = self.random_int_from_range(1, 10000);
+                // Generates a random number and places chances for 80% against 20%
+                if random_number >= 1 && random_number < 8000 {
+                    // 1 to 8000 range targets chicken
+                    let mint = self.mint_chicken(caller);
+                    if mint.is_err() {
+                        return Err(FactoryError::FailedMint);
+                    }
+                    // Record last mint for account as chicken
+                    self.last_mint.insert(caller, &Some((0, mint.unwrap())));
                 }
-                self.last_mint.insert(caller, &Some((0, mint.unwrap())));
+                else {
+                    // 8000 to 10000 range targets fox
+                    let mint = self.mint_fox(caller);
+                    if mint.is_err() {
+                        return Err(FactoryError::FailedMint);
+                    }
+                    // Record last mint for account as fox
+                    self.last_mint.insert(caller, &Some((1, mint.unwrap())));
+                }
+                Ok(())
             }
             else {
-                // 8000 to 10000 range targets fox
+                // Get a defined mint for a Fox (Can only be used twice)
+                let direct_fox_mints = self.get_direct_fox_mints(self.env().caller());
+
+                if direct_fox_mints == 2 {
+                    return Err(FactoryError::ExceededDirectFoxMintAllowance);
+                }
+
                 let mint = self.mint_fox(caller);
                 if mint.is_err() {
                     return Err(FactoryError::FailedMint);
                 }
+                
+                // Record last mint for account as fox
                 self.last_mint.insert(caller, &Some((1, mint.unwrap())));
+
+                Ok(())
+                
             }
-            Ok(())
         }
 
         #[ink(message)]
@@ -181,6 +225,12 @@ mod factory {
         #[ink(message)]
         pub fn get_last_mint_by_account(&self, account: AccountId) -> Option<(u8, u128)> {
             self.last_mint.get(account).unwrap_or(None)
+        }
+
+        // Gets the number of direct fox mints done by user
+        #[ink(message)]
+        pub fn get_direct_fox_mints(&self, account: AccountId) -> u8 {
+            self.direct_fox_mints.get(account).unwrap_or(0)
         }
 
         // Gets the total number of NFTs minted: Chickens and Foxes. Returns (chickens count, foxes count)
