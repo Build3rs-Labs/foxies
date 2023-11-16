@@ -135,7 +135,7 @@ mod factory {
         }
 
         #[ink(message, payable)]
-        pub fn generate_random_nft(&mut self)-> Result<(), FactoryError> {
+        pub fn mint_nft(&mut self)-> Result<(), FactoryError> {
 
             let azero_sent = self.env().transferred_value();
 
