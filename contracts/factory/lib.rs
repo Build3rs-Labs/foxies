@@ -202,7 +202,7 @@ mod factory {
         }
 
         #[ink(message)]
-        pub fn pick_random_fox_holder_with_rarity(&self) -> AccountId {
+        pub fn pick_random_fox_holder_with_rarity(&self) -> (AccountId, u128) {
 
             // Generate random number
             
@@ -214,7 +214,7 @@ mod factory {
 
             if self.nfts.len() == 0 {
                 // No fox has been minted yet
-                return AccountId::from([0u8; 32]);
+                return (AccountId::from([0u8; 32]), 0);
             }
             
             if let Some(rarities) = self.rarities.get(random_number) {
@@ -253,7 +253,7 @@ mod factory {
             }
 
             // Return the owner address of the indexed NFT Id
-            nft.owner_of(Id::U128(nft_id)).unwrap()
+            (nft.owner_of(Id::U128(nft_id)).unwrap(), nft_id)
 
         }
 

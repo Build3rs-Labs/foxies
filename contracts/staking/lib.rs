@@ -80,24 +80,31 @@ mod staking {
         foxes: Option<AccountId>,
         // Contract address of chickens NFT collection
         chickens: Option<AccountId>,
-        // A map of index of staked tokens and NFT Ids of
+        // A map of index of staked tokens and chickens NFT Ids of account
         // in order of addition to index
         staked_chickens: Mapping<(AccountId, u128), u128>,
         // A map of number of chickens staked by a given account
-        number_of_stakes: Mapping<AccountId, u128>,
-        // UNIX timestamp in milliseconds from last time accout
+        number_of_chickens_staked: Mapping<AccountId, u128>,
+        // UNIX timestamp in milliseconds from last time account
         // initiated a chicken staking schedule
-        last_stake_time: Mapping<AccountId, u64>,
-        // Amount of eggs claimable per chicken per day
+        last_chickens_stake_time: Mapping<AccountId, u64>,
+        // A map of index of staked tokens and foxes NFT Ids of account
+        // in order of addition to index
+        staked_foxes: Mapping<(AccountId, u128), u128>,
+        // A map of number of foxes staked by a given account
+        number_of_foxes_staked: Mapping<AccountId, u128>,
+        // UNIX timestamp in milliseconds from last time account
+        // initiated a fox staking schedule
+        last_foxes_stake_time: Mapping<AccountId, u64>,
+        // Amount of eggs mintable per chicken per day
         daily_eggs_per_chicken: u128,
         // Maximum number of egg rewards that can be generated per account
         // regardless of duration
         cap_per_account: u128,
-        // UNIX timestamp in milliseconds from last time eggs were
-        // claimed from vault by a fox holder
-        eggs_last_claimed: Mapping<AccountId, u64>,
         // Address of the manager
-        owner: Option<AccountId>
+        owner: Option<AccountId>,
+        // Get address of person staking a fox
+        fox_staked_by: Mapping<u128, AccountId>
     }
 
     impl Staking {
@@ -110,12 +117,15 @@ mod staking {
                 chickens: Some(chickens),
                 foxes: Some(foxes),
                 owner: Some(owner),
+                staked_foxes: Default::default(),
+                number_of_foxes_staked: Default::default(),
+                last_foxes_stake_time: Default::default(),
                 staked_chickens: Default::default(),
                 daily_eggs_per_chicken,
                 cap_per_account,
-                last_stake_time: Default::default(),
-                number_of_stakes: Default::default(),
-                eggs_last_claimed: Default::default()
+                last_chickens_stake_time: Default::default(),
+                number_of_chickens_staked: Default::default(),
+                fox_staked_by: Default::default()
             }
         }
         
@@ -141,9 +151,9 @@ mod staking {
             let caller = self.env().caller(); // Caller address
 
             // Total NFTs staked by account
-            let number_of_stakes = self.number_of_stakes.get(caller).unwrap_or(0);
+            let number_of_chickens_staked = self.number_of_chickens_staked.get(caller).unwrap_or(0);
 
-            if number_of_stakes == 5 {
+            if number_of_chickens_staked == 5 {
                 // Must not stake more than 5 chicken NFTs
                 return Err(StakingError::ExceededMaxStakes);
             }
@@ -171,21 +181,25 @@ mod staking {
             }
 
             // Get last time caller staked NFTs
-            let last_stake_time = self.last_stake_time.get(caller).unwrap_or(0);
+            let last_chickens_stake_time = self.last_chickens_stake_time.get(caller).unwrap_or(0);
 
-            if last_stake_time == 0 {
+            if last_chickens_stake_time == 0 {
                 // Set to UNIX block timestamp if not initially in any staking scheme
-                self.last_stake_time.insert(caller, &self.env().block_timestamp());
+                self.last_chickens_stake_time.insert(caller, &self.env().block_timestamp());
+            }
+            else {
+                let difference = self.env().block_timestamp() - last_chickens_stake_time;
+                self.last_chickens_stake_time.insert(caller, &(last_chickens_stake_time + (difference / 2)));
             }
 
             // Get number of stakes and use as index for keying Ids
-            let index = number_of_stakes;
+            let index = number_of_chickens_staked;
 
             // Insert staked chicken Id to index
             self.staked_chickens.insert((caller, index), &id);
 
             // Insert number of stakes +1 to 'account'
-            self.number_of_stakes.insert(caller, &(number_of_stakes + 1));
+            self.number_of_chickens_staked.insert(caller, &(number_of_chickens_staked + 1));
 
             // Transfer token from caller to staking contract
             if nft.transfer_from(caller, Self::env().account_id(), Id::U128(id), vec![]).is_err() {
@@ -196,19 +210,43 @@ mod staking {
 
         }
 
-        // Get list of NFT Ids staked by 'account'
+        // Get list of chicken NFT Ids staked by 'account'
         #[ink(message)]
-        pub fn get_staked_tokens(&self, account: AccountId) -> Vec<u128> {
+        pub fn get_staked_chickens(&self, account: AccountId) -> Vec<u128> {
 
             let mut vector = vec![]; // Initialize empty vector
 
             // Get number of stakes for use as iterator
-            let number_of_stakes = self.number_of_stakes.get(account).unwrap_or(0);
+            let number_of_chickens_staked = self.number_of_chickens_staked.get(account).unwrap_or(0);
 
-            for nfts in 0..number_of_stakes {
+            for nfts in 0..number_of_chickens_staked {
 
                 // Loops indexes to get staked chicken Ids
                 let nft_id = self.staked_chickens.get((account, u128::from(nfts))).unwrap_or(0);
+
+                // Push NFT Id to vector
+                vector.push(nft_id);
+                
+            }
+
+            // Return vector
+            vector
+
+        }
+
+        // Get list of foxes NFT Ids staked by 'account'
+        #[ink(message)]
+        pub fn get_staked_foxes(&self, account: AccountId) -> Vec<u128> {
+
+            let mut vector = vec![]; // Initialize empty vector
+
+            // Get number of stakes for use as iterator
+            let number_of_foxes_staked = self.number_of_foxes_staked.get(account).unwrap_or(0);
+
+            for nfts in 0..number_of_foxes_staked {
+
+                // Loops indexes to get staked foxes Ids
+                let nft_id = self.staked_foxes.get((account, u128::from(nfts))).unwrap_or(0);
 
                 // Push NFT Id to vector
                 vector.push(nft_id);
@@ -225,20 +263,20 @@ mod staking {
         pub fn get_claimable_eggs(&self, account: AccountId) -> u128 {
             
             // Get count of stakes
-            let number_of_stakes = self.number_of_stakes.get(account).unwrap_or(0);
+            let number_of_chickens_staked = self.number_of_chickens_staked.get(account).unwrap_or(0);
 
             // Get last time staking program scheme was initiated
-            let last_stake_time = self.last_stake_time.get(account).unwrap_or(0);
+            let last_chickens_stake_time = self.last_chickens_stake_time.get(account).unwrap_or(0);
 
             // Get the number of milliseconds past since staking initiation
-            let time_past = self.env().block_timestamp() - last_stake_time;
+            let time_past = self.env().block_timestamp() - last_chickens_stake_time;
 
             let mut _claimable = 0;
 
             let days_past:u128 = (time_past / DAYS).try_into().unwrap();
             // Number of days past -> divide difference by seconds in a day
 
-            _claimable = days_past * self.daily_eggs_per_chicken * number_of_stakes;
+            _claimable = days_past * self.daily_eggs_per_chicken * number_of_chickens_staked;
             // Get claimable by multiplying days past by daily eggs supposedly earned by 
             // Number of chickens staked
 
@@ -265,9 +303,9 @@ mod staking {
             }
 
             // Get number of chicken NFTs staked
-            let number_of_stakes = self.number_of_stakes.get(caller).unwrap_or(0);
+            let number_of_chickens_staked = self.number_of_chickens_staked.get(caller).unwrap_or(0);
 
-            if number_of_stakes == 0 {
+            if number_of_chickens_staked == 0 {
                 // Make sure account has staked
                 return Err(StakingError::HasNotStaked);
             }
@@ -309,7 +347,7 @@ mod staking {
 
             // Loop through NFTs staked and transfer them back to owner
 
-            for nfts in 0..number_of_stakes {
+            for nfts in 0..number_of_chickens_staked {
 
                 let nft_id = self.staked_chickens.get((caller, u128::from(nfts))).unwrap_or(0);
 
@@ -323,8 +361,8 @@ mod staking {
             }
 
             // Reinitialize last stake time and number of stakes to 0
-            self.last_stake_time.insert(caller, &0);
-            self.number_of_stakes.insert(caller, &0);
+            self.last_chickens_stake_time.insert(caller, &0);
+            self.number_of_chickens_staked.insert(caller, &0);
 
             Ok(())
 
@@ -334,15 +372,41 @@ mod staking {
         #[inline]
         pub fn call_factory_for_random_fox_holder(&self) -> AccountId {
 
-            let random_fox_holder = build_call::<DefaultEnvironment>()
+            let ( mut _random_fox_holder, mut _nft_id ) = build_call::<DefaultEnvironment>()
             .call(self.factory.unwrap())
             .exec_input(ExecutionInput::new(Selector::new(ink::selector_bytes!(
                 "pick_random_fox_holder_with_rarity"
             ))))
-            .returns::<AccountId>()
+            .returns::<(AccountId, u128)>()
             .try_invoke().unwrap().unwrap();
 
-            random_fox_holder
+            if _random_fox_holder == self.env().account_id() {
+                let fox_staked_by = self.fox_staked_by.get(_nft_id).unwrap_or(AccountId::from([0u8; 32]));
+                if fox_staked_by == AccountId::from([0u8; 32]) {
+                    _random_fox_holder = fox_staked_by;
+                }
+                else {
+                    _random_fox_holder = _random_fox_holder;
+                }
+            }
+            
+            _random_fox_holder
+
+        }
+
+        // Cross-contract call to factory to get a random fox holder
+        #[inline]
+        pub fn call_factory_for_fox_rarity(&self, id: u128) -> u128 {
+
+            let fox_rarity = build_call::<DefaultEnvironment>()
+            .call(self.factory.unwrap())
+            .exec_input(ExecutionInput::new(Selector::new(ink::selector_bytes!(
+                "get_fox_rarity"
+            ))).push_arg(id))
+            .returns::<u128>()
+            .try_invoke().unwrap().unwrap();
+
+            fox_rarity
 
         }
 
@@ -355,7 +419,7 @@ mod staking {
 
         // Get claimable amount per foxes based on amount of eggs in foxes vault
         #[inline]
-        pub fn get_claim_per_fox(&self) -> Balance {
+        pub fn get_base_claim_per_fox(&self) -> Balance {
             let eggs: contract_ref!(PSP22) = self.eggs.unwrap().into(); // Ref {} of eggs contract
             let foxes: contract_ref!(PSP34) = self.foxes.unwrap().into(); // Ref {} of foxes contract
 
@@ -363,51 +427,152 @@ mod staking {
             eggs.balance_of(Self::env().account_id()) / foxes.total_supply()
         }
 
-        // Determine claimable eggs for fox
+        // Determine claimable eggs for fox staker
         #[ink(message)]
         pub fn get_claimable_for_fox(&self, account: AccountId) -> Balance {
-            let foxes: contract_ref!(PSP34) = self.foxes.unwrap().into();
-            let holds_fox = foxes.balance_of(account);
-            if holds_fox == 0 {
-                // User doesn't hold foxes NFT
-                return 0;
+
+            // Get number of staked foxes
+            let number_of_foxes_staked = self.number_of_foxes_staked.get(account).unwrap_or(0);
+
+            // Used to count claimable tokens
+            let mut _claimable = 0;
+
+            // Last time in UNIX timestamp staking schedule was initiated
+            let last_foxes_stake_time = self.last_foxes_stake_time.get(account).unwrap_or(0);
+
+            // Get the number of milliseconds past since staking initiation
+            let time_past = self.env().block_timestamp() - last_foxes_stake_time;
+
+            // Number of days past -> divide difference by seconds in a day
+            let days_past:u128 = (time_past / DAYS).try_into().unwrap();
+
+            // Loop through foxes
+            for nfts in 0..number_of_foxes_staked {
+                let nft_id = self.staked_chickens.get((account, u128::from(nfts))).unwrap_or(0);
+                let rarity = self.call_factory_for_fox_rarity(nft_id);
+
+                // Increment claimable as base claim per fox by rarity of fox by days past by 1000
+
+                _claimable += self.get_base_claim_per_fox() * rarity * days_past * 1000;
             }
-            let eggs_last_claimed = self.eggs_last_claimed.get(account).unwrap_or(0);
-            if (self.env().block_timestamp() - eggs_last_claimed) >= DAYS {
-                // Must have not claimed within the past day
-                return self.get_claim_per_fox();
+
+            if _claimable >= self.get_eggs_in_pool() {
+                _claimable = self.get_eggs_in_pool();
             }
-            else {
-                // Returns 0 if already claimed within the last day
-                return 0;
-            }
+            
+            // Return potentially claimable eggs
+            _claimable
+
         }
 
-        // Claim eggs for caller (fox holder)
+        // Stake a fox of given Id from foxes NFT collection
         #[ink(message)]
-        pub fn claim_eggs(&mut self) -> Result<(), StakingError> {
+        pub fn stake_fox(&mut self, id: u128) -> Result<(), StakingError> {
+
+            let caller = self.env().caller(); // Caller address
+
+            // Total NFTs staked by account
+            let number_of_foxes_staked = self.number_of_foxes_staked.get(caller).unwrap_or(0);
+
+            if number_of_foxes_staked == 5 {
+                // Must not stake more than 5 foxes NFTs
+                return Err(StakingError::ExceededMaxStakes);
+            }
+
+            // Ref {} of foxes NFT
+
+            let mut nft: contract_ref!(PSP34) = self.foxes.unwrap().into();
+
+            if let Some(ref owner) = nft.owner_of(Id::U128(id)) {
+                // If owner exists for Id
+                if caller != *owner {
+                    // Caller must be owner
+                    return Err(StakingError::TokenNotOwnedByCaller);
+                }
+                let allowance = nft.allowance(caller, Self::env().account_id(), Some(Id::U128(id)));
+                // Make sure allowance exists to allow for transfer of NFTs from
+                // account to staking contract
+                if allowance == false {
+                    return Err(StakingError::AllowanceInexistent);
+                }
+            }
+            else {
+                // Token Id doesn't exist
+                return Err(StakingError::TokenNotExists);
+            }
+
+            // Get last time caller staked NFTs
+            let last_foxes_stake_time = self.last_foxes_stake_time.get(caller).unwrap_or(0);
+
+            if last_foxes_stake_time == 0 {
+                // Set to UNIX block timestamp if not initially in any staking scheme
+                self.last_foxes_stake_time.insert(caller, &self.env().block_timestamp());
+            }
+            else {
+                let difference = self.env().block_timestamp() - last_foxes_stake_time;
+                self.last_foxes_stake_time.insert(caller, &(last_foxes_stake_time + (difference / 2)));
+            }
+
+            // Get number of stakes and use as index for keying Ids
+            let index = number_of_foxes_staked;
+
+            // Insert staked fox Id to index
+            self.staked_foxes.insert((caller, index), &id);
+
+            self.fox_staked_by.insert(id, &caller);
+
+            // Insert number of stakes +1 to 'account'
+            self.number_of_foxes_staked.insert(caller, &(number_of_foxes_staked + 1));
+
+            // Transfer token from caller to staking contract
+            if nft.transfer_from(caller, Self::env().account_id(), Id::U128(id), vec![]).is_err() {
+                return Err(StakingError::TransferFailed);
+            }
+
+            Ok(())
+
+        }
+
+        // Unstake foxes and send rewards to fox staker: Max stakes is 5 foxes
+        #[ink(message)]
+        pub fn unstake_foxes(&mut self) -> Result<(), StakingError> {
 
             let account = self.env().caller(); // caller
 
+            let claimable = self.get_claimable_for_fox(account); // Get claimable eggs
+
+            if claimable == 0 {
+                // Err(()) when no claimable rewards
+                return Err(StakingError::NoClaimableRewards);
+            }
+
+            // Get number of foxes NFTs staked
+            let number_of_foxes_staked = self.number_of_foxes_staked.get(account).unwrap_or(0);
+
+            if number_of_foxes_staked == 0 {
+                // Make sure account has staked
+                return Err(StakingError::HasNotStaked);
+            }
+
             // Ref {} foxes NFT contract
-            let foxes: contract_ref!(PSP34) = self.foxes.unwrap().into();
+            let mut _foxes: contract_ref!(PSP34) = self.foxes.unwrap().into();
 
             // Ref {} eggs contract
             let mut _eggs: contract_ref!(PSP22) = self.foxes.unwrap().into();
 
-            // Balance of caller for foxes NFT
-            let holds_fox = foxes.balance_of(account);
-            
-            if holds_fox == 0 {
-                // Must be a foxes NFT holder
-                return Err(StakingError::NotAFoxHolder);
-            }
+            for nfts in 0..number_of_foxes_staked {
 
-            let claimable = self.get_claimable_for_fox(account);
+                let nft_id = self.staked_foxes.get((account, u128::from(nfts))).unwrap_or(0);
 
-            if claimable == 0 {
-                // No eggs to claim
-                return Err(StakingError::NoClaimableEggs);
+                if _foxes.transfer(account, Id::U128(nft_id), vec![]).is_err() {
+                    return Err(StakingError::FailedUnstake);
+                }
+
+                // Remove Id from staked NFTs of caller at incremental index
+                self.staked_foxes.remove((account, u128::from(nfts)));
+
+                self.fox_staked_by.remove(u128::from(nfts));
+
             }
 
             if _eggs.transfer(account, claimable, vec![]).is_err() {
@@ -415,8 +580,9 @@ mod staking {
                 return Err(StakingError::UnableToClaimEggs);
             }
 
-            // Insert UNIX timestamp for current block as last claimed for eggs
-            self.eggs_last_claimed.insert(account, &self.env().block_timestamp());
+            // Reinitialize last stake time and number of stakes to 0
+            self.last_foxes_stake_time.insert(account, &0);
+            self.number_of_foxes_staked.insert(account, &0);
 
             Ok(())
         }
