@@ -413,17 +413,15 @@ mod staking {
         // Determine claimable eggs for fox staker
         #[ink(message)]
         pub fn get_claimable_for_fox(&self, account: AccountId) -> Balance {
-            // Ref {} of foxes NFT
-            let foxes: contract_ref!(PSP34) = self.foxes.unwrap().into();
 
             // Get number of staked foxes
-            let number_of_foxes_staked = self.number_of_foxes_staked.get(caller).unwrap_or(0);
+            let number_of_foxes_staked = self.number_of_foxes_staked.get(account).unwrap_or(0);
 
             // Used to count claimable tokens
             let mut _claimable = 0;
 
             // Last time in UNIX timestamp staking schedule was initiated
-            let last_foxes_stake_time = self.last_foxes_stake_time.get(caller).unwrap_or(0);
+            let last_foxes_stake_time = self.last_foxes_stake_time.get(account).unwrap_or(0);
 
             // Get the number of milliseconds past since staking initiation
             let time_past = self.env().block_timestamp() - last_foxes_stake_time;
@@ -534,7 +532,7 @@ mod staking {
             }
 
             // Ref {} foxes NFT contract
-            let foxes: contract_ref!(PSP34) = self.foxes.unwrap().into();
+            let mut _foxes: contract_ref!(PSP34) = self.foxes.unwrap().into();
 
             // Ref {} eggs contract
             let mut _eggs: contract_ref!(PSP22) = self.foxes.unwrap().into();
@@ -543,7 +541,7 @@ mod staking {
 
                 let nft_id = self.staked_foxes.get((account, u128::from(nfts))).unwrap_or(0);
 
-                if _nft.transfer(account, Id::U128(nft_id), vec![]).is_err() {
+                if _foxes.transfer(account, Id::U128(nft_id), vec![]).is_err() {
                     return Err(StakingError::FailedUnstake);
                 }
 
