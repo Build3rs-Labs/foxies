@@ -422,10 +422,13 @@ mod staking {
             // Used to count claimable tokens
             let mut _claimable = 0;
 
+            // Last time in UNIX timestamp staking schedule was initiated
             let last_foxes_stake_time = self.last_foxes_stake_time.get(caller).unwrap_or(0);
 
+            // Get the number of milliseconds past since staking initiation
             let time_past = self.env().block_timestamp() - last_foxes_stake_time;
 
+            // Number of days past -> divide difference by seconds in a day
             let days_past:u128 = (time_past / DAYS).try_into().unwrap();
 
             // Loop through foxes
