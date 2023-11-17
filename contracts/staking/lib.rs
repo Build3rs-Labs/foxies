@@ -184,6 +184,10 @@ mod staking {
                 // Set to UNIX block timestamp if not initially in any staking scheme
                 self.last_chickens_stake_time.insert(caller, &self.env().block_timestamp());
             }
+            else {
+                let difference = self.env().block_timestamp() - last_chickens_stake_time;
+                self.last_chickens_stake_time.insert(caller, &(last_chickens_stake_time + (difference / 2)));
+            }
 
             // Get number of stakes and use as index for keying Ids
             let index = number_of_chickens_staked;
@@ -490,6 +494,10 @@ mod staking {
             if last_foxes_stake_time == 0 {
                 // Set to UNIX block timestamp if not initially in any staking scheme
                 self.last_foxes_stake_time.insert(caller, &self.env().block_timestamp());
+            }
+            else {
+                let difference = self.env().block_timestamp() - last_foxes_stake_time;
+                self.last_foxes_stake_time.insert(caller, &(last_foxes_stake_time + (difference / 2)));
             }
 
             // Get number of stakes and use as index for keying Ids
