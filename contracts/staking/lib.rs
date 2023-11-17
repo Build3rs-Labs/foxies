@@ -102,7 +102,9 @@ mod staking {
         // regardless of duration
         cap_per_account: u128,
         // Address of the manager
-        owner: Option<AccountId>
+        owner: Option<AccountId>,
+        // Get address of person staking a fox
+        fox_staked_by: Mapping<u128, AccountId>
     }
 
     impl Staking {
@@ -122,7 +124,8 @@ mod staking {
                 daily_eggs_per_chicken,
                 cap_per_account,
                 last_chickens_stake_time: Default::default(),
-                number_of_chickens_staked: Default::default()
+                number_of_chickens_staked: Default::default(),
+                fox_staked_by: Default::default()
             }
         }
         
@@ -369,15 +372,25 @@ mod staking {
         #[inline]
         pub fn call_factory_for_random_fox_holder(&self) -> AccountId {
 
-            let random_fox_holder = build_call::<DefaultEnvironment>()
+            let ( mut _random_fox_holder, mut _nft_id ) = build_call::<DefaultEnvironment>()
             .call(self.factory.unwrap())
             .exec_input(ExecutionInput::new(Selector::new(ink::selector_bytes!(
                 "pick_random_fox_holder_with_rarity"
             ))))
-            .returns::<AccountId>()
+            .returns::<(AccountId, u128)>()
             .try_invoke().unwrap().unwrap();
 
-            random_fox_holder
+            if _random_fox_holder == self.env().account_id() {
+                let fox_staked_by = self.fox_staked_by.get(_nft_id).unwrap_or(AccountId::from([0u8; 32]));
+                if fox_staked_by == AccountId::from([0u8; 32]) {
+                    _random_fox_holder = fox_staked_by;
+                }
+                else {
+                    _random_fox_holder = _random_fox_holder;
+                }
+            }
+            
+            _random_fox_holder
 
         }
 
@@ -506,6 +519,8 @@ mod staking {
             // Insert staked fox Id to index
             self.staked_foxes.insert((caller, index), &id);
 
+            self.fox_staked_by.insert(id, &caller);
+
             // Insert number of stakes +1 to 'account'
             self.number_of_foxes_staked.insert(caller, &(number_of_foxes_staked + 1));
 
@@ -555,6 +570,8 @@ mod staking {
 
                 // Remove Id from staked NFTs of caller at incremental index
                 self.staked_foxes.remove((account, u128::from(nfts)));
+
+                self.fox_staked_by.remove(u128::from(nfts));
 
             }
 
