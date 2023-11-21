@@ -1,8 +1,18 @@
 import Head from "next/head";
 import styles from "@/styles/Home.module.css";
-import Header2 from "@/components/Header2";
+import Header from "@/components/Header";
+
+import { ApiPromise, WsProvider } from '@polkadot/api';
+import { randomAsU8a } from '@polkadot/util-crypto';
+
+import React, { useEffect, useState } from "react";
+
+import { useWallet } from "useink";
 
 export default function Mint() {
+
+  const { account } = useWallet();
+
   const backgroundStyle = {
     backgroundSize: "cover",
     backgroundPosition: "center center",
@@ -11,6 +21,17 @@ export default function Mint() {
 
     minHeight: "100vh",
   };
+
+  const [api, setAPI] = useState(null);
+
+  useEffect(() => {
+    let connect = async ()=> {
+      let wsProvider = new WsProvider("wss://ws.test.azero.dev");
+      let _api = await ApiPromise.create({ provider: wsProvider });
+      setAPI(_api);
+    }
+    connect();
+  }, []);
 
   return (
     <>
@@ -22,7 +43,7 @@ export default function Mint() {
       </Head>
       <div>
         <div style={backgroundStyle} className="brightness-50 "></div>
-        <Header2 />
+        <Header />
         <div className="absolute z-40 w-full h-full top-0">
           <h1 className="pt-20 font-VT323 text-white text-7xl text-center">
             Welcome to the <br />
@@ -36,9 +57,9 @@ export default function Mint() {
             </div>
             <div className=" p-4 text-center	">
               In this wonderful game, you'll be able to play 2 characters :
-              <button class="relative mx-auto mt-8 border-4  border-black bg-white rounded-full text-4xl sm:text-6xl text-black px-12 flex items-center">
-                <span class="relative font-VT323">Mint</span>
-                <span class="absolute top-1/2 right-4 transform -translate-y-1/2 text-4xl font-bold font-mono">
+              <button onClick={()=>null} className="relative mx-auto mt-8 border-4  border-black bg-white rounded-full text-4xl sm:text-6xl text-black px-12 flex items-center">
+                <span className="relative font-VT323">Mint</span>
+                <span className="absolute top-1/2 right-4 transform -translate-y-1/2 text-4xl font-bold font-mono">
                   &gt;
                 </span>
               </button>
