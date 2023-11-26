@@ -88,7 +88,7 @@ export default function Header() {
   }
 
   return (
-    <header className="flex z-50 w-full h-20 absolute top-0 bg-transparent">
+    <header className="flex z-50 w-full h-20 absolute top-0 bg-transparent font-VT323">
       {/* ... Mobile menu code starts ... */}
       <section className="MOBILE-MENU flex lg:hidden overflow-y-hidden white text-white">
         <div
@@ -118,15 +118,15 @@ export default function Header() {
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </div>
-          <ul className="flex flex-col items-center justify-between min-h-[250px] text-3xl font-bold drop-shadow-xl">
-            <li className="my-8 uppercase hover:underline">
+          <ul className="flex flex-col items-center justify-between min-h-[250px] text-5xl font-bold drop-shadow-xl">
+            <li className="my-8  hover:underline">
               <Link href="/mint">MINT</Link>
             </li>
-            <li className="my-8 uppercase hover:underline">
+            <li className="my-8 hover:underline">
               <Link href="/coop">COOP</Link>
             </li>
 
-            <li className=" my-8 uppercase hover:underline flex">
+            <li className=" my-8 flex">
               <a href="" target="blank" rel="noreferrer" className="px-4 mt-2">
                 <Image src="/twitter.png" width={35} height={35} />
               </a>
@@ -145,7 +145,7 @@ export default function Header() {
       <div className=" w-full justify-between items-end mx-8 pt-8 relative hidden lg:flex">
         <div className="flex">
           <Link href="/coop">
-            <button className="mt-1 mx-auto h-11 font-VT323 bg-white rounded-full text-2xl text-black px-6 flex items-center">
+            <button className="mt-1 mx-auto h-11  bg-white rounded-full text-2xl text-black px-6 flex items-center">
               <span className=" ">Bring me to the coop !</span>
             </button>
           </Link>
