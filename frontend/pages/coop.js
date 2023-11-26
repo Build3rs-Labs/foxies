@@ -1,14 +1,14 @@
 import Head from "next/head";
 import styles from "@/styles/Home.module.css";
-import Header2 from "@/components/Header2";
 import Image from "next/image";
+import Header from "@/components/Header";
 
 export default function Coop() {
   const backgroundStyle = {
     backgroundSize: "cover",
     backgroundPosition: "center center",
     backgroundAttachment: "fixed",
-    backgroundImage: 'url("/mint.jpg")', // Replace with the actual image path
+    backgroundImage: 'url("/mint.jpg")', 
 
     minHeight: "100vh",
   };
@@ -23,7 +23,7 @@ export default function Coop() {
       </Head>
       <div>
         <div style={backgroundStyle} className="brightness-50 "></div>
-        <Header2 />
+        <Header />
         <div className="absolute z-40 w-full h-full top-0">
          
             <h1 className="pt-20 font-VT323 text-white text-7xl text-center">

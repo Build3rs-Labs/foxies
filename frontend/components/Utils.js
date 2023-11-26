@@ -48,7 +48,7 @@ export const getBalance = async (api, account)=> {
     
     console.log('the balance is :' + balance)
 
-    transfer(api, account);
+   // transfer(api, account);
     
 }
 
