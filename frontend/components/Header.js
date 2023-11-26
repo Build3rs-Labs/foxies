@@ -2,8 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useWallet, useAllWallets } from "useink";
 import Link from "next/link";
 import Image from "next/image";
+import { ApiPromise, WsProvider } from "@polkadot/api";
 
-import { formatWallet, CallContract } from "./Utils";
+import { formatWallet, CallContract, getBalance } from "./Utils";
 
 export const ConnectWallet = ({ children }) => {
   const { account, connect, disconnect } = useWallet();
@@ -11,10 +12,24 @@ export const ConnectWallet = ({ children }) => {
   const [shouldRender, setShouldRender] = useState(false);
   const polkadotWallet = wallets[2];
 
+  var wsProvider;
+  var api;
+
+  var callOptions; 
+
+  const test = async () => {
+    wsProvider = new WsProvider("wss://ws.test.azero.dev");
+    api = await ApiPromise.create({ provider: wsProvider });
+    getBalance(api, account);
+  };
   useEffect(() => {
     const shouldRenderConnectWallet = true;
     setShouldRender(shouldRenderConnectWallet);
-  }, []);
+    console.log(account);
+    if (account) {
+      test();
+    }
+  }, [account]);
 
   if (!shouldRender) {
     return null;
@@ -32,7 +47,10 @@ export const ConnectWallet = ({ children }) => {
               Connect Wallet
             </button>
           ) : (
-            <a href={polkadotWallet.installUrl}>
+            <a
+              href={polkadotWallet.installUrl}
+              className=" border-2	border-white	rounded-full font-VT323 text-2xl text-white px-4 py-1"
+            >
               Install {polkadotWallet.title}
             </a>
           )}
@@ -58,16 +76,13 @@ export default function Header() {
     <header className="flex z-50 w-full h-20 absolute top-0 bg-transparent">
       <div className="flex w-full justify-between items-end mx-8 pt-8 relative">
         <div className="flex">
-        
-            <a href="" target="blank" rel="noreferrer" className="px-4">
-              <Image src="/twitter.png" width={35} height={35} />
-            </a>
-      
-          
-            <a href="" target="blank" rel="noreferrer" className="fill-white	">
-              <Image src="/discord.png" width={40} height={40} />
-            </a>
-          
+          <a href="" target="blank" rel="noreferrer" className="px-4">
+            <Image src="/twitter.png" width={35} height={35} />
+          </a>
+
+          <a href="" target="blank" rel="noreferrer" className="fill-white	">
+            <Image src="/discord.png" width={40} height={40} />
+          </a>
         </div>
 
         <ConnectWallet />

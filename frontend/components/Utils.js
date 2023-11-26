@@ -16,13 +16,13 @@ const ABIs = {
 const query_address = "5C4hrfjw9DjXZTzV3MwzrrAr9P1MJhSrvWGWqi1eSuyUpnhM";
 
 const CAs = {
-    factory:"FACTORY_CONTRACT_ADDRESS",
-    staking:"STAKING_CONTRACT_ADDRESS",
-    eggs:"EGGS_CONTRACT_ADDRESS",
-    chickens:"CHICKENS_CONTRACT_ADDRESS",
-    foxes:"FOXES_CONTRACT_ADDRESS"
-}
-
+    factory: "5CAMJvKSHXx942wwDKGWRMvT3mMU7M9jg3wF638iueTRuxz2",
+    staking: "5EPX5sSqty4JQTPpAse8J4fHod7R2AFv6Gy6zRHNsopMuX2A",
+    eggs: "5D3QKPxFAtVzRtARTsAtQFc5qcX22QtJH8rX9zncyCfa3vV9",
+    chickens: "5CAMJvKSHXx942wwDKGWRMvT3mMU7M9jg3wF638iueTRuxz2",
+    foxes: "5DApRrJU5FMZYegkQjCk861kweST3TjX4JoCrx9YsqpEsAGu"
+};
+3
 export const getGas = (api) => {
     return {
         gasLimit: api.registry.createType('WeightV2', {
@@ -46,7 +46,7 @@ export const getBalance = async (api, account)=> {
     
     let balance = balance_.output.toHuman().Ok;
     
-    console.log(balance)
+    console.log('the balance is :' + balance)
 
     transfer(api, account);
     
