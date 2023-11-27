@@ -65,6 +65,7 @@ export const ConnectWallet = ({ children }) => {
                         ) : (
                           <a
                             href={wallet.installUrl}
+                            target= "_blank"
                             className="border-2 border-gray-300 rounded-md font-medium text-black px-4 py-2 w-full"
                           >
                             Install {wallet.title}
