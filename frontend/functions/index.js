@@ -16,7 +16,7 @@ const ABIs = {
 const query_address = "5C4hrfjw9DjXZTzV3MwzrrAr9P1MJhSrvWGWqi1eSuyUpnhM";
 
 const CAs = {
-    factory: "5CAMJvKSHXx942wwDKGWRMvT3mMU7M9jg3wF638iueTRuxz2",
+    factory: "5Cncot7MgdEymzufYcr9vBMHMnC4AyKeqGZfzaZUp3ir6iv9",
     staking: "5EPX5sSqty4JQTPpAse8J4fHod7R2AFv6Gy6zRHNsopMuX2A",
     eggs: "5D3QKPxFAtVzRtARTsAtQFc5qcX22QtJH8rX9zncyCfa3vV9",
     chickens: "5CAMJvKSHXx942wwDKGWRMvT3mMU7M9jg3wF638iueTRuxz2",
@@ -33,7 +33,7 @@ export const getGas = (api) => {
     };
 }
 
-export const mint = async (api, account)=> {
+export const mint = async (api, account, type="random")=> {
     if (!api || !account) {
         return; //Wallet and/or API not connected
     }
@@ -41,7 +41,18 @@ export const mint = async (api, account)=> {
     let gas = getGas(api);
     let contract = new ContractPromise(api, ABIs.factory, CAs.factory);
 
-    let mint = await contract.tx["mintNft"](account.address).signAndSend(
+    if (type == "random") {
+        let amount = 6 * (10 ** 12); // 6 AZERO: Random mint
+        amount = api.createType("Balance", amount.toLocaleString("fullwide", {useGrouping:false}));
+        gas.value = amount;
+    }
+    else {
+        let amount = 100 * (10 ** 12); // 100 AZERO: Precise fox mint
+        amount = api.createType("Balance", amount.toLocaleString("fullwide", {useGrouping:false}));
+        gas.value = amount;
+    }
+
+    await contract.tx["mintNft"](gas).signAndSend(
         account.address,
         { signer: account.signer },
         async ({ events = [], status }) => {
