@@ -1,13 +1,11 @@
 import Head from "next/head";
 import styles from "@/styles/Home.module.css";
 import Header from "@/components/Header";
-
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { randomAsU8a } from '@polkadot/util-crypto';
-
 import React, { useEffect, useState } from "react";
-
 import { useWallet } from "useink";
+import { formatWallet, CallContract, mint } from "../functions/index";
 
 export default function Mint() {
 
@@ -23,6 +21,12 @@ export default function Mint() {
   };
 
   const [api, setAPI] = useState(null);
+  var wsProvider;
+  
+  const handleMint = async () => {
+    wsProvider = new WsProvider("wss://ws.test.azero.dev");
+    mint(api, account);
+  }
 
   useEffect(() => {
     let connect = async ()=> {
@@ -57,7 +61,7 @@ export default function Mint() {
             </div>
             <div className=" p-4 text-center	">
               In this wonderful game, you'll be able to play 2 characters :
-              <button onClick={()=>null} className="relative mx-auto mt-8 border-4  border-black bg-white rounded-full text-4xl sm:text-6xl text-black px-12 flex items-center">
+              <button onClick={handleMint} className="relative mx-auto mt-8 border-4  border-black bg-white rounded-full text-4xl sm:text-6xl text-black px-12 flex items-center">
                 <span className="relative font-VT323">Mint</span>
                 <span className="absolute top-1/2 right-4 transform -translate-y-1/2 text-4xl font-bold font-mono">
                   &gt;

@@ -1,22 +1,21 @@
-import React, { useEffect, useState } from "react";
-import { useWallet, useAllWallets } from "useink";
-import Link from "next/link";
+import React, { useEffect, useState } from 'react';
+import { useWallet, useAllWallets } from 'useink';
+import { ApiPromise, WsProvider } from '@polkadot/api';
+import { formatWallet, getBalance } from '../functions/index';
 import Image from "next/image";
-import { ApiPromise, WsProvider } from "@polkadot/api";
-
-import { formatWallet, CallContract, getBalance } from "./Utils";
+import Link from "next/link";
 
 export const ConnectWallet = ({ children }) => {
   const { account, connect, disconnect } = useWallet();
   const wallets = useAllWallets();
   const [shouldRender, setShouldRender] = useState(false);
-  const polkadotWallet = wallets[2];
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   var wsProvider;
   var api;
 
   const test = async () => {
-    wsProvider = new WsProvider("wss://ws.test.azero.dev");
+    wsProvider = new WsProvider('wss://ws.test.azero.dev');
     api = await ApiPromise.create({ provider: wsProvider });
     getBalance(api, account);
   };
@@ -30,31 +29,65 @@ export const ConnectWallet = ({ children }) => {
     }
   }, [account]);
 
-  if (!shouldRender) {
-    return null;
-  }
+  const handleWalletConnect = (wallet) => {
+    connect(wallet.extensionName);
+    setIsModalOpen(false); // Close the modal after connecting
+  };
+
+  if (!shouldRender) return null;
 
   if (!account) {
     return (
-      <ul className="flex">
-        <li key={polkadotWallet.title}>
-          {polkadotWallet.installed ? (
-            <button
-              className="border-2 border-white rounded-full font-VT323 text-2xl text-white px-4 py-1"
-              onClick={() => connect(polkadotWallet.extensionName)}
-            >
-              Connect Wallet
-            </button>
-          ) : (
-            <a
-              href={polkadotWallet.installUrl}
-              className="border-2 border-white rounded-full font-VT323 text-2xl text-white px-4 py-1"
-            >
-              Install {polkadotWallet.title}
-            </a>
-          )}
-        </li>
-      </ul>
+      <>
+        <button
+          className="border-2 border-white rounded-full font-VT323 text-2xl text-white px-4 py-1"
+          onClick={() => setIsModalOpen(true)}
+        >
+          Connect Wallet
+        </button>
+
+        {isModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full" id="my-modal">
+            <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white bg-opacity-70">
+              <div className="mt-3 text-center">
+                <h3 className="text-lg leading-6 font-medium text-black">Select a Wallet</h3>
+                <div className="mt-2 px-7 py-3">
+                  <ul className="flex flex-col">
+                    {wallets.map((wallet, index) => (
+                      <li key={wallet.title} className="my-2">
+                        {wallet.installed ? (
+                          <button
+                            className="border-2 border-gray-300 rounded-md font-medium text-black px-4 py-2 w-full"
+                            onClick={() => handleWalletConnect(wallet)}
+                          >
+                            Connect {wallet.title}
+                          </button>
+                        ) : (
+                          <a
+                            href={wallet.installUrl}
+                            className="border-2 border-gray-300 rounded-md font-medium text-black px-4 py-2 w-full"
+                          >
+                            Install {wallet.title}
+                          </a>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="items-center px-4 py-3">
+                  <button
+                    id="ok-btn"
+                    className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
+                    onClick={() => setIsModalOpen(false)}
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </>
     );
   }
 
@@ -69,6 +102,7 @@ export const ConnectWallet = ({ children }) => {
     </>
   );
 };
+
 
 export default function Header() {
   const [isNavOpen, setIsNavOpen] = useState(false);
@@ -91,6 +125,7 @@ export default function Header() {
     <header className="flex z-50 w-full h-20 absolute top-0 bg-transparent font-VT323">
       {/* ... Mobile menu code starts ... */}
       <section className="MOBILE-MENU flex lg:hidden overflow-y-hidden white text-white">
+        <ConnectWallet />
         <div
           className="HAMBURGER-ICON cursor-pointer space-y-2 mr-4 mt-4 absolute right-0"
           onClick={() => handleNavClick()}

@@ -33,6 +33,40 @@ export const getGas = (api) => {
     };
 }
 
+export const mint = async (api, account)=> {
+    if (!api || !account) {
+        return; //Wallet and/or API not connected
+    }
+
+    let gas = getGas(api);
+    let amount = 6 * (10 ** 12);
+    let contract = new ContractPromise(api, ABIs.factory, CAs.factory);
+
+    let mint = await contract.query["factory::mint_nft"](query_address, gas, account.address).signAndSend(
+        account.address,
+        { signer: account.signer },
+        async ({ events = [], status }) => {
+            if (status.isInBlock) {
+                //in block
+            } else if (status.isFinalized) {
+                let failed = false;
+                events.forEach(({ phase, event: { data, method, section } }) => {
+                    if (method == "ExtrinsicFailed") {
+                        failed = true;
+                    }
+                });
+                if (failed == true) {
+                    //failed
+                }
+                else {
+                    //completed
+                }
+            }
+        }
+    );
+    
+}
+
 export const getBalance = async (api, account)=> {
     if (!api || !account) {
         return; //Wallet and/or API not connected
