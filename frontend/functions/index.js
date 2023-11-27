@@ -39,10 +39,9 @@ export const mint = async (api, account)=> {
     }
 
     let gas = getGas(api);
-    let amount = 6 * (10 ** 12);
     let contract = new ContractPromise(api, ABIs.factory, CAs.factory);
 
-    let mint = await contract.query["factory::mint_nft"](query_address, gas, account.address).signAndSend(
+    let mint = await contract.tx["mintNft"](account.address).signAndSend(
         account.address,
         { signer: account.signer },
         async ({ events = [], status }) => {
@@ -56,10 +55,10 @@ export const mint = async (api, account)=> {
                     }
                 });
                 if (failed == true) {
-                    //failed
+                    console.log('fail !')
                 }
                 else {
-                    //completed
+                    console.log('minted !')
                 }
             }
         }
