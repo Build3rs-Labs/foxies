@@ -19,7 +19,7 @@ There are 2 types of playable characters :
 - 1,500 foxes
 - The in-game currency is the $EGGS token.
 - The game dynamics are based on the interactions between the foxes and the chickens.
-- Chickens NFTs can be staked to generate $EGGS each day, but when they try to sell their $EGGS, there is a 50% chance that the accumulated $EGGS gets stolen by a Wolf.
+- Chickens NFTs can be staked to generate $EGGS each day, but when they try to sell their $EGGS, there is a 50% chance that the accumulated $EGGS gets stolen by a Fox.
 - Additionally, a 20% tax is charged on sold $EGGS and distributed to the foxes NFTs holders.
   Foxes automatically earn 20% of all the $EGGS sold by the chickens.
 
