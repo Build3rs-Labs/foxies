@@ -1,5 +1,5 @@
 import { ContractPromise } from '@polkadot/api-contract';
-
+import { toastError, toastSuccess } from "@/components/toast";
 import { useWallet, useAllWallets } from 'useink';
 
 export const formatWallet = (address) => {
@@ -40,7 +40,7 @@ export const mint = async (api, account, type="random")=> {
 
     let gas = getGas(api);
     let contract = new ContractPromise(api, ABIs.factory, CAs.factory);
-
+  
     if (type == "random") {
         let amount = 6 * (10 ** 12); // 6 AZERO: Random mint
         amount = api.createType("Balance", amount.toLocaleString("fullwide", {useGrouping:false}));
@@ -66,9 +66,11 @@ export const mint = async (api, account, type="random")=> {
                     }
                 });
                 if (failed == true) {
+                    toastError();
                     console.log('fail !')
                 }
                 else {
+                    toastSuccess();
                     console.log('minted !')
                 }
             }

@@ -6,6 +6,8 @@ import { randomAsU8a } from '@polkadot/util-crypto';
 import React, { useEffect, useState } from "react";
 import { useWallet } from "useink";
 import { formatWallet, CallContract, mint } from "../functions/index";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Mint() {
 
@@ -46,34 +48,38 @@ export default function Mint() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div>
-        <div style={backgroundStyle} className="brightness-50 "></div>
+      <div className={styles.pageBackground}></div>
         <Header />
         <div className="absolute z-40 w-full h-full top-0">
-          <h1 className="pt-20 font-VT323 text-white text-7xl text-center">
+          <h1 className="pt-20 font-VT323 text-white text-5xl lg:text-7xl text-center">
             Welcome to the <br />
             world of Foxies !
           </h1>
 
-          <div className="pt-40 grid grid-cols-1 md:grid-cols-3 lg:grid-flow-row gap-6 font-VT323 text-white text-4xl mx-16 leading-10">
-            <div className="p-4">
+          <div className="pt-14 lg:pt-40 grid grid-cols-1 md:grid-cols-3 lg:grid-flow-row gap-6 font-VT323 text-white text-2xl lg:text-4xl mx-4 lg:mx-16 lg:leading-10">
+            <div className="lg:p-4 text-center lg:text-left">
               Chickens generate $EGGS tokens while being staked. They might
               become handy later on in the game...
             </div>
-            <div className=" p-4 text-center	">
+            <div className=" lg:p-4 text-center	">
               In this wonderful game, you'll be able to play 2 characters :
-              <button onClick={handleMint} className="relative mx-auto mt-8 border-4  border-black bg-white rounded-full text-4xl sm:text-6xl text-black px-12 flex items-center">
-                <span className="relative font-VT323">Mint</span>
-                <span className="absolute top-1/2 right-4 transform -translate-y-1/2 text-4xl font-bold font-mono">
-                  &gt;
-                </span>
+              <button onClick={handleMint} className="relative mx-auto mt-8 border-2  border-black bg-white rounded-full text-2xl lg:text-4xl text-black px-12 flex items-center">
+                <span className="relative font-VT323">Random Mint</span>
               </button>
+              <p>6 AZERO</p>
+              <button onClick={handleMint} className="relative mx-auto mt-8 border-2  border-black bg-white rounded-full text-2xl lg:text-4xl text-black px-12 flex items-center">
+                <span className="relative font-VT323">Mint a Fox !</span>
+              </button>
+              <p>100 AZERO <br /> only 2 available !</p>
+
             </div>
-            <div className="p-4 text-right">
+            <div className="lg:p-4 text-center lg:text-right">
               Foxes love $EGGS and they are eager to steal them from chickens...
               You should try staking your fox.
             </div>
           </div>
         </div>
+        <ToastContainer />
       </div>
     </>
   );

@@ -125,8 +125,11 @@ export default function Header() {
   return (
     <header className="flex z-50 w-full h-20 absolute top-0 bg-transparent font-VT323">
       {/* ... Mobile menu code starts ... */}
-      <section className="MOBILE-MENU flex lg:hidden overflow-y-hidden white text-white">
+      <section className="MOBILE-MENU flex lg:hidden overflow-y-hidden white text-white mt- mx-2">
+        <div className='mt-4'>
         <ConnectWallet />
+
+        </div>
         <div
           className="HAMBURGER-ICON cursor-pointer space-y-2 mr-4 mt-4 absolute right-0"
           onClick={() => handleNavClick()}
