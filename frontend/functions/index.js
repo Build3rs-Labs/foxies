@@ -16,11 +16,11 @@ const ABIs = {
 const query_address = "5C4hrfjw9DjXZTzV3MwzrrAr9P1MJhSrvWGWqi1eSuyUpnhM";
 
 const CAs = {
-    factory: "5GLLfWiiW6pD5h194f1nJVxuV9Y2sJCCxWg6nLXJGkswi5qZ",
-    staking: "5EDxJXXC12kRNA5wWhuJ2YQ9VsKzDqYiq3MXHDvbRiLyV6eA",
-    eggs: "5HkRTxfvWyNSBGtX12ogWBKsCMGA7rdmnSg1S1pQzdVQhe1B",
-    chickens: "5GzxzrmuG23X3QCkd5uoCv6rH12bjDRksCbPUfq9BN2xD9ta",
-    foxes: "5D9y8YhHLpLNkv2pe2FqazqfuSNid17Y9cNSf9g1m2nix7LM"
+    factory: "5ETg9weR6icRB6mksKUiuvNKaXFkZaZ5Fo1mdvo8BubaBRKG",
+    staking: "5GE93yTJ9RRhoKf1L2y3dBpN1yfCmZQ4ZAihHqp4MfokmiHa",
+    eggs: "5CARCisLd2BhN6eaPShUn7dsEkJXhKez4hD2u2y3ywVqNh9g",
+    chickens: "5ECDpbhzrCykpzvujyLRnoaJBhQufvwtLLy3rRrm8FKhnHmG",
+    foxes: "5EbZiUxYwFkkvqjyUfotd4yNJxL6K1LDg4NP8AjcNvzSM5Q2"
 };
 3
 export const getGas = (api) => {
