@@ -191,7 +191,7 @@ mod factory {
                 self.last_mint.insert(caller, &Some((1, mint.unwrap())));
                 
                 // Increment direct fox mints
-                self.direct_fox_mints.insert(caller, &direct_fox_mints + 1);
+                self.direct_fox_mints.insert(caller, &(direct_fox_mints + 1));
                 
             }
 
