@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { useWallet, useAllWallets } from 'useink';
-import { ApiPromise, WsProvider } from '@polkadot/api';
-import { formatWallet, getBalance } from '../functions/index';
+import React, { useEffect, useState } from "react";
+import { useWallet, useAllWallets } from "useink";
+import { ApiPromise, WsProvider } from "@polkadot/api";
+import { formatWallet, getBalances } from "../functions/index";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -11,23 +11,20 @@ export const ConnectWallet = ({ children }) => {
   const [shouldRender, setShouldRender] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  var wsProvider;
-  var api;
+  const [api, setApi] = useState();
 
-  const test = async () => {
-    wsProvider = new WsProvider('wss://ws.test.azero.dev');
-    api = await ApiPromise.create({ provider: wsProvider });
-    getBalance(api, account);
-  };
+  var wsProvider;
 
   useEffect(() => {
+    let connect = async () => {
+      let wsProvider = new WsProvider("wss://ws.test.azero.dev");
+      let _api = await ApiPromise.create({ provider: wsProvider });
+      setApi(_api);
+    };
+    connect();
     const shouldRenderConnectWallet = true;
     setShouldRender(shouldRenderConnectWallet);
-    console.log(account);
-    if (account) {
-      test();
-    }
-  }, [account]);
+  }, []);
 
   const handleWalletConnect = (wallet) => {
     connect(wallet.extensionName);
@@ -47,10 +44,15 @@ export const ConnectWallet = ({ children }) => {
         </button>
 
         {isModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full" id="my-modal">
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full"
+            id="my-modal"
+          >
             <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white bg-opacity-70">
               <div className="mt-3 text-center">
-                <h3 className="text-lg leading-6 font-medium text-black">Select a Wallet</h3>
+                <h3 className="text-lg leading-6 font-medium text-black">
+                  Select a Wallet
+                </h3>
                 <div className="mt-2 px-7 py-3">
                   <ul className="flex flex-col">
                     {wallets.map((wallet, index) => (
@@ -65,7 +67,7 @@ export const ConnectWallet = ({ children }) => {
                         ) : (
                           <a
                             href={wallet.installUrl}
-                            target= "_blank"
+                            target="_blank"
                             className="border-2 border-gray-300 rounded-md font-medium text-black px-4 py-2 w-full"
                           >
                             Install {wallet.title}
@@ -104,7 +106,6 @@ export const ConnectWallet = ({ children }) => {
   );
 };
 
-
 export default function Header() {
   const [isNavOpen, setIsNavOpen] = useState(false);
 
@@ -126,9 +127,8 @@ export default function Header() {
     <header className="flex z-50 w-full h-20 absolute top-0 bg-transparent font-VT323">
       {/* ... Mobile menu code starts ... */}
       <section className="MOBILE-MENU flex lg:hidden overflow-y-hidden white text-white mt- mx-2">
-        <div className='mt-4'>
-        <ConnectWallet />
-
+        <div className="mt-4">
+          <ConnectWallet />
         </div>
         <div
           className="HAMBURGER-ICON cursor-pointer space-y-2 mr-4 mt-4 absolute right-0"

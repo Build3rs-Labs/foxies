@@ -85,18 +85,41 @@ export const getBalance = async (api, account)=> {
     }
 
     let gas = getGas(api);
-
     let contract = new ContractPromise(api, ABIs.PSP22, CAs.eggs);
-
     let balance_ = await contract.query["psp22::balanceOf"](query_address, gas, account.address);
-    
-    let balance = balance_.output.toHuman().Ok;
-    
+    let balance = balance_.output.toHuman().Ok;    
     console.log('the balance is :' + balance)
 
-   // transfer(api, account);
-    
 }
+
+
+export const getBalances = async (api, account)=> {
+    if (!api || !account) {
+        return; //Wallet and/or API not connected
+    }
+
+    let gas = getGas(api);
+    let contract = new ContractPromise(api, ABIs.PSP34, CAs.chickens);
+    let balance_ = await contract.query["psp34::balanceOf"](query_address, gas, account.address);
+    let balance = balance_.output.toHuman().Ok;
+    console.log('the balance of chickens is :' + balance);
+
+    let contract2 = new ContractPromise(api, ABIs.PSP34, CAs.foxes);
+    let balance_2 = await contract2.query["psp34::balanceOf"](query_address, gas, account.address);
+    let balance2 = balance_2.output.toHuman().Ok;
+    console.log('the balance of foxes is :' + balance2)
+
+    let contract3 = new ContractPromise(api, ABIs.PSP22, CAs.eggs);
+    let balance_3 = await contract3.query["psp22::balanceOf"](query_address, gas, account.address);
+    let balance3 = balance_3.output.toHuman().Ok;
+    console.log('the balance of eggs is :' + balance2)
+    let balances = [balance, balance2, balance3];
+
+    return balances;
+
+}
+
+ // getDirectFoxMints(account)
 
 export const transfer = async (api, account)=> {
     if (!api || !account) {
