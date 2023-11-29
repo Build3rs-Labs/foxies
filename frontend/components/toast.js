@@ -14,7 +14,7 @@ export const toastError = () =>
   });
 
 export const toastSuccess = () =>
-  toast.success("Succes !", {
+  toast.success("Success !", {
     position: "bottom-right",
     autoClose: 5000,
     hideProgressBar: false,
