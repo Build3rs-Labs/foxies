@@ -17,8 +17,8 @@ const query_address = "5C4hrfjw9DjXZTzV3MwzrrAr9P1MJhSrvWGWqi1eSuyUpnhM";
 
 const CAs = {
     factory: "5GLLfWiiW6pD5h194f1nJVxuV9Y2sJCCxWg6nLXJGkswi5qZ",
-    staking: "5CJpWup2tQoxRVZxzXx9rjsbLqPzq3dNntXA8t2CJLe2g1e1",
-    eggs: "5CmyabGAzL1D95aVmy1Ewc8qoL9azYvphKJsKUfUPVpBNoVt",
+    staking: "5EDxJXXC12kRNA5wWhuJ2YQ9VsKzDqYiq3MXHDvbRiLyV6eA",
+    eggs: "5HkRTxfvWyNSBGtX12ogWBKsCMGA7rdmnSg1S1pQzdVQhe1B",
     chickens: "5GzxzrmuG23X3QCkd5uoCv6rH12bjDRksCbPUfq9BN2xD9ta",
     foxes: "5D9y8YhHLpLNkv2pe2FqazqfuSNid17Y9cNSf9g1m2nix7LM"
 };

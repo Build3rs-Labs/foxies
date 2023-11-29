@@ -22,10 +22,11 @@ mod token {
             name: Option<String>,
             symbol: Option<String>,
             decimals: u8,
-            owner: AccountId
+            owner: AccountId,
+            initial_mint: Balance
         ) -> Self {
             Self {
-                data: PSP22Data::new(0, Self::env().caller()),
+                data: PSP22Data::new(initial_mint, Self::env().caller()),
                 name,
                 symbol,
                 decimals,
