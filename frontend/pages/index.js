@@ -36,6 +36,7 @@ export default function Home() {
               src="/Foxies.png"
               width={600}
               height={600}
+              alt="logo"
               className="mx-10 px-10"
             />
             <h1 className="font-VT323 text-white text-2xl xl:text-4xl relative bottom-10 sm:bottom-14 text-center">

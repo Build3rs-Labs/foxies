@@ -28,8 +28,6 @@ export default function Coop() {
       setBalances(result)
       setIDs(result2);
     };
-  
-    console.log(account);
     if (account) {
       call();
     }
@@ -73,9 +71,9 @@ export default function Coop() {
             </div>
             <div className="p-4 text-center">
             Must read before staking!
-            <Image className="mx-auto" src="/book.png" width={160} height={160} />
+            <Image className="mx-auto" src="/book.png" width={160} height={160} alt="book"/>
             <p className="py-8">Your $EGGS balance : <br />{balances[2]} $EGGS</p>
-            <Image className="mx-auto" src="/egg.png" width={140} height={140} />
+            <Image className="mx-auto" src="/egg.png" width={140} alt="egg" height={140} />
             </div>
           </div>
         </div>

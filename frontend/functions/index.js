@@ -33,6 +33,47 @@ export const getGas = (api) => {
     };
 }
 
+export const getTokenIdsChickensTest= async (api, account, balances) => {
+    if (!api || !account) {
+        return;
+    }
+    let tokenIds = {
+        foxes: [],
+        chickens: []
+    };
+    let gas = getGas(api);
+        let psp34Contract = new ContractPromise(api, ABIs.PSP34, CAs.chickens);
+            const tokenIdResponse = await psp34Contract.query["psp34Enumerable::ownersTokenByIndex"](query_address, gas, "5ECbrmsnASt3hJVk5EqcZgZVfNvquhg1CQ3tAd1RtWLAZtHH", 0);
+            const tokenId = tokenIdResponse.output.toHuman().Ok;
+            console.log(tokenId);
+    return tokenIds;
+};
+
+export const getTokenIdsForBoth = async (api, account, balances) => {
+    if (!api || !account) {
+        return;
+    }
+    let tokenIds = {
+        foxes: [],
+        chickens: []
+    };
+    let gas = getGas(api);
+    let psp34ContractChickens = new ContractPromise(api, ABIs.PSP34, CAs.chickens);
+    for (let i = 0; i < balances[0]; i++) {
+        const tokenIdResponseChickens = await psp34ContractChickens.query["psp34Enumerable::ownersTokenByIndex"](query_address, gas, account.address, i.toLocaleString("fullwide", {useGrouping:false}));
+        const tokenIdChickens = tokenIdResponseChickens.output.toHuman().Ok;
+        tokenIds.chickens.push(tokenIdChickens);
+    }
+    let psp34ContractFoxes = new ContractPromise(api, ABIs.PSP34, CAs.foxes);
+    for (let i = 0; i < balances[1]; i++) {
+        const tokenIdResponseFoxes = await psp34ContractFoxes.query["psp34Enumerable::ownersTokenByIndex"](query_address, gas, account.address, i.toLocaleString("fullwide", {useGrouping:false}));
+        const tokenIdFoxes = tokenIdResponseFoxes.output.toHuman().Ok;
+        tokenIds.foxes.push(tokenIdFoxes);
+    }
+    console.log(tokenIds);
+    return tokenIds;
+};
+
 export const mint = async (api, account, type="random")=> {
     if (!api || !account) {
         return; //Wallet and/or API not connected
