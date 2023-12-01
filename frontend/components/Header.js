@@ -167,11 +167,11 @@ export default function Header() {
 
             <li className=" my-8 flex">
               <a href="" target="blank" rel="noreferrer" className="px-4 mt-2">
-                <Image src="/twitter.png" width={35} height={35} />
+                <Image src="/twitter.png" width={35} alt="twitter" height={35} />
               </a>
 
               <a href="" target="blank" rel="noreferrer" className="px-4	">
-                <Image src="/discord.png" width={50} height={50} />
+                <Image src="/discord.png" width={50} alt="discord" height={50} />
               </a>
             </li>
           </ul>
@@ -190,11 +190,11 @@ export default function Header() {
           </Link>
 
           <a href="" target="blank" rel="noreferrer" className="px-4 mt-2">
-            <Image src="/twitter.png" width={35} height={35} />
+            <Image src="/twitter.png" alt="twitter" width={35} height={35} />
           </a>
 
           <a href="" target="blank" rel="noreferrer" className="fill-white	">
-            <Image src="/discord.png" width={50} height={50} />
+            <Image src="/discord.png" alt="discord" width={50} height={50} />
           </a>
         </div>
 
