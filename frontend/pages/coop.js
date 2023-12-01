@@ -13,7 +13,7 @@ import "react-toastify/dist/ReactToastify.css";
 export default function Coop() {
 
   const { account, connect, disconnect } = useWallet();
-  const [balances, setBalances] = useState(['X', 'X', 'X']);
+  const [balances, setBalances] = useState([0, 0, 0]);
   const [IDs, setIDs] = useState([]);
   var api;
   var wsProvider;
@@ -55,14 +55,14 @@ export default function Coop() {
          
           <div className="pt-14 lg:28 grid grid-cols-1 md:grid-cols-3 lg:grid-flow-row gap-6 font-VT323 text-white text-2xl lg:text-4xl mx-4 lg:mx-16 lg:leading-10">
             <div className="p-4">
-            You own {balances[0]} chickens.
+            You own {balances[0]} {(balances[0] == 1)?"chicken":"chickens"}.
             <p className="pt-12">Stake your NFTs to earn delicious $EGGS rewards.</p>
             <button  className="relative mx-auto mt-8 border-2  border-black bg-white rounded-full text-2xl lg:text-4xl text-black px-4 flex items-center">
                 <span className="relative font-VT323">Stake Chickens</span>
               </button>
             </div>
             <div className=" p-4 text-center	">
-             You own {balances[1]} foxes.
+             You own {balances[1]} {(balances[1] == 1)?"fox":"foxes"}.
              <p className="pt-12">Stake your NFTs to try to steal the precious $EGGS</p>
           {/*   <button className=" border-2 border-black bg-white rounded-full text-xl text-black px-12 flex items-center">
                 MINT
@@ -72,7 +72,7 @@ export default function Coop() {
               </button>
             </div>
             <div className="p-4 text-center">
-            Must read before staking !
+            Must read before staking!
             <Image className="mx-auto" src="/book.png" width={160} height={160} />
             <p className="py-8">Your $EGGS balance : <br />{balances[2]} $EGGS</p>
             <Image className="mx-auto" src="/egg.png" width={140} height={140} />
