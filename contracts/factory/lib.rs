@@ -43,7 +43,9 @@ mod factory {
         /// Returned when a user has exceeded their max direct fox mints
         ExceededDirectFoxMintAllowance,
         /// Failed to send AZERO
-        FailedAZEROTransfer
+        FailedAZEROTransfer,
+        // Returned when mint type by admin is invalid
+        InvalidMintType
     }
 
     #[ink(storage)]
@@ -136,6 +138,35 @@ mod factory {
                 return Err(FactoryError::OnlyOwnerAllowed);
             }
             self.azero_for_random_mints = amount;
+            Ok(())
+        }
+
+        #[ink(message)]
+        pub fn mint_by_admin(&mut self, mint_type: u8, account: AccountId) -> Result<(), FactoryError> {
+            if self.env().caller() != self.owner.unwrap() {
+                return Err(FactoryError::OnlyOwnerAllowed);
+            }
+            if mint_type == 0 {
+                // 0 for Chicken
+                let mint = self.mint_chicken(account);
+                if mint.is_err() {
+                    return Err(FactoryError::FailedMint);
+                }
+                // Record last mint for account as chicken
+                self.last_mint.insert(account, &Some((0, mint.unwrap())));
+            }
+            else if mint_type == 1 {
+                // 1 for Fox
+                let mint = self.mint_fox(account);
+                if mint.is_err() {
+                    return Err(FactoryError::FailedMint);
+                }
+                // Record last mint for account as fox
+                self.last_mint.insert(account, &Some((1, mint.unwrap())));
+            }
+            else {
+                return Err(FactoryError::InvalidMintType);
+            }
             Ok(())
         }
 
