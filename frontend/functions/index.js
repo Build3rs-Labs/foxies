@@ -112,14 +112,14 @@ export const getBalances = async (api, account)=> {
     let contract3 = new ContractPromise(api, ABIs.PSP22, CAs.eggs);
     let balance_3 = await contract3.query["psp22::balanceOf"](query_address, gas, account.address);
     let balance3 = balance_3.output.toHuman().Ok;
-    console.log('the balance of eggs is :' + balance2)
+    console.log('the balance of eggs is :' + balance3)
     let balances = [balance, balance2, balance3];
 
     return balances;
 
 }
 
-export const getAndStoreTokenIdsForBoth2 = async (api, account, balances) => {
+export const getTokenIdsChickensTest= async (api, account, balances) => {
     if (!api || !account) {
         return;
     }
@@ -142,7 +142,7 @@ export const getAndStoreTokenIdsForBoth2 = async (api, account, balances) => {
 
 
 
-export const getAndStoreTokenIdsForBoth = async (api, account, balances) => {
+export const getTokenIdsForBoth = async (api, account, balances) => {
     if (!api || !account) {
         return;
     }
