@@ -23,11 +23,9 @@ export default function Mint() {
   };
 
   const [api, setAPI] = useState(null);
-  var wsProvider;
   
-  const handleMint = async () => {
-    wsProvider = new WsProvider("wss://ws.test.azero.dev");
-    mint(api, account);
+  const handleMint = async (api, account, type) => {
+    mint(api, account, type);
   }
 
   useEffect(() => {
@@ -63,11 +61,11 @@ export default function Mint() {
             </div>
             <div className=" lg:p-4 text-center	">
               In this wonderful game, you'll be able to play 2 characters :
-              <button onClick={handleMint} className="relative mx-auto mt-8 border-2  border-black bg-white rounded-full text-2xl lg:text-4xl text-black px-12 flex items-center">
+              <button onClick={()=>handleMint(api, account, "random")} className="relative mx-auto mt-8 border-2  border-black bg-white rounded-full text-2xl lg:text-4xl text-black px-12 flex items-center">
                 <span className="relative font-VT323">Random Mint</span>
               </button>
               <p>6 AZERO</p>
-              <button onClick={handleMint} className="relative mx-auto mt-8 border-2  border-black bg-white rounded-full text-2xl lg:text-4xl text-black px-12 flex items-center">
+              <button onClick={()=>handleMint(api, account, "fox")} className="relative mx-auto mt-8 border-2  border-black bg-white rounded-full text-2xl lg:text-4xl text-black px-12 flex items-center">
                 <span className="relative font-VT323">Mint a Fox !</span>
               </button>
               <p>100 AZERO <br /> only 2 available !</p>
