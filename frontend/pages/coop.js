@@ -6,7 +6,7 @@ import { ApiPromise, WsProvider } from '@polkadot/api';
 import { randomAsU8a } from '@polkadot/util-crypto';
 import React, { useEffect, useState } from "react";
 import { useWallet } from "useink";
-import { formatWallet, CallContract, getBalances } from "../functions/index";
+import { formatWallet, CallContract, getBalances, getAndStoreTokenIdsForBoth} from "../functions/index";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -14,22 +14,31 @@ export default function Coop() {
 
   const { account, connect, disconnect } = useWallet();
   const [balances, setBalances] = useState([]);
+  const [IDs, setIDs] = useState([]);
   var api;
   var wsProvider;
 
   useEffect(() => {
-    const balances = async () => {
+    const call = async () => {
       wsProvider = new WsProvider('wss://ws.test.azero.dev');
       api = await ApiPromise.create({ provider: wsProvider });
       let result = await getBalances(api, account);
+      let balancesParam = {
+        chickens: result[0],
+        foxes: result[1],
+      };
+  
+      let result2 = await getAndStoreTokenIdsForBoth(api, account, balancesParam);
       setBalances(result)
-      console.log(result)
+      setIDs(result2);
     };
+  
     console.log(account);
     if (account) {
-      balances();
+      call();
     }
   }, [account]);
+  
 
   return (
     <>

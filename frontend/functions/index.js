@@ -119,6 +119,35 @@ export const getBalances = async (api, account)=> {
 
 }
 
+
+
+export const getAndStoreTokenIdsForBoth = async (api, account, balances) => {
+    if (!api || !account) {
+        return;
+    }
+
+    let tokenIds = {
+        foxes: [],
+        chickens: []
+    };
+    let gas = getGas(api);
+    for (const tokenType of ['chickens', 'foxes']) {
+        let psp34Contract = new ContractPromise(api, ABIs.PSP34, CAs.tokenType);
+
+        for (let i = 0; i < balances[tokenType]; i++) {
+           
+            const tokenIdResponse = await psp34Contract.query["psp34Enumerable::ownersTokenByIndex"](query_address, gas, account.address, i);
+            const tokenId = tokenIdResponse.output.toHuman().Ok;
+            console.log(tokenId)
+            tokenIds[tokenType].push(tokenId);
+        }
+    }
+    console.log(tokenIds)
+    return tokenIds;
+};
+
+
+
  // getDirectFoxMints(account)
 
 export const transfer = async (api, account)=> {
