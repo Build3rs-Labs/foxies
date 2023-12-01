@@ -23,11 +23,7 @@ export default function Coop() {
       wsProvider = new WsProvider('wss://ws.test.azero.dev');
       api = await ApiPromise.create({ provider: wsProvider });
       let result = await getBalances(api, account);
-      let balancesParam = {
-        chickens: result[0],
-        foxes: result[1],
-      };
-  
+      let balancesParam = [result[0], result[1]];
       let result2 = await getAndStoreTokenIdsForBoth(api, account, balancesParam);
       setBalances(result)
       setIDs(result2);

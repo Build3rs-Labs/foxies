@@ -119,6 +119,27 @@ export const getBalances = async (api, account)=> {
 
 }
 
+export const getAndStoreTokenIdsForBoth2 = async (api, account, balances) => {
+    if (!api || !account) {
+        return;
+    }
+
+    let tokenIds = {
+        foxes: [],
+        chickens: []
+    };
+    let gas = getGas(api);
+
+        let psp34Contract = new ContractPromise(api, ABIs.PSP34, CAs.chickens);
+            const tokenIdResponse = await psp34Contract.query["psp34Enumerable::ownersTokenByIndex"](query_address, gas, "5ECbrmsnASt3hJVk5EqcZgZVfNvquhg1CQ3tAd1RtWLAZtHH", 0);
+            const tokenId = tokenIdResponse.output.toHuman().Ok;
+            console.log(tokenId);
+
+
+    return tokenIds;
+};
+
+
 
 
 export const getAndStoreTokenIdsForBoth = async (api, account, balances) => {
@@ -131,24 +152,27 @@ export const getAndStoreTokenIdsForBoth = async (api, account, balances) => {
         chickens: []
     };
     let gas = getGas(api);
-    for (const tokenType of ['chickens', 'foxes']) {
-        let psp34Contract = new ContractPromise(api, ABIs.PSP34, CAs.tokenType);
 
-        for (let i = 0; i < balances[tokenType]; i++) {
-           
-            const tokenIdResponse = await psp34Contract.query["psp34Enumerable::ownersTokenByIndex"](query_address, gas, account.address, i);
-            const tokenId = tokenIdResponse.output.toHuman().Ok;
-            console.log(tokenId)
-            tokenIds[tokenType].push(tokenId);
-        }
+
+    let psp34ContractChickens = new ContractPromise(api, ABIs.PSP34, CAs.chickens);
+    for (let i = 0; i < balances[0]; i++) {
+        const tokenIdResponseChickens = await psp34ContractChickens.query["psp34Enumerable::ownersTokenByIndex"](query_address, gas, account.address, i.toLocaleString("fullwide", {useGrouping:false}));
+        const tokenIdChickens = tokenIdResponseChickens.output.toHuman().Ok;
+        tokenIds.chickens.push(tokenIdChickens);
     }
-    console.log(tokenIds)
+
+    let psp34ContractFoxes = new ContractPromise(api, ABIs.PSP34, CAs.foxes);
+    for (let i = 0; i < balances[1]; i++) {
+        const tokenIdResponseFoxes = await psp34ContractFoxes.query["psp34Enumerable::ownersTokenByIndex"](query_address, gas, account.address, i.toLocaleString("fullwide", {useGrouping:false}));
+        const tokenIdFoxes = tokenIdResponseFoxes.output.toHuman().Ok;
+        tokenIds.foxes.push(tokenIdFoxes);
+    }
+
+    console.log(tokenIds);
     return tokenIds;
 };
 
 
-
- // getDirectFoxMints(account)
 
 export const transfer = async (api, account)=> {
     if (!api || !account) {
