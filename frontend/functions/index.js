@@ -49,6 +49,7 @@ export const getTokenIdsChickensTest= async (api, account, balances) => {
     return tokenIds;
 };
 
+
 export const getTokenIdsForBoth = async (api, account, balances) => {
     if (!api || !account) {
         return;
@@ -72,6 +73,56 @@ export const getTokenIdsForBoth = async (api, account, balances) => {
     }
     console.log(tokenIds);
     return tokenIds;
+};
+export const PSP34_approve = async (api, account,  token_type="random") => {
+    if (!api || !account) {
+        console.log("API, account not provided.");
+        return;
+    }
+
+    let gas = getGas(api);
+    let contract = new ContractPromise(api, ABIs.PSP34, CAs.chickens);
+
+    await contract.tx["psp34::approve"](gas,"5GE93yTJ9RRhoKf1L2y3dBpN1yfCmZQ4ZAihHqp4MfokmiHa", null, true).signAndSend(
+        account.address,
+        { signer: account.signer },
+        async ({ events = [], status }) => {
+            if (status.isInBlock) {
+                //in block
+            } else if (status.isFinalized) {
+                let failed = false;
+                events.forEach(({ phase, event: { data, method, section } }) => {
+                    if (method == "ExtrinsicFailed") {
+                        failed = true;
+                    }
+                });
+                if (failed == true) {
+                    toastError();
+                    console.log('fail !')
+                }
+                else {
+                    toastSuccess();
+                    console.log('worked !')
+                }
+            }
+        }
+    );
+};
+export const PSP34_allowance = async (api, account,  token_type="random") => {
+    if (!api || !account) {
+        console.log("API, account not provided.");
+        return;
+    }
+
+    let gas = getGas(api);
+    let contract = new ContractPromise(api, ABIs.PSP34, CAs.chickens);
+
+   let query_ = await contract.query["psp34::allowance"](query_address, gas, account.address, "5GE93yTJ9RRhoKf1L2y3dBpN1yfCmZQ4ZAihHqp4MfokmiHa", null);
+   let query = query_.output.toHuman().Ok;
+   console.log('Is the staking allowed ? ' + query);
+   return query;
+
+   
 };
 
 export const mint = async (api, account, type="random")=> {

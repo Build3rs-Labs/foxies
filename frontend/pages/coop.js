@@ -3,36 +3,77 @@ import styles from "@/styles/Home.module.css";
 import Image from "next/image";
 import Header from "@/components/Header";
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import { randomAsU8a } from '@polkadot/util-crypto';
 import React, { useEffect, useState } from "react";
 import { useWallet } from "useink";
-import { formatWallet, CallContract, getBalances, getTokenIdsForBoth} from "../functions/index";
+import { formatWallet, CallContract, getBalances, getTokenIdsForBoth, PSP34_approve, PSP34_allowance } from "../functions/index";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function Coop() {
-
   const { account, connect, disconnect } = useWallet();
   const [balances, setBalances] = useState([0, 0, 0]);
   const [IDs, setIDs] = useState([]);
+  const [isApproved, setIsApproved] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   var api;
   var wsProvider;
 
-  useEffect(() => {
-    const call = async () => {
+
+  const handleApprove = async () => {
+    try {
+      setIsLoading(true);
       wsProvider = new WsProvider('wss://ws.test.azero.dev');
       api = await ApiPromise.create({ provider: wsProvider });
-      let result = await getBalances(api, account);
-      let balancesParam = [result[0], result[1]];
-      let result2 = await getTokenIdsForBoth(api, account, balancesParam);
-      setBalances(result)
-      setIDs(result2);
-    };
+      await PSP34_approve(api, account);
+      // Optionally, re-check the allowance status after approval
+      const approvalStatus = await PSP34_allowance(api, account);
+      setIsApproved(approvalStatus);
+    } catch (error) {
+      toast.error("Approval failed: " + error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  useEffect(() => {
     if (account) {
+      setIsLoading(true);
+      const call = async () => {
+        wsProvider = new WsProvider('wss://ws.test.azero.dev');
+        api = await ApiPromise.create({ provider: wsProvider });
+        let result = await getBalances(api, account);
+        let approvalStatus = await PSP34_allowance(api, account);
+        PSP34_approve(api, account)
+        setIsApproved(approvalStatus);
+        let balancesParam = [result[0], result[1]];
+        let result2 = await getTokenIdsForBoth(api, account, balancesParam);
+        setBalances(result);
+        setIDs(result2);
+        setIsLoading(false);
+      };
       call();
     }
   }, [account]);
-  
+
+  const renderStakeButtons = () => {
+    if (isLoading) {
+      return <p className="text-center text-white">Loading...</p>;
+    }
+
+    if (isApproved) {
+      return (
+        <button className="relative mx-auto mt-8 border-2 border-black bg-white rounded-full text-2xl lg:text-4xl text-black px-4 flex items-center">
+          <span className="relative font-VT323">Stake Chickens</span>
+        </button>
+      );
+    } else {
+      return (
+        <button onClick={() => PSP34_approve(api, account)} className="relative mx-auto mt-8 border-2 border-black bg-white rounded-full text-2xl lg:text-4xl text-black px-4 flex items-center">
+          <span className="relative font-VT323">Approve</span>
+        </button>
+      );
+    }
+  };
 
   return (
     <>
@@ -46,34 +87,25 @@ export default function Coop() {
         <div className={styles.pageBackground}></div>
         <Header />
         <div className="absolute z-40 w-full h-full top-0">
-         
-            <h1 className="pt-20 font-VT323 text-white text-5xl lg:text-7xl text-center">
-            You're in the coop !
-            </h1>
-         
+          <h1 className="pt-20 font-VT323 text-white text-5xl lg:text-7xl text-center">
+            You're in the coop!
+          </h1>
           <div className="pt-14 lg:28 grid grid-cols-1 md:grid-cols-3 lg:grid-flow-row gap-6 font-VT323 text-white text-2xl lg:text-4xl mx-4 lg:mx-16 lg:leading-10">
             <div className="p-4">
-            You own {balances[0]} {(balances[0] == 1)?"chicken":"chickens"}.
-            <p className="pt-12">Stake your NFTs to earn delicious $EGGS rewards.</p>
-            <button  className="relative mx-auto mt-8 border-2  border-black bg-white rounded-full text-2xl lg:text-4xl text-black px-4 flex items-center">
-                <span className="relative font-VT323">Stake Chickens</span>
-              </button>
-            </div>
-            <div className=" p-4 text-center	">
-             You own {balances[1]} {(balances[1] == 1)?"fox":"foxes"}.
-             <p className="pt-12">Stake your NFTs to try to steal the precious $EGGS</p>
-          {/*   <button className=" border-2 border-black bg-white rounded-full text-xl text-black px-12 flex items-center">
-                MINT
-              </button> */}  
-              <button  className="relative mx-auto mt-8 border-2  border-black bg-white rounded-full text-2xl lg:text-4xl text-black px-4 flex items-center">
-                <span className="relative font-VT323">Stake Foxes</span>
-              </button>
+              You own {balances[0]} {(balances[0] === 1) ? "chicken" : "chickens"}.
+              <p className="pt-12">Stake your NFTs to earn delicious $EGGS rewards.</p>
+              {!account ? <p className="text-white">First, connect your wallet</p> : renderStakeButtons()}
             </div>
             <div className="p-4 text-center">
-            Must read before staking!
-            <Image className="mx-auto" src="/book.png" width={160} height={160} alt="book"/>
-            <p className="py-8">Your $EGGS balance : <br />{balances[2]} $EGGS</p>
-            <Image className="mx-auto" src="/egg.png" width={140} alt="egg" height={140} />
+              You own {balances[1]} {(balances[1] === 1) ? "fox" : "foxes"}.
+              <p className="pt-12">Stake your NFTs to try to steal the precious $EGGS.</p>
+              {/* Placeholder for second stake button or additional logic */}
+            </div>
+            <div className="p-4 text-center">
+              Must read before staking!
+              <Image className="mx-auto" src="/book.png" width={160} height={160} alt="book"/>
+              <p className="py-8">Your $EGGS balance: <br />{balances[2]} $EGGS</p>
+              <Image className="mx-auto" src="/egg.png" width={140} alt="egg" height={140} />
             </div>
           </div>
         </div>
