@@ -133,17 +133,18 @@ export const mint = async (api, account, type="random")=> {
 
     let gas = getGas(api);
     let contract = new ContractPromise(api, ABIs.factory, CAs.factory);
+
+    let amount;
   
     if (type == "random") {
-        let amount = 6 * (10 ** 12); // 6 AZERO: Random mint
-        amount = api.createType("Balance", amount.toLocaleString("fullwide", {useGrouping:false}));
-        gas.value = amount;
+        amount = 6 * (10 ** 12); // 6 AZERO: Random mint
     }
     else {
-        let amount = 100 * (10 ** 12); // 100 AZERO: Precise fox mint
-        amount = api.createType("Balance", amount.toLocaleString("fullwide", {useGrouping:false}));
-        gas.value = amount;
+        amount = 100 * (10 ** 12); // 100 AZERO: Precise fox mint
     }
+
+    amount = api.createType("Balance", amount.toLocaleString("fullwide", {useGrouping:false}));
+    gas.value = amount;
 
     await contract.tx["mintNft"](gas).signAndSend(
         account.address,
