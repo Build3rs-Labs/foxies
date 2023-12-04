@@ -16,64 +16,75 @@ export default function Coop() {
   const [isApproved, setIsApproved] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const [foxBalances, setFoxBalances] = useState([0, 0]);
+  const [foxIDs, setFoxIDs] = useState([]);
+  const [isFoxApproved, setIsFoxApproved] = useState(false);
+
   var api;
   var wsProvider;
 
 
-  const handleApprove = async () => {
+  const handleApprove = async (animal) => {
     try {
-      setIsLoading(true);
+
       wsProvider = new WsProvider('wss://ws.test.azero.dev');
       api = await ApiPromise.create({ provider: wsProvider });
-      await PSP34_approve(api, account);
-      // Optionally, re-check the allowance status after approval
+      await PSP34_approve(api, account, animal);
       const approvalStatus = await PSP34_allowance(api, account);
       setIsApproved(approvalStatus);
     } catch (error) {
       toast.error("Approval failed: " + error.message);
-    } finally {
-      setIsLoading(false);
-    }
+    } 
   };
+
   useEffect(() => {
     if (account) {
       setIsLoading(true);
       const call = async () => {
         wsProvider = new WsProvider('wss://ws.test.azero.dev');
         api = await ApiPromise.create({ provider: wsProvider });
+
         let result = await getBalances(api, account);
-        let approvalStatus = await PSP34_allowance(api, account);
-        PSP34_approve(api, account)
+        let approvalStatus = await PSP34_allowance(api, account, 'chickens');
         setIsApproved(approvalStatus);
         let balancesParam = [result[0], result[1]];
         let result2 = await getTokenIdsForBoth(api, account, balancesParam);
         setBalances(result);
         setIDs(result2);
+
+        let foxApprovalStatus = await PSP34_allowance(api, account, 'foxes'); 
+
+        setIsFoxApproved(foxApprovalStatus);
+
         setIsLoading(false);
       };
       call();
     }
   }, [account]);
 
-  const renderStakeButtons = () => {
+  const renderStakeButtons = (animalType) => {
+    const isAnimalApproved = animalType === "chicken" ? isApproved : isFoxApproved;
+    const approveFunction = animalType === "chicken" ? () => handleApprove('chickens') : () =>handleApprove('foxes'); 
+  
     if (isLoading) {
       return <p className="text-center text-white">Loading...</p>;
     }
-
-    if (isApproved) {
+  
+    if (isAnimalApproved) {
       return (
         <button className="relative mx-auto mt-8 border-2 border-black bg-white rounded-full text-2xl lg:text-4xl text-black px-4 flex items-center">
-          <span className="relative font-VT323">Stake Chickens</span>
+          <span className="relative font-VT323">{`Stake ${animalType === "chicken" ? "Chickens" : "Foxes"}`}</span>
         </button>
       );
     } else {
       return (
-        <button onClick={() => PSP34_approve(api, account)} className="relative mx-auto mt-8 border-2 border-black bg-white rounded-full text-2xl lg:text-4xl text-black px-4 flex items-center">
+        <button onClick={approveFunction} className="relative mx-auto mt-8 border-2 border-black bg-white rounded-full text-2xl lg:text-4xl text-black px-4 flex items-center">
           <span className="relative font-VT323">Approve</span>
         </button>
       );
     }
   };
+  
 
   return (
     <>
@@ -94,12 +105,12 @@ export default function Coop() {
             <div className="p-4">
               You own {balances[0]} {(balances[0] === 1) ? "chicken" : "chickens"}.
               <p className="pt-12">Stake your NFTs to earn delicious $EGGS rewards.</p>
-              {!account ? <p className="text-white">First, connect your wallet</p> : renderStakeButtons()}
+              {!account ? <p className="text-white">First, connect your wallet</p> :   renderStakeButtons("chicken")}
             </div>
             <div className="p-4 text-center">
               You own {balances[1]} {(balances[1] === 1) ? "fox" : "foxes"}.
               <p className="pt-12">Stake your NFTs to try to steal the precious $EGGS.</p>
-              {/* Placeholder for second stake button or additional logic */}
+              {!account ? <p className="text-white">First, connect your wallet</p> :   renderStakeButtons("foxes")}
             </div>
             <div className="p-4 text-center">
               Must read before staking!

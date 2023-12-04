@@ -74,14 +74,19 @@ export const getTokenIdsForBoth = async (api, account, balances) => {
     console.log(tokenIds);
     return tokenIds;
 };
-export const PSP34_approve = async (api, account,  token_type="random") => {
+export const PSP34_approve = async (api, account,  token_type) => {
     if (!api || !account) {
         console.log("API, account not provided.");
         return;
     }
 
     let gas = getGas(api);
-    let contract = new ContractPromise(api, ABIs.PSP34, CAs.chickens);
+    let contract;
+    if (token_type === 'chickens'){
+        contract = new ContractPromise(api, ABIs.PSP34, CAs.chickens);
+    } else {
+        contract = new ContractPromise(api, ABIs.PSP34, CAs.foxes);
+    }
 
     await contract.tx["psp34::approve"](gas,"5GE93yTJ9RRhoKf1L2y3dBpN1yfCmZQ4ZAihHqp4MfokmiHa", null, true).signAndSend(
         account.address,
@@ -108,18 +113,23 @@ export const PSP34_approve = async (api, account,  token_type="random") => {
         }
     );
 };
-export const PSP34_allowance = async (api, account,  token_type="random") => {
+
+export const PSP34_allowance = async (api, account,  token_type) => {
     if (!api || !account) {
         console.log("API, account not provided.");
         return;
     }
 
     let gas = getGas(api);
-    let contract = new ContractPromise(api, ABIs.PSP34, CAs.chickens);
-
+    let contract;
+    if (token_type === 'chickens'){
+        contract = new ContractPromise(api, ABIs.PSP34, CAs.chickens);
+    } else {
+        contract = new ContractPromise(api, ABIs.PSP34, CAs.foxes);
+    }
    let query_ = await contract.query["psp34::allowance"](query_address, gas, account.address, "5GE93yTJ9RRhoKf1L2y3dBpN1yfCmZQ4ZAihHqp4MfokmiHa", null);
    let query = query_.output.toHuman().Ok;
-   console.log('Is the staking allowed ? ' + query);
+   console.log('Is the staking allowed for ' + token_type + ' : ' + query);
    return query;
 
    
@@ -211,7 +221,6 @@ export const getBalances = async (api, account)=> {
 
 }
 
- // getDirectFoxMints(account)
 
 export const transfer = async (api, account)=> {
     if (!api || !account) {
