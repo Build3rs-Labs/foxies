@@ -74,40 +74,44 @@ export const getTokenIdsForBoth = async (api, account, balances) => {
     console.log(tokenIds);
     return tokenIds;
 };
-export const PSP34_approve = async (api, account,  token_type) => {
-    if (!api || !account) {
-        console.log("API, account not provided.");
-        return;
-    }
-
-    let gas = getGas(api);
-
-    let contract = new ContractPromise(api, ABIs.PSP34, CAs[token_type]);
-
-    await contract.tx["psp34::approve"](gas, CAs.staking, null, true).signAndSend(
-        account.address,
-        { signer: account.signer },
-        async ({ events = [], status }) => {
-            if (status.isInBlock) {
-                //in block
-            } else if (status.isFinalized) {
-                let failed = false;
-                events.forEach(({ phase, event: { data, method, section } }) => {
-                    if (method == "ExtrinsicFailed") {
-                        failed = true;
+export const PSP34_approve = (api, account,  token_type) => {
+    return new Promise(async (resolve, reject)=> {
+        if (!api || !account) {
+            console.log("API, account not provided.");
+            return;
+        }
+    
+        let gas = getGas(api);
+    
+        let contract = new ContractPromise(api, ABIs.PSP34, CAs[token_type]);
+    
+        await contract.tx["psp34::approve"](gas, CAs.staking, null, true).signAndSend(
+            account.address,
+            { signer: account.signer },
+            async ({ events = [], status }) => {
+                if (status.isInBlock) {
+                    //in block
+                } else if (status.isFinalized) {
+                    let failed = false;
+                    events.forEach(({ phase, event: { data, method, section } }) => {
+                        if (method == "ExtrinsicFailed") {
+                            failed = true;
+                        }
+                    });
+                    if (failed == true) {
+                        toastError();
+                        console.log("failed");
+                        reject("error");
                     }
-                });
-                if (failed == true) {
-                    toastError();
-                    console.log('fail !')
-                }
-                else {
-                    toastSuccess();
-                    console.log('worked !')
+                    else {
+                        toastSuccess();
+                        console.log("worked")
+                        resolve("success")
+                    }
                 }
             }
-        }
-    );
+        );
+    });
 };
 
 export const PSP34_allowance = async (api, account,  token_type) => {
