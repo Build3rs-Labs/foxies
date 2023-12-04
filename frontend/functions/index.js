@@ -81,14 +81,10 @@ export const PSP34_approve = async (api, account,  token_type) => {
     }
 
     let gas = getGas(api);
-    let contract;
-    if (token_type === 'chickens'){
-        contract = new ContractPromise(api, ABIs.PSP34, CAs.chickens);
-    } else {
-        contract = new ContractPromise(api, ABIs.PSP34, CAs.foxes);
-    }
 
-    await contract.tx["psp34::approve"](gas,"5GE93yTJ9RRhoKf1L2y3dBpN1yfCmZQ4ZAihHqp4MfokmiHa", null, true).signAndSend(
+    let contract = new ContractPromise(api, ABIs.PSP34, CAs[token_type]);
+
+    await contract.tx["psp34::approve"](gas, CAs.staking, null, true).signAndSend(
         account.address,
         { signer: account.signer },
         async ({ events = [], status }) => {
@@ -121,18 +117,13 @@ export const PSP34_allowance = async (api, account,  token_type) => {
     }
 
     let gas = getGas(api);
-    let contract;
-    if (token_type === 'chickens'){
-        contract = new ContractPromise(api, ABIs.PSP34, CAs.chickens);
-    } else {
-        contract = new ContractPromise(api, ABIs.PSP34, CAs.foxes);
-    }
-   let query_ = await contract.query["psp34::allowance"](query_address, gas, account.address, "5GE93yTJ9RRhoKf1L2y3dBpN1yfCmZQ4ZAihHqp4MfokmiHa", null);
-   let query = query_.output.toHuman().Ok;
-   console.log('Is the staking allowed for ' + token_type + ' : ' + query);
-   return query;
 
-   
+    let contract = new ContractPromise(api, ABIs.PSP34, CAs[token_type]);
+    
+    let query_ = await contract.query["psp34::allowance"](query_address, gas, account.address, CAs.staking, null);
+    let query = query_.output.toHuman().Ok;
+    console.log('Is the staking allowed for ' + token_type + ' : ' + query);
+    return query;
 };
 
 export const mint = async (api, account, type="random")=> {
