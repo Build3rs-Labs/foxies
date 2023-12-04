@@ -72,7 +72,7 @@ export default function Coop() {
     const approveFunction = animalType === "chicken" ? () => handleApprove('chickens') : () =>handleApprove('foxes'); 
   
     if (isLoading) {
-      return <p className="text-center text-white">Loading...</p>;
+      return <p className="text-center text-white mt-3">Loading...</p>;
     }
   
     if (isAnimalApproved) {
