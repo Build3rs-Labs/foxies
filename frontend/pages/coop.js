@@ -30,8 +30,13 @@ export default function Coop() {
       wsProvider = new WsProvider('wss://ws.test.azero.dev');
       api = await ApiPromise.create({ provider: wsProvider });
       await PSP34_approve(api, account, animal);
-      const approvalStatus = await PSP34_allowance(api, account);
-      setIsApproved(approvalStatus);
+      const approvalStatus = await PSP34_allowance(api, account, animal);
+      if (animal == "chickens") {
+        setIsApproved(approvalStatus);
+      }
+      else {
+        setIsFoxApproved(approvalStatus);
+      }
     } catch (error) {
       toast.error("Approval failed: " + error.message);
     } 
