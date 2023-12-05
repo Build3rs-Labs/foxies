@@ -5,7 +5,7 @@ import Header from "@/components/Header";
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import React, { useEffect, useState } from "react";
 import { useWallet } from "useink";
-import { formatWallet, CallContract, getBalances, getTokenIdsForBoth, PSP34_approve, PSP34_allowance } from "../functions/index";
+import { formatWallet, CallContract, getBalances, getTokenIdsForBoth, PSP34_approve, PSP34_allowance, stake } from "../functions/index";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -41,7 +41,18 @@ export default function Coop() {
       toast.error("Approval failed: " + error.message);
     } 
   };
+  const handleStake = async (animal) => {
+    try {
 
+      wsProvider = new WsProvider('wss://ws.test.azero.dev');
+      api = await ApiPromise.create({ provider: wsProvider });
+     
+      const stakeStatus = await stake(api, account, animal);
+     console.log(stakeStatus);
+    } catch (error) {
+      toast.error("Approval failed: " + error.message);
+    } 
+  };
   useEffect(() => {
     if (account) {
       setIsLoading(true);
@@ -69,7 +80,8 @@ export default function Coop() {
 
   const renderStakeButtons = (animalType) => {
     const isAnimalApproved = animalType === "chicken" ? isApproved : isFoxApproved;
-    const approveFunction = animalType === "chicken" ? () => handleApprove('chickens') : () =>handleApprove('foxes'); 
+    const approveFunction = animalType === "chicken" ? () => handleApprove('chickens') : () =>handleApprove('foxes');
+    const stakeFunction = animalType === "chicken" ? () => handleStake('chicken') : () =>handleStake('fox'); 
   
     if (isLoading) {
       return <p className="text-center text-white mt-3">Loading...</p>;
@@ -77,7 +89,7 @@ export default function Coop() {
   
     if (isAnimalApproved) {
       return (
-        <button className="relative mx-auto mt-8 border-2 border-black bg-white rounded-full text-2xl lg:text-4xl text-black px-4 flex items-center">
+        <button  onClick={stakeFunction} className="relative mx-auto mt-8 border-2 border-black bg-white rounded-full text-2xl lg:text-4xl text-black px-4 flex items-center">
           <span className="relative font-VT323">{`Stake ${animalType === "chicken" ? "Chickens" : "Foxes"}`}</span>
         </button>
       );

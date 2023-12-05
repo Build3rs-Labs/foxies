@@ -74,6 +74,47 @@ export const getTokenIdsForBoth = async (api, account, balances) => {
     console.log(tokenIds);
     return tokenIds;
 };
+
+export const stake = (api, account, token_type) => {
+    return new Promise(async (resolve, reject)=> {
+        if (!api || !account) {
+            console.log("API, account not provided.");
+            return;
+        }
+    
+        let gas = getGas(api);
+    
+        let contract = new ContractPromise(api, ABIs.staking, CAs.staking);
+    
+        await contract.tx["stakeFox"](gas, 7).signAndSend(
+            account.address,
+            { signer: account.signer },
+            async ({ events = [], status }) => {
+                if (status.isInBlock) {
+                    
+                } else if (status.isFinalized) {
+                    let failed = false;
+                    events.forEach(({ phase, event: { data, method, section } }) => {
+                        if (method == "ExtrinsicFailed") {
+                            failed = true;
+                        }
+                    });
+                    if (failed == true) {
+                        toastError();
+                        console.log("failed");
+                        reject("error");
+                    }
+                    else {
+                        toastSuccess();
+                        console.log("worked")
+                        resolve("success")
+                    }
+                }
+            }
+        );
+    });
+};
+
 export const PSP34_approve = (api, account,  token_type) => {
     return new Promise(async (resolve, reject)=> {
         if (!api || !account) {
