@@ -102,7 +102,7 @@ const renderStakeButtons = (animalType) => {
     return (
       <>
         <button onClick={stakeFunction} className="relative mx-auto mt-8 border-2 border-black bg-white rounded-full text-2xl lg:text-4xl text-black px-4 flex items-center">
-          <span className="relative font-VT323">{`Stake ${animalType === "chicken" ? "Chicken" : "Fox"}`}</span>
+          <span className="relative font-VT323">{`Stake ${animalType === "chicken" ? "a Chicken" : "a Fox"}`}</span>
         </button>
         <button onClick={unstakeFunction} className="relative mx-auto mt-4 border-2 border-black bg-white rounded-full text-2xl lg:text-4xl text-black px-4 flex items-center">
           <span className="relative font-VT323">{`Unstake ${animalType === "chicken" ? "Chickens" : "Foxes"}`}</span>
