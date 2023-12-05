@@ -1,6 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std, no_main)]
 
-const DAYS:u64 = 86400000; // Milliseconds in a day
+//const DAYS:u64 = 86400000; // Milliseconds in a day
+const DAYS:u64 = 120000; // Milliseconds in a day
 
 #[ink::contract]
 mod staking {
@@ -295,10 +296,10 @@ mod staking {
                 return Err(StakingError::HasNotStaked);
             }
 
-            if claimable > 0 { // If there are eggs claimable
+            // Ref {} of chickens NFT contract
+            let mut _nft: contract_ref!(PSP34) = self.chickens.unwrap().into();
 
-                // Ref {} of chickens NFT contract
-                let mut _nft: contract_ref!(PSP34) = self.chickens.unwrap().into();
+            if claimable > 0 { // If there are eggs claimable
 
                 let mut source = random::default(self.env().block_timestamp());
                 let random_number = source.read::<u64>() % 2 + 1; // Random between 1 and 2
