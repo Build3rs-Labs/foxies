@@ -16,11 +16,9 @@ mod staking {
 
     use ink::prelude::vec;
 
-    use ink::{
-        env::{
-            call::{build_call, ExecutionInput, Selector},
-            DefaultEnvironment
-        }
+    use ink::env::{
+        call::{build_call, ExecutionInput, Selector},
+        DefaultEnvironment
     };
 
     use ink::contract_ref;
@@ -52,8 +50,6 @@ mod staking {
         ExceededMaxStakes,
         /// Thrown when transfer from user to staking contract fails
         TransferFailed,
-        /// Thrown when there are no claimable eggs for chicken staker
-        NoClaimableRewards,
         /// Thrown when a user fails to stake
         FailedUnstake,
         /// Thrown when only the manager is allowed to call the method
@@ -62,8 +58,6 @@ mod staking {
         NotAFoxHolder,
         /// Thrown when an account hasn't staked any NFT
         HasNotStaked,
-        /// Thrown when a fox holder doesn't have claimable eggs
-        NoClaimableEggs,
         /// Thrown when a failure happens when trying to claim eggs from vault
         UnableToClaimEggs,
         /// Thrown when a mint fails
@@ -293,11 +287,6 @@ mod staking {
 
             let claimable = self.get_claimable_eggs(caller); // Get claimable eggs
 
-            if claimable == 0 {
-                // Err(()) when no claimable rewards
-                return Err(StakingError::NoClaimableRewards);
-            }
-
             // Get number of chicken NFTs staked
             let number_of_chickens_staked = self.number_of_chickens_staked.get(caller).unwrap_or(0);
 
@@ -306,39 +295,43 @@ mod staking {
                 return Err(StakingError::HasNotStaked);
             }
 
-            // Ref {} of chickens NFT contract
-            let mut _nft: contract_ref!(PSP34) = self.chickens.unwrap().into();
+            if claimable > 0 { // If there are eggs claimable
 
-            let mut source = random::default(self.env().block_timestamp());
-            let random_number = source.read::<u64>() % 2 + 1; // Random between 1 and 2
+                // Ref {} of chickens NFT contract
+                let mut _nft: contract_ref!(PSP34) = self.chickens.unwrap().into();
 
-            let zero_account = AccountId::from([0u8; 32]); // Zero account
+                let mut source = random::default(self.env().block_timestamp());
+                let random_number = source.read::<u64>() % 2 + 1; // Random between 1 and 2
 
-            // Instance A -> 1 (not stolen by fox)
-            // Instance B -> 2 (stolen by fox)
+                let zero_account = AccountId::from([0u8; 32]); // Zero account
 
-            if random_number == 1 { // Instance A
-                // Owner takes 80% of the rewards
-                //
-                let amount_for_pool = (20 * claimable) / 100;
-                let amount_for_account = (80 * claimable) / 100;
+                // Instance A -> 1 (not stolen by fox)
+                // Instance B -> 2 (stolen by fox)
 
-                // Mint 80% to caller
-                let _ = self.mint_and_transfer_eggs_to_account(caller, amount_for_account);
-                // Mint 20% to fox eggs vault
-                let _ = self.mint_and_transfer_eggs_to_account(Self::env().account_id(), amount_for_pool);
-            }
-            else { // Instance B
-                // Get random fox by calling factory
-                let random_fox = self.call_factory_for_random_fox_holder();
-                if random_fox == zero_account {
-                    // If no fox exists, mint all to fox eggs vault
-                    let _ = self.mint_and_transfer_eggs_to_account(Self::env().account_id(), claimable);
+                if random_number == 1 { // Instance A
+                    // Owner takes 80% of the rewards
+                    //
+                    let amount_for_pool = (20 * claimable) / 100;
+                    let amount_for_account = (80 * claimable) / 100;
+
+                    // Mint 80% to caller
+                    let _ = self.mint_and_transfer_eggs_to_account(caller, amount_for_account);
+                    // Mint 20% to fox eggs vault
+                    let _ = self.mint_and_transfer_eggs_to_account(Self::env().account_id(), amount_for_pool);
                 }
-                else {
-                    // If a fox is returned, mint all to selected fox
-                    let _ = self.mint_and_transfer_eggs_to_account(random_fox, claimable);
+                else { // Instance B
+                    // Get random fox by calling factory
+                    let random_fox = self.call_factory_for_random_fox_holder();
+                    if random_fox == zero_account {
+                        // If no fox exists, mint all to fox eggs vault
+                        let _ = self.mint_and_transfer_eggs_to_account(Self::env().account_id(), claimable);
+                    }
+                    else {
+                        // If a fox is returned, mint all to selected fox
+                        let _ = self.mint_and_transfer_eggs_to_account(random_fox, claimable);
+                    }
                 }
+
             }
 
             // Loop through NFTs staked and transfer them back to owner
@@ -533,11 +526,6 @@ mod staking {
 
             let claimable = self.get_claimable_for_fox(account); // Get claimable eggs
 
-            if claimable == 0 {
-                // Err(()) when no claimable rewards
-                return Err(StakingError::NoClaimableRewards);
-            }
-
             // Get number of foxes NFTs staked
             let number_of_foxes_staked = self.number_of_foxes_staked.get(account).unwrap_or(0);
 
@@ -550,7 +538,7 @@ mod staking {
             let mut _foxes: contract_ref!(PSP34) = self.foxes.unwrap().into();
 
             // Ref {} eggs contract
-            let mut _eggs: contract_ref!(PSP22) = self.foxes.unwrap().into();
+            let mut _eggs: contract_ref!(PSP22) = self.eggs.unwrap().into();
 
             for nfts in 0..number_of_foxes_staked {
 
@@ -567,11 +555,12 @@ mod staking {
 
             }
 
-            if _eggs.transfer(account, claimable, vec![]).is_err() {
-                // Transfer claimable eggs to fox holder
-                return Err(StakingError::UnableToClaimEggs);
+            if claimable > 0 {
+                if _eggs.transfer(account, claimable, vec![]).is_err() {
+                    // Transfer claimable eggs to fox holder
+                    return Err(StakingError::UnableToClaimEggs);
+                }
             }
-
             // Reinitialize last stake time and number of stakes to 0
             self.last_foxes_stake_time.insert(account, &0);
             self.number_of_foxes_staked.insert(account, &0);
