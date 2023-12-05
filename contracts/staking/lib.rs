@@ -16,11 +16,9 @@ mod staking {
 
     use ink::prelude::vec;
 
-    use ink::{
-        env::{
-            call::{build_call, ExecutionInput, Selector},
-            DefaultEnvironment
-        }
+    use ink::env::{
+        call::{build_call, ExecutionInput, Selector},
+        DefaultEnvironment
     };
 
     use ink::contract_ref;
