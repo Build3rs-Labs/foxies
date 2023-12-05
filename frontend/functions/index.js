@@ -132,6 +132,45 @@ export const stake = async (api, account, token_type) => {
     });
 };
 
+export const unstake = async (api, account, token_type) => {
+    return new Promise(async (resolve, reject) => {
+        if (!api || !account || !token_type) {
+            console.log("API, account, or token type not provided.");
+            return;
+        }
+
+        let gas = getGas(api);
+        let stakingContract = new ContractPromise(api, ABIs.staking, CAs.staking);
+
+        let txName = token_type === 'fox' ? "unstakeFoxes" : "unstakeChickens";
+       
+        await stakingContract.tx[txName](gas).signAndSend(
+            account.address,
+            { signer: account.signer },
+            async ({ events = [], status }) => {
+                if (status.isInBlock) {
+                    // Handle isInBlock status
+                } else if (status.isFinalized) {
+                    let failed = false;
+                    events.forEach(({ event: { method } }) => {
+                        if (method === "ExtrinsicFailed") {
+                            failed = true;
+                        }
+                    });
+                    if (failed) {
+                        console.log("Unstaking failed");
+                        reject("Unstaking failed");
+                    } else {
+                        console.log("Unstaking successful");
+                        resolve("Unstaking successful");
+                    }
+                }
+            }
+        );
+    });
+};
+
+
 export const PSP34_approve = (api, account,  token_type) => {
     return new Promise(async (resolve, reject)=> {
         if (!api || !account) {
