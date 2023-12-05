@@ -26,7 +26,7 @@ const CAs = {
 export const getGas = (api) => {
     return {
         gasLimit: api.registry.createType('WeightV2', {
-            refTime:99999999999,
+            refTime:105000000000,
             proofSize:99999999999,
         }),
         storageDepositLimit:99999999999
@@ -279,17 +279,17 @@ export const getBalances = async (api, account)=> {
     let gas = getGas(api);
     let contract = new ContractPromise(api, ABIs.PSP34, CAs.chickens);
     let balance_ = await contract.query["psp34::balanceOf"](query_address, gas, account.address);
-    let balance = balance_.output.toHuman().Ok;
+    let balance = parseFloat(balance_.output.toHuman().Ok.replace(/\,/g, ""));
     console.log('the balance of chickens is :' + balance);
 
     let contract2 = new ContractPromise(api, ABIs.PSP34, CAs.foxes);
     let balance_2 = await contract2.query["psp34::balanceOf"](query_address, gas, account.address);
-    let balance2 = balance_2.output.toHuman().Ok;
+    let balance2 = parseFloat(balance_2.output.toHuman().Ok.replace(/\,/g, ""));
     console.log('the balance of foxes is :' + balance2)
 
     let contract3 = new ContractPromise(api, ABIs.PSP22, CAs.eggs);
     let balance_3 = await contract3.query["psp22::balanceOf"](query_address, gas, account.address);
-    let balance3Raw = balance_3.output.toHuman().Ok;
+    let balance3Raw = parseFloat(balance_3.output.toHuman().Ok.replace(/\,/g, ""));
     let balance3 = parseFloat(balance3Raw) / 1e6;
     
     console.log('The balance of eggs is: ' + balance3);
