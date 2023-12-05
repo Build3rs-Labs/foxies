@@ -33,23 +33,6 @@ export const getGas = (api) => {
     };
 }
 
-export const getTokenIdsChickensTest= async (api, account, balances) => {
-    if (!api || !account) {
-        return;
-    }
-    let tokenIds = {
-        foxes: [],
-        chickens: []
-    };
-    let gas = getGas(api);
-        let psp34Contract = new ContractPromise(api, ABIs.PSP34, CAs.chickens);
-            const tokenIdResponse = await psp34Contract.query["psp34Enumerable::ownersTokenByIndex"](query_address, gas, "5ECbrmsnASt3hJVk5EqcZgZVfNvquhg1CQ3tAd1RtWLAZtHH", 0);
-            const tokenId = tokenIdResponse.output.toHuman().Ok;
-            console.log(tokenId);
-    return tokenIds;
-};
-
-
 export const getTokenIdsForBoth = async (api, account, balances) => {
     if (!api || !account) {
         return;
@@ -306,8 +289,11 @@ export const getBalances = async (api, account)=> {
 
     let contract3 = new ContractPromise(api, ABIs.PSP22, CAs.eggs);
     let balance_3 = await contract3.query["psp22::balanceOf"](query_address, gas, account.address);
-    let balance3 = balance_3.output.toHuman().Ok;
-    console.log('the balance of eggs is :' + balance2)
+    let balance3Raw = balance_3.output.toHuman().Ok;
+    let balance3 = parseFloat(balance3Raw) / 1e6;
+    
+    console.log('The balance of eggs is: ' + balance3);
+    
     let balances = [balance, balance2, balance3];
 
     return balances;

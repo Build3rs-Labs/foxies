@@ -5,7 +5,7 @@ import Header from "@/components/Header";
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import React, { useEffect, useState } from "react";
 import { useWallet } from "useink";
-import { formatWallet, CallContract, getBalances, getTokenIdsForBoth, PSP34_approve, PSP34_allowance, stake, unstake } from "../functions/index";
+import { getBalances, getTokenIdsForBoth, PSP34_approve, PSP34_allowance, stake, unstake } from "../functions/index";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -15,9 +15,6 @@ export default function Coop() {
   const [IDs, setIDs] = useState([]);
   const [isApproved, setIsApproved] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  const [foxBalances, setFoxBalances] = useState([0, 0]);
-  const [foxIDs, setFoxIDs] = useState([]);
   const [isFoxApproved, setIsFoxApproved] = useState(false);
 
   var api;
@@ -50,6 +47,8 @@ export default function Coop() {
      
       const stakeStatus = await stake(api, account, animal);
      console.log(stakeStatus);
+     let result = await getBalances(api, account);
+     setBalances(result);
     } catch (error) {
       toast.error("Approval failed: " + error.message);
     } 
@@ -62,6 +61,8 @@ export default function Coop() {
      
       const stakeStatus = await unstake(api, account, animal);
      console.log(stakeStatus);
+     let result = await getBalances(api, account);
+     setBalances(result);
     } catch (error) {
       toast.error("Approval failed: " + error.message);
     } 
@@ -76,11 +77,7 @@ export default function Coop() {
         let result = await getBalances(api, account);
         let approvalStatus = await PSP34_allowance(api, account, 'chickens');
         setIsApproved(approvalStatus);
-        let balancesParam = [result[0], result[1]];
-        let result2 = await getTokenIdsForBoth(api, account, balancesParam);
         setBalances(result);
-        setIDs(result2);
-
         let foxApprovalStatus = await PSP34_allowance(api, account, 'foxes'); 
 
         setIsFoxApproved(foxApprovalStatus);
@@ -105,7 +102,7 @@ const renderStakeButtons = (animalType) => {
     return (
       <>
         <button onClick={stakeFunction} className="relative mx-auto mt-8 border-2 border-black bg-white rounded-full text-2xl lg:text-4xl text-black px-4 flex items-center">
-          <span className="relative font-VT323">{`Stake ${animalType === "chicken" ? "Chickens" : "Foxes"}`}</span>
+          <span className="relative font-VT323">{`Stake ${animalType === "chicken" ? "Chicken" : "Fox"}`}</span>
         </button>
         <button onClick={unstakeFunction} className="relative mx-auto mt-4 border-2 border-black bg-white rounded-full text-2xl lg:text-4xl text-black px-4 flex items-center">
           <span className="relative font-VT323">{`Unstake ${animalType === "chicken" ? "Chickens" : "Foxes"}`}</span>
@@ -140,24 +137,25 @@ const renderStakeButtons = (animalType) => {
             You're in the coop!
           </h1>
           <div className="pt-14 lg:28 grid grid-cols-1 md:grid-cols-3 lg:grid-flow-row gap-6 font-VT323 text-white text-2xl lg:text-4xl mx-4 lg:mx-16 lg:leading-10">
-            <div className="p-4">
+            <div className="p-4 text-center lg:text-left">
               You own {balances[0]} {(balances[0] === 1) ? "chicken" : "chickens"}.
-              <p className="pt-12">Stake your NFTs to earn delicious $EGGS rewards.</p>
+              <p className="pt-2 lg:pt-12">Stake your NFTs to earn delicious $EGGS rewards.</p>
               {!account ? <p className="text-white">First, connect your wallet</p> :   renderStakeButtons("chicken")}
             </div>
             <div className="p-4 text-center">
               You own {balances[1]} {(balances[1] === 1) ? "fox" : "foxes"}.
-              <p className="pt-12">Stake your NFTs to try to steal the precious $EGGS.</p>
+              <p className="pt-2 lg:pt-12">Stake your NFTs to try to steal the precious $EGGS.</p>
               {!account ? <p className="text-white">First, connect your wallet</p> :   renderStakeButtons("foxes")}
             </div>
             <div className="p-4 text-center">
               Must read before staking!
               <Image className="mx-auto" src="/book.png" width={160} height={160} alt="book"/>
-              <p className="py-8">Your $EGGS balance: <br />{balances[2]} $EGGS</p>
+              <p className="pb-8">Your $EGGS balance: <br />{balances[2]} $EGGS</p>
               <Image className="mx-auto" src="/egg.png" width={140} alt="egg" height={140} />
             </div>
           </div>
         </div>
+        <ToastContainer />
       </div>
     </>
   );
