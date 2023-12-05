@@ -41,6 +41,7 @@ export default function Coop() {
       toast.error("Approval failed: " + error.message);
     } 
   };
+  
   const handleStake = async (animal) => {
     try {
 
@@ -77,11 +78,10 @@ export default function Coop() {
       call();
     }
   }, [account]);
-
   const renderStakeButtons = (animalType) => {
     const isAnimalApproved = animalType === "chicken" ? isApproved : isFoxApproved;
-    const approveFunction = animalType === "chicken" ? () => handleApprove('chickens') : () =>handleApprove('foxes');
-    const stakeFunction = animalType === "chicken" ? () => handleStake('chicken') : () =>handleStake('fox'); 
+    const approveFunction = animalType === "chicken" ? () => handleApprove('chickens') : () => handleApprove('foxes');
+    const stakeFunction = animalType === "chicken" ? () => handleStake('chicken') : () => handleStake('fox'); 
   
     if (isLoading) {
       return <p className="text-center text-white mt-3">Loading...</p>;
@@ -89,7 +89,7 @@ export default function Coop() {
   
     if (isAnimalApproved) {
       return (
-        <button  onClick={stakeFunction} className="relative mx-auto mt-8 border-2 border-black bg-white rounded-full text-2xl lg:text-4xl text-black px-4 flex items-center">
+        <button onClick={stakeFunction} className="relative mx-auto mt-8 border-2 border-black bg-white rounded-full text-2xl lg:text-4xl text-black px-4 flex items-center">
           <span className="relative font-VT323">{`Stake ${animalType === "chicken" ? "Chickens" : "Foxes"}`}</span>
         </button>
       );
@@ -101,6 +101,7 @@ export default function Coop() {
       );
     }
   };
+  
   
 
   return (

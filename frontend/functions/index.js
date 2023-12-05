@@ -75,39 +75,56 @@ export const getTokenIdsForBoth = async (api, account, balances) => {
     return tokenIds;
 };
 
-export const stake = (api, account, token_type) => {
-    return new Promise(async (resolve, reject)=> {
-        if (!api || !account) {
-            console.log("API, account not provided.");
+
+export const stake = async (api, account, token_type) => {
+    return new Promise(async (resolve, reject) => {
+        if (!api || !account || !token_type) {
+            console.log("API, account, or token type not provided.");
             return;
         }
-    
+
         let gas = getGas(api);
-    
-        let contract = new ContractPromise(api, ABIs.staking, CAs.staking);
-    
-        await contract.tx["stakeFox"](gas, 7).signAndSend(
+        let contractAddress = token_type === 'fox' ? CAs.foxes : CAs.chickens;
+        let contract = new ContractPromise(api, ABIs.PSP34, contractAddress);
+        let tokenIdToStake;
+
+        try {
+            const tokenIdResponse = await contract.query["psp34Enumerable::ownersTokenByIndex"](
+                query_address, gas, account.address, "0"
+            );
+            tokenIdToStake = tokenIdResponse.output.toHuman().Ok;
+
+            if (!tokenIdToStake) {
+                throw new Error(`No ${token_type} token found to stake.`);
+            }
+        } catch (error) {
+            console.error(error.message);
+            reject(error.message);
+            return;
+        }
+
+        let stakingContract = new ContractPromise(api, ABIs.staking, CAs.staking);
+        let txName = token_type === 'fox' ? "stakeFox" : "stakeChicken";
+
+        await stakingContract.tx[txName](gas, tokenIdToStake).signAndSend(
             account.address,
             { signer: account.signer },
             async ({ events = [], status }) => {
                 if (status.isInBlock) {
-                    
+                    // Handle isInBlock status
                 } else if (status.isFinalized) {
                     let failed = false;
-                    events.forEach(({ phase, event: { data, method, section } }) => {
-                        if (method == "ExtrinsicFailed") {
+                    events.forEach(({ event: { method } }) => {
+                        if (method === "ExtrinsicFailed") {
                             failed = true;
                         }
                     });
-                    if (failed == true) {
-                        toastError();
-                        console.log("failed");
-                        reject("error");
-                    }
-                    else {
-                        toastSuccess();
-                        console.log("worked")
-                        resolve("success")
+                    if (failed) {
+                        console.log("Staking failed");
+                        reject("Staking failed");
+                    } else {
+                        console.log("Staking successful");
+                        resolve("Staking successful");
                     }
                 }
             }
