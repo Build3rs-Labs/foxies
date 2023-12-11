@@ -291,9 +291,22 @@ export const getBalances = async (api, account)=> {
     let balance_3 = await contract3.query["psp22::balanceOf"](query_address, gas, account.address);
     let balance3Raw = parseFloat(balance_3.output.toHuman().Ok.replace(/\,/g, ""));
     let balance3 = parseFloat(balance3Raw) / 1e6;
+    console.log('The balance of eggs is: ' + balance3Raw);
     
-    console.log('The balance of eggs is: ' + balance3);
-    
+
+
+    let contract4 = new ContractPromise(api, ABIs.staking, CAs.staking);
+    let balance_4 = await contract4.query["getClaimableForFox"](query_address, gas, account.address);
+    let balance4Raw = parseFloat(balance_4.output.toHuman().Ok.replace(/\,/g, ""));
+    console.log('The getClaimableForFox is: ' + balance4Raw);
+    let balance4 = parseFloat(balance4Raw) / 1e6;
+
+    let contract5 = new ContractPromise(api, ABIs.staking, CAs.staking);
+    let balance_5 = await contract5.query["getClaimableEggs"](query_address, gas, account.address);
+    let balance5Raw = parseFloat(balance_5.output.toHuman().Ok.replace(/\,/g, ""));
+    console.log('The getClaimableEggs is: ' + balance5Raw);
+    let balance5 = parseFloat(balance4Raw) / 1e6;
+
     let balances = [balance, balance2, balance3];
 
     return balances;
