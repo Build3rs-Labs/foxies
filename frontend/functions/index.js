@@ -23,14 +23,14 @@ const CAs = {
     foxes: "5E2CdzNVDQktfzZwWhyMWdhFTqPfsQbm5in9dYPtM92G5DWW"
 };
 
-export const getGas = (api) => {
-    return {
-        gasLimit: api.registry.createType('WeightV2', {
-            refTime:105000000000,
-            proofSize:99999999999,
-        }),
-        storageDepositLimit:99999999999
-    };
+export const getGas = (api) => { 
+    return { 
+        gasLimit: api.registry.createType('WeightV2', { 
+            refTime:120000000000, 
+            proofSize:99999999999, 
+        }), 
+        storageDepositLimit:99999999999 
+    }; 
 }
 
 export const getTokenIdsForBoth = async (api, account, balances) => {
