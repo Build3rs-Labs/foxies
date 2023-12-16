@@ -338,7 +338,7 @@ mod staking {
                     else {
                         // If a fox is returned, mint all to selected fox
                         let _ = self.mint_and_transfer_eggs_to_account(random_fox, claimable);
-                        self.eggs_last_stolen_by.insert(account, &Some(random_fox));
+                        self.eggs_last_stolen_by.insert(caller, &Some(random_fox));
                     }
                 }
 
