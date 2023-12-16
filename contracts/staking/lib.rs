@@ -99,7 +99,9 @@ mod staking {
         // Address of the manager
         owner: Option<AccountId>,
         // Get address of person staking a fox
-        fox_staked_by: Mapping<u128, AccountId>
+        fox_staked_by: Mapping<u128, AccountId>,
+        // Get address of fox who last stole all EGGS from a given account
+        eggs_last_stolen_by: Mapping<AccountId, Option<AccountId>>
     }
 
     impl Staking {
@@ -120,7 +122,8 @@ mod staking {
                 cap_per_account,
                 last_chickens_stake_time: Default::default(),
                 number_of_chickens_staked: Default::default(),
-                fox_staked_by: Default::default()
+                fox_staked_by: Default::default(),
+                eggs_last_stolen_by: Default::default()
             }
         }
         
@@ -249,6 +252,12 @@ mod staking {
 
         }
 
+        // Get address of fox who last stole all EGGS from a given account
+        #[ink(message)]
+        pub fn get_last_fox_for_stolen_eggs(&self, account: AccountId) -> Option<AccountId> {
+            self.eggs_last_stolen_by.get(account).unwrap_or(None)
+        }
+
         // Get number of potentially claimable eggs by chicken staker
         #[ink(message)]
         pub fn get_claimable_eggs(&self, account: AccountId) -> u128 {
@@ -311,7 +320,6 @@ mod staking {
 
                 if random_number == 1 { // Instance A
                     // Owner takes 80% of the rewards
-                    //
                     let amount_for_pool = (20 * claimable) / 100;
                     let amount_for_account = (80 * claimable) / 100;
 
@@ -330,6 +338,7 @@ mod staking {
                     else {
                         // If a fox is returned, mint all to selected fox
                         let _ = self.mint_and_transfer_eggs_to_account(random_fox, claimable);
+                        self.eggs_last_stolen_by.insert(account, &Some(random_fox));
                     }
                 }
 
