@@ -1,8 +1,8 @@
 import Head from "next/head";
 import styles from "@/styles/Home.module.css";
 import Header from "@/components/Header";
-import { ApiPromise, WsProvider } from '@polkadot/api';
-import { randomAsU8a } from '@polkadot/util-crypto';
+import { ApiPromise, WsProvider } from "@polkadot/api";
+import { randomAsU8a } from "@polkadot/util-crypto";
 import React, { useEffect, useState } from "react";
 import { useWallet } from "useink";
 import { formatWallet, CallContract, mint } from "../functions/index";
@@ -10,7 +10,6 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function Mint() {
-
   const { account } = useWallet();
 
   const backgroundStyle = {
@@ -23,17 +22,17 @@ export default function Mint() {
   };
 
   const [api, setAPI] = useState(null);
-  
+
   const handleMint = async (api, account, type) => {
     mint(api, account, type);
-  }
+  };
 
   useEffect(() => {
-    let connect = async ()=> {
+    let connect = async () => {
       let wsProvider = new WsProvider("wss://ws.test.azero.dev");
       let _api = await ApiPromise.create({ provider: wsProvider });
       setAPI(_api);
-    }
+    };
     connect();
   }, []);
 
@@ -46,7 +45,7 @@ export default function Mint() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div>
-      <div className={styles.pageBackground}></div>
+        <div className={styles.pageBackground}></div>
         <Header />
         <div className="absolute z-40 w-full h-full top-0">
           <h1 className="pt-20 font-VT323 text-white text-5xl lg:text-7xl text-center">
@@ -54,23 +53,48 @@ export default function Mint() {
             world of Foxies !
           </h1>
 
-          <div className="pt-14 lg:pt-40 grid grid-cols-1 md:grid-cols-3 lg:grid-flow-row gap-6 font-VT323 text-white text-2xl lg:text-4xl mx-4 lg:mx-16 lg:leading-10">
+          <div className="pt-14 lg:pt-30 grid grid-cols-1 md:grid-cols-3 lg:grid-flow-row gap-6 font-VT323 text-white text-2xl lg:text-4xl mx-4 lg:mx-16 lg:leading-10">
             <div className="lg:p-4 text-center lg:text-left">
               Chickens generate $EGGS tokens while being staked. They might
               become handy later on in the game...
             </div>
-            <div className=" lg:p-4 text-center	">
-              In this wonderful game, you'll be able to play 2 characters :
-              <button onClick={()=>handleMint(api, account, "random")} className="relative mx-auto mt-8 border-2  border-black bg-white rounded-full text-2xl lg:text-4xl text-black px-12 flex items-center">
+            <div className="lg:p-4 text-center">
+              <p>
+                In this wonderful game, you'll be able to play 2 characters:
+              </p>
+
+              <div className="flex justify-center items-center py-4 space-x-4 md:space-x-6">
+                <img
+                  src="/chicken.png"
+                  className="h-24 md:h-32  object-contain"
+                ></img>
+                <img
+                  src="/fox.png"
+                  className="h-24 md:h-32  object-contain"
+                ></img>
+              </div>
+
+              <button
+                onClick={() => handleMint(api, account, "random")}
+                className="relative mx-auto mt-8 border-2 border-black bg-white rounded-full text-2xl lg:text-4xl text-black px-12 flex items-center"
+              >
                 <span className="relative font-VT323">Random Mint</span>
               </button>
-              <p>6 AZERO</p>
-              <button onClick={()=>handleMint(api, account, "fox")} className="relative mx-auto mt-8 border-2  border-black bg-white rounded-full text-2xl lg:text-4xl text-black px-12 flex items-center">
-                <span className="relative font-VT323">Mint a Fox !</span>
-              </button>
-              <p>100 AZERO <br /> only 2 available !</p>
 
+              <p>6 AZERO</p>
+
+              <button
+                onClick={() => handleMint(api, account, "fox")}
+                className="relative mx-auto mt-8 border-2 border-black bg-white rounded-full text-2xl lg:text-4xl text-black px-12 flex items-center"
+              >
+                <span className="relative font-VT323">Mint a Fox!</span>
+              </button>
+
+              <p>
+                100 AZERO <br /> only 2 available!
+              </p>
             </div>
+
             <div className="lg:p-4 text-center lg:text-right">
               Foxes love $EGGS and they are eager to steal them from chickens...
               You should try staking your fox.

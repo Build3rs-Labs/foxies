@@ -37,7 +37,7 @@ export const ConnectWallet = ({ children }) => {
     return (
       <>
         <button
-          className="border-2 border-white rounded-full font-VT323 text-2xl text-white px-4 py-1"
+          className="border-2 border-white rounded-full font-VT323 lg:text-2xl text-white px-4 py-1"
           onClick={() => setIsModalOpen(true)}
         >
           Connect Wallet
@@ -68,7 +68,7 @@ export const ConnectWallet = ({ children }) => {
                           <a
                             href={wallet.installUrl}
                             target="_blank"
-                            className="border-2 border-gray-300 rounded-md font-medium text-black px-4 py-2"
+                            className="border-2 border-gray-300 rounded-md block font-medium text-black px-4 py-2 w-full"
                           >
                             Install {wallet.title}
                           </a>
@@ -97,7 +97,7 @@ export const ConnectWallet = ({ children }) => {
   return (
     <>
       <button
-        className="border-2 border-white rounded-full tracking-widest font-VT323 text-2xl text-white px-4 py-1"
+        className="border-2 border-white rounded-full tracking-widest font-VT323 lg:text-2xl text-white px-4 py-1"
         onClick={disconnect}
       >
         {formatWallet(account.address)}
