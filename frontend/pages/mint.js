@@ -8,10 +8,11 @@ import { useWallet } from "useink";
 import { formatWallet, CallContract, mint } from "../functions/index";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Image from "next/image";
 
 export default function Mint() {
   const { account } = useWallet();
-
+  const scrollSections = [0, 1];
   const backgroundStyle = {
     backgroundSize: "cover",
     backgroundPosition: "center center",
@@ -20,7 +21,51 @@ export default function Mint() {
 
     minHeight: "100vh",
   };
+  const [scrollPos, setScrollPos] = useState(0);
+  const [currentSection, setCurrentSection] = useState(scrollSections[0]);
+  const [sectionIndex, setSectionIndex] = useState(0);
+  const [opacity, setOpacity] = useState(1);
 
+  const handleScroll = () => {
+    if (window.scrollY > 0) {
+      const windowHeight = window.innerHeight;
+      const scrollHeight = Math.max(
+        1,
+        document.documentElement.scrollHeight - windowHeight
+      );
+
+      const scrollPercentage = (window.scrollY / scrollHeight) * 100;
+
+      const minScrollPos = 0;
+      const newScrollPos = Math.max(minScrollPos, scrollHeight);
+
+      setScrollPos(newScrollPos);
+
+      let sectionIndex = Math.floor(scrollPercentage / 25);
+      sectionIndex = Math.min(sectionIndex, scrollSections.length - 1);
+      console.log(window.scrollY);
+      setSectionIndex(sectionIndex);
+
+      setCurrentSection(scrollSections[sectionIndex]);
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [scrollPos]);
+
+  const [isVisible, setIsVisible] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsVisible(true);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
   const [api, setAPI] = useState(null);
 
   const handleMint = async (api, account, type) => {
@@ -44,63 +89,63 @@ export default function Mint() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <div>
+      <div className="w-full h-[140vh] absolute font-VT323">
         <div className={styles.pageBackground}></div>
-        <Header />
-        <div className="absolute z-40 w-full h-full top-0">
-          <h1 className="pt-20 font-VT323 text-white text-5xl lg:text-7xl text-center">
-            Welcome to the <br />
-            world of Foxies !
-          </h1>
 
-          <div className="pt-14 lg:pt-30 grid grid-cols-1 md:grid-cols-3 lg:grid-flow-row gap-6 font-VT323 text-white text-2xl lg:text-4xl mx-4 lg:mx-16 lg:leading-10">
-            <div className="lg:p-4 text-center lg:text-left">
-              Chickens generate $EGGS tokens while being staked. They might
-              become handy later on in the game...
-            </div>
-            <div className="lg:p-4 text-center">
-              <p>
-                In this wonderful game, you'll be able to play 2 characters:
-              </p>
+        <div className="w-full  h-[100dvh] sm:h-[100vh] fixed bottom-[0%] z-50">
+          <Header />
 
-              <div className="flex justify-center items-center py-4 space-x-4 md:space-x-6">
-                <img
-                  src="/chicken.png"
-                  className="h-24 md:h-32  object-contain"
-                ></img>
-                <img
-                  src="/fox.png"
-                  className="h-24 md:h-32  object-contain"
-                ></img>
+          <div
+            className={` w-full transition-opacity duration-1000 ${
+              sectionIndex === 0 ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            <div class="flex items-center justify-start absolute lg:left-1/2 left-[20%] top-48">
+              <div
+                className={`lg:text-lg xl:text-3xl max-w-[550px] text-left rounded-full ${styles.bubble} ${styles["bubble-bottom-left"]}`}
+              >
+                Welcome to the world of Foxie!
+                <br />
+                <br /> Chickens peacefully produce $EGGS
+                <br />
+                Foxes are sneaky, they steal $EGGS
               </div>
-
-              <button
-                onClick={() => handleMint(api, account, "random")}
-                className="relative mx-auto mt-8 border-2 border-black bg-white rounded-full text-2xl lg:text-4xl text-black px-12 flex items-center"
-              >
-                <span className="relative font-VT323">Random Mint</span>
-              </button>
-
-              <p>6 AZERO</p>
-
-              <button
-                onClick={() => handleMint(api, account, "fox")}
-                className="relative mx-auto mt-8 border-2 border-black bg-white rounded-full text-2xl lg:text-4xl text-black px-12 flex items-center"
-              >
-                <span className="relative font-VT323">Mint a Fox!</span>
-              </button>
-
-              <p>
-                100 AZERO <br /> only 2 available!
-              </p>
             </div>
-
-            <div className="lg:p-4 text-center lg:text-right">
-              Foxes love $EGGS and they are eager to steal them from chickens...
-              You should try staking your fox.
+            <div className="absolute bottom-20 lg:right-1/2">
+              <Image
+                src="/farmer1.png"
+                width={150}
+                height={600}
+                alt="logo"
+                className="mx-4"
+              />
+            </div>
+          </div>
+          <div
+            className={` w-full h-full flex items-center justify-center flex-col	 transition-opacity duration-1000 ${
+              sectionIndex === 1 ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            <div className="flex mx-6">
+              <div className="mx-2">
+                <Image src="/chicken.png" width={350} height={600} alt="logo" />
+              </div>
+              <div className="mx-2">
+                <Image src="/fox.png" width={350} height={600} alt="logo" />
+              </div>
+            </div>
+            <h1 className="text-white text-4xl pt-8">12000 NFTs left</h1>
+            <div className="flex">
+              <button className="mx-2  border-[2px] border-black bg-white rounded-lg text-2xl lg:text-4xl  text-black px-4 flex items-center">
+                <span className=" font-VT323">Random mint</span>
+              </button>
+              <button className="mx-2  border-[2px] border-black bg-white rounded-lg text-2xl lg:text-4xl  text-black px-4 flex items-center">
+                <span className=" font-VT323">Fox mint</span>
+              </button>
             </div>
           </div>
         </div>
+
         <ToastContainer />
       </div>
     </>

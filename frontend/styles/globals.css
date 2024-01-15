@@ -13,5 +13,13 @@ body,
 body > div:first-child,
 div#__next,
 div#__next > div {
-  height: 100%;
+
+}
+
+button {
+  transition: transform 0.125s ease, color 0.125s ease, background-color 0.125s ease, border-color 0.125s ease;
+}
+
+button:hover {
+  transform: scale(1.1); 
 }
