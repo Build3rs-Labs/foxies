@@ -102,13 +102,18 @@ export default function Mint() {
           >
             <div class="flex items-center justify-start absolute lg:left-1/2 left-[20%] top-48">
               <div
-                className={`lg:text-lg xl:text-3xl max-w-[550px] text-left rounded-full ${styles.bubble} ${styles["bubble-bottom-left"]}`}
+                className={`lg:text-lg xl:text-3xl max-w-[650px] px-12 py-6
+                 text-center rounded-full ${styles.bubble} ${styles["bubble-bottom-left"]}`}
               >
-                Welcome to the world of Foxie!
+                <div className="flex"> Welcome to the world of Foxie! <img src="/earth.png" className="  w-8 h-8  ml-2 lg:mt-1"></img> </div>
+                
+                <br /> 
+                <div className="flex">Chickens peacefully produce $EGGS <img src="/egg.png" className=" w-8 h-8  ml-2 "></img> </div>
+                
                 <br />
-                <br /> Chickens peacefully produce $EGGS
-                <br />
-                Foxes are sneaky, they steal $EGGS
+                
+                <div className="flex">Foxes are sneaky, they steal $EGGS <img src="/egg.png" className=" w-8 h-8  ml-2 "></img> </div>
+                
               </div>
             </div>
             <div className="absolute bottom-20 lg:right-1/2">
@@ -135,7 +140,7 @@ export default function Mint() {
               </div>
             </div>
             <h1 className="text-white text-4xl pt-8">12000 NFTs left</h1>
-            <div className="flex">
+            <div className="flex z-50">
               <button className="mx-2  border-[2px] border-black bg-white rounded-lg text-2xl lg:text-4xl  text-black px-4 flex items-center">
                 <span className=" font-VT323">Random mint</span>
               </button>
