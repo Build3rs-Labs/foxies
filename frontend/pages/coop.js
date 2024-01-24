@@ -10,15 +10,63 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export default function Coop() {
+    const scrollSections = [0, 1, 2];
   const { account, connect, disconnect } = useWallet();
   const [balances, setBalances] = useState([0, 0, 0]);
   const [IDs, setIDs] = useState([]);
   const [isApproved, setIsApproved] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isFoxApproved, setIsFoxApproved] = useState(false);
+  const [scrollPos, setScrollPos] = useState(0);
+  const [currentSection, setCurrentSection] = useState(scrollSections[0]);
+  const [sectionIndex, setSectionIndex] = useState(0);
+  const [opacity, setOpacity] = useState(1);
+
+
+  const handleScroll = () => {
+    if (window.scrollY > 0) {
+      const windowHeight = window.innerHeight;
+      const scrollHeight = Math.max(
+        1,
+        document.documentElement.scrollHeight - windowHeight
+      );
+
+      const scrollPercentage = (window.scrollY / scrollHeight) * 100;
+
+      const minScrollPos = 0;
+      const newScrollPos = Math.max(minScrollPos, scrollHeight);
+
+      setScrollPos(newScrollPos);
+
+      let sectionIndex = Math.floor(scrollPercentage / 30);
+      sectionIndex = Math.min(sectionIndex, scrollSections.length - 1);
+      console.log('sectionIndex is ' + sectionIndex);
+      setSectionIndex(sectionIndex);
+
+      setCurrentSection(scrollSections[sectionIndex]);
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [scrollPos]);
+
+  const [isVisible, setIsVisible] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsVisible(true);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   var api;
   var wsProvider;
+
 
 
   const handleApprove = async (animal) => {
@@ -95,7 +143,7 @@ const renderStakeButtons = (animalType) => {
   const unstakeFunction = animalType === "chicken" ? () => handleUnstake('chicken') : () => handleUnstake('fox');
 
   if (isLoading) {
-    return <p className="text-center text-white mt-3">Loading...</p>;
+    return <p className="text-center text-3xl text-white mt-3">Loading...</p>;
   }
 
   if (isAnimalApproved) {
@@ -111,7 +159,7 @@ const renderStakeButtons = (animalType) => {
     );
   } else {
     return (
-      <button onClick={approveFunction} className="relative mx-auto mt-8 border-2 border-black bg-white rounded-full text-2xl lg:text-4xl text-black px-4 flex items-center">
+      <button onClick={approveFunction} className="relative mx-auto mt-8 border-2 border-black bg-white rounded-lg text-2xl lg:text-4xl text-black px-8 flex items-center">
         <span className="relative font-VT323">Approve</span>
       </button>
     );
@@ -129,30 +177,70 @@ const renderStakeButtons = (animalType) => {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <div>
-        <div className={styles.pageBackground}></div>
-        <Header />
-        <div className="absolute z-40 w-full h-full top-0">
-          <h1 className="pt-20 font-VT323 text-white text-5xl lg:text-7xl text-center">
-            You're in the coop!
+      <div className="w-full h-[200vh] absolute font-VT323">
+        <div className={styles.pageBackground2}></div>
+        <div className="w-full  h-[100dvh] sm:h-[100vh] fixed bottom-[0%] z-50">
+        <h1 className="pt-20 font-VT323 text-white text-3xl lg:text-5xl text-center">
+        Your $EGGS balance: <br />{balances[2].toLocaleString()} $EGGS
           </h1>
-          <div className="pt-14 lg:28 grid grid-cols-1 md:grid-cols-3 lg:grid-flow-row gap-6 font-VT323 text-white text-2xl lg:text-4xl mx-4 lg:mx-16 lg:leading-10">
-            <div className="p-4 text-center lg:text-left">
-              You own {balances[0]} {(balances[0] === 1) ? "chicken" : "chickens"}.
-              <p className="pt-2 lg:pt-12">Stake your NFTs to earn delicious $EGGS rewards.</p>
-              {!account ? <p className="text-white">First, connect your wallet</p> :   renderStakeButtons("chicken")}
+          <Header />
+            {/* BUBBLE */}
+          <div
+            className={` w-full transition-opacity duration-1000 ${
+              sectionIndex === 0 ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            <div class="flex items-center justify-start absolute lg:left-1/2 left-[20%] top-48">
+              <div
+                className={`lg:text-lg xl:text-3xl max-w-[650px] px-12 py-6
+                 text-center rounded-full ${styles.bubble} ${styles["bubble-bottom-left"]}`}
+              >
+                <div className="flex">Here you can stake your NFTs to earn
+$EGGS rewards !
+$EGGS can be used to mint more NFTs
+and increase your chances of getting a
+fox ! They can also be sold for profit. </div>
+                
+             
+
+                
+              </div>
             </div>
-            <div className="p-4 text-center">
-              You own {balances[1]} {(balances[1] === 1) ? "fox" : "foxes"}.
-              <p className="pt-2 lg:pt-12">Stake your NFTs to try to steal the precious $EGGS.</p>
-              {!account ? <p className="text-white">First, connect your wallet</p> :   renderStakeButtons("foxes")}
+            <div className="absolute bottom-20 lg:right-1/2">
+              <Image
+                src="/farmer2.png"
+                width={150}
+                height={600}
+                alt="logo"
+                className="mx-4"
+              />
             </div>
-            <div className="p-4 text-center">
-              Must read before staking!
-              <Image className="mx-auto" src="/book.png" width={160} height={160} alt="book"/>
-              <p className="pb-8">Your $EGGS balance: <br />{balances[2].toLocaleString()} $EGGS</p>
-              <Image className="mx-auto" src="/egg.png" width={140} alt="egg" height={140} />
+        </div>
+         {/* CHICKEN */}
+        <div className={`absolute w-full h-full flex items-center pt-12 flex-col	transition-opacity duration-1000 ${
+              sectionIndex === 1 ? "opacity-100" : "opacity-0"
+            }`}
+          >
+            <div className="flex mx-6">
+                <Image src="/chicken.png" width={350} height={600} alt="logo" />
             </div>
+            {!account ? <p className="text-white text-3xl pt-4">First, connect your wallet</p> :   renderStakeButtons("chicken")}
+            <button className="relative mx-auto mt-8 border-2 border-black bg-white rounded-lg text-2xl lg:text-4xl text-black px-8 flex items-center">
+           <span className="relative font-VT323">You own {balances[0]} {(balances[0] === 1) ? "chicken" : "chickens"}.</span>
+           </button>
+          </div>
+           {/* FOX */}
+           <div className={`absolute  w-full h-full flex items-center pt-12 flex-col	transition-opacity duration-1000 ${
+              sectionIndex === 2 ? "opacity-100" : "opacity-0"
+            }`}
+          >
+              <div className="flex mx-6">
+                <Image src="/fox.png" width={350} height={600} alt="logo" />
+            </div>
+            {!account ? <p className="text-white text-3xl pt-4">First, connect your wallet</p> :   renderStakeButtons("fox")}
+            <button className="relative mx-auto mt-8 border-2 border-black bg-white rounded-lg text-2xl lg:text-4xl text-black px-8 flex items-center">
+           <span className="relative font-VT323">You own {balances[1]} {(balances[1] === 1) ? "fox" : "foxes"}.</span>
+           </button>
           </div>
         </div>
         <ToastContainer />
