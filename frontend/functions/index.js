@@ -70,7 +70,7 @@ export const stake = async (api, account, token_type) => {
         let contractAddress = token_type === 'fox' ? CAs.foxes : CAs.chickens;
         let contract = new ContractPromise(api, ABIs.PSP34, contractAddress);
         let tokenIdToStake;
-
+        console.log(token_type)
         try {
             const tokenIdResponse = await contract.query["psp34Enumerable::ownersTokenByIndex"](
                 query_address, gas, account.address, "0"
@@ -78,6 +78,7 @@ export const stake = async (api, account, token_type) => {
             tokenIdToStake = tokenIdResponse.output.toHuman().Ok;
 
             if (!tokenIdToStake) {
+                
                 throw new Error(`No ${token_type} token found to stake.`);
             }
         } catch (error) {
@@ -124,9 +125,9 @@ export const unstake = async (api, account, token_type) => {
 
         let gas = getGas(api);
         let stakingContract = new ContractPromise(api, ABIs.staking, CAs.staking);
-
-        let txName = token_type === 'fox' ? "unstakeFoxes" : "unstakeChickens";
        
+        let txName = token_type === 'fox' ? "unstakeFoxes" : "unstakeChickens";
+        console.log(token_type)
         await stakingContract.tx[txName](gas).signAndSend(
             account.address,
             { signer: account.signer },

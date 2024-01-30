@@ -45,7 +45,7 @@ export const ConnectWallet = ({ children }) => {
 
         {isModalOpen && (
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full z-50"
+            className="fixed inset-0 bg-black bg-opacity-50 overflow-y-auto h-full w-full"
             id="my-modal"
           >
             <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white bg-opacity-70">
@@ -106,7 +106,7 @@ export const ConnectWallet = ({ children }) => {
   );
 };
 
-export default function Header() {
+export default function HeaderCoop() {
   const [isNavOpen, setIsNavOpen] = useState(false);
 
   useEffect(() => {
@@ -183,15 +183,15 @@ export default function Header() {
 
       <div className=" w-full justify-between items-end mx-8 pt-8 relative hidden lg:flex">
         <div className="flex">
-          <Link href="/coop">
+          <Link href="/mint">
             <button className="mt-1 mx-auto h-11  bg-white rounded-full text-2xl text-black px-6 flex items-center">
-              <span className=" ">Bring me to the coop !</span>
+              <span className=" ">Bring me to the mint !</span>
             </button>
           </Link>
 
-          <a href="https://twitter.com/foxiesgame" target="_blank" className="px-4 mt-2">
-  <Image src="/twitter.png" alt="twitter" width={35} height={35} />
-</a>
+          <a href="https://twitter.com/foxiesgame" target="blank"  className="px-4 mt-2">
+            <Image src="/twitter.png" alt="twitter" width={35} height={35} />
+          </a>
 
           <a href="" target="blank" rel="noreferrer" className="fill-white	">
             <Image src="/discord.png" alt="discord" width={50} height={50} />

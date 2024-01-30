@@ -1,7 +1,7 @@
 import Head from "next/head";
 import styles from "@/styles/Home.module.css";
 import Image from "next/image";
-import Header from "@/components/Header";
+import HeaderCoop from "@/components/HeaderCoop";
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import React, { useEffect, useState } from "react";
 import { useWallet } from "useink";
@@ -88,6 +88,7 @@ export default function Coop() {
   };
 
   const handleStake = async (animal) => {
+    console.log(animal)
     try {
 
       wsProvider = new WsProvider('wss://ws.test.azero.dev');
@@ -135,36 +136,38 @@ export default function Coop() {
       call();
     }
   }, [account]);
-
-const renderStakeButtons = (animalType) => {
-  const isAnimalApproved = animalType === "chicken" ? isApproved : isFoxApproved;
-  const approveFunction = animalType === "chicken" ? () => handleApprove('chickens') : () => handleApprove('foxes');
-  const stakeFunction = animalType === "chicken" ? () => handleStake('chicken') : () => handleStake('fox');
-  const unstakeFunction = animalType === "chicken" ? () => handleUnstake('chicken') : () => handleUnstake('fox');
-
-  if (isLoading) {
-    return <p className="text-center text-3xl text-white mt-3">Loading...</p>;
-  }
-
-  if (isAnimalApproved) {
-    return (
-      <>
-        <button onClick={stakeFunction} className="relative mx-auto mt-8 border-2 border-black bg-white rounded-full text-2xl lg:text-4xl text-black px-4 flex items-center">
-          <span className="relative font-VT323">{`Stake ${animalType === "chicken" ? "a Chicken" : "a Fox"}`}</span>
+  const renderStakeButtons = (animalType) => {
+    console.log(animalType)
+    const isAnimalApproved = animalType === "chicken" ? isApproved : isFoxApproved;
+    const approveFunction = animalType === "chicken" ? () => handleApprove('chickens') : () => handleApprove('foxes');
+    const stakeFunction = () => handleStake(animalType);
+    const unstakeFunction = animalType === "chicken" ? () => handleUnstake('chicken') : () => handleUnstake('fox');
+    
+  
+    if (isLoading === true) {
+      return <p className="text-center text-3xl text-white mt-3">Loading...</p>;
+    }
+  
+    if (isAnimalApproved) {
+      return (
+        <>
+          <button onClick={stakeFunction} className="relative mx-auto mt-8 border-2 border-black bg-white rounded-full text-2xl lg:text-4xl text-black px-4 flex items-center">
+            <span className="relative font-VT323">{`Stake ${animalType === "chicken" ? "a Chicken" : "a Fox"}`}</span>
+          </button>
+          <button onClick={unstakeFunction} className="relative mx-auto mt-4 border-2 border-black bg-white rounded-full text-2xl lg:text-4xl text-black px-4 flex items-center">
+            <span className="relative font-VT323">{`Unstake ${animalType === "chicken" ? "Chickens" : "Foxes"}`}</span>
+          </button>
+        </>
+      );
+    } else {
+      return (
+        <button onClick={approveFunction} className="relative mx-auto mt-8 border-2 border-black bg-white rounded-lg text-2xl lg:text-4xl text-black px-8 flex items-center">
+          <span className="relative font-VT323">Approve</span>
         </button>
-        <button onClick={unstakeFunction} className="relative mx-auto mt-4 border-2 border-black bg-white rounded-full text-2xl lg:text-4xl text-black px-4 flex items-center">
-          <span className="relative font-VT323">{`Unstake ${animalType === "chicken" ? "Chickens" : "Foxes"}`}</span>
-        </button>
-      </>
-    );
-  } else {
-    return (
-      <button onClick={approveFunction} className="relative mx-auto mt-8 border-2 border-black bg-white rounded-lg text-2xl lg:text-4xl text-black px-8 flex items-center">
-        <span className="relative font-VT323">Approve</span>
-      </button>
-    );
-  }
-};
+      );
+    }
+  };
+  
 
   
   
@@ -183,7 +186,7 @@ const renderStakeButtons = (animalType) => {
         <h1 className="pt-20 font-VT323 text-white text-3xl lg:text-5xl text-center">
         Your $EGGS balance: <br />{balances[2].toLocaleString()} $EGGS
           </h1>
-          <Header />
+          <HeaderCoop />
             {/* BUBBLE */}
           <div
             className={` w-full transition-opacity duration-1000 ${
@@ -196,14 +199,10 @@ const renderStakeButtons = (animalType) => {
                  text-center rounded-full ${styles.bubble} ${styles["bubble-bottom-left"]}`}
               >
                 <div className="flex">Here you can stake your NFTs to earn
-$EGGS rewards !
-$EGGS can be used to mint more NFTs
-and increase your chances of getting a
-fox ! They can also be sold for profit. </div>
-                
-             
-
-                
+                    $EGGS rewards !
+                    $EGGS can be used to mint more NFTs
+                    and increase your chances of getting a
+                    fox ! They can also be sold for profit. </div>
               </div>
             </div>
             <div className="absolute bottom-20 lg:right-1/2">
@@ -231,7 +230,7 @@ fox ! They can also be sold for profit. </div>
           </div>
            {/* FOX */}
            <div className={`absolute  w-full h-full flex items-center pt-12 flex-col	transition-opacity duration-1000 ${
-              sectionIndex === 2 ? "opacity-100" : "opacity-0"
+              sectionIndex === 2 ? "opacity-100" : "opacity-0 hidden"
             }`}
           >
               <div className="flex mx-6">
