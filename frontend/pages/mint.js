@@ -70,7 +70,10 @@ export default function Mint() {
   const [api, setAPI] = useState(null);
 
   const handleMint = async (api, account, type) => {
-    mint(api, account, type);
+    await mint(api, account, type);
+    const nftCountValue = await getMintedNftCount(api);
+    console.log(nftCountValue + " nftCountValue")
+    setNftLeft(12000 - nftCountValue);
   };
 
   useEffect(() => {
