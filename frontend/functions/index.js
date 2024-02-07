@@ -33,6 +33,23 @@ export const getGas = (api) => {
     }; 
 }
 
+
+
+
+export const getMintedNftCount = async (api) => {
+    if (!api) {
+        return;
+    }
+    let gas = getGas(api);
+    let chickens_ = new ContractPromise(api, ABIs.PSP34, CAs.chickens);
+    let foxes_ = new ContractPromise(api, ABIs.PSP34, CAs.foxes);
+    const chickens = await chickens_.query["psp34::totalSupply"](query_address , gas);
+    const foxes = await foxes_.query["psp34::totalSupply"](query_address , gas);
+    const numberReturn = Number(chickens.output.toHuman().Ok) + Number(foxes.output.toHuman().Ok);
+    console.log(numberReturn);
+    return numberReturn;
+};
+
 export const getTokenIdsForBoth = async (api, account, balances) => {
     if (!api || !account) {
         return;
