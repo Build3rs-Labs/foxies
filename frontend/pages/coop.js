@@ -183,8 +183,8 @@ export default function Coop() {
       <div className="w-full h-[200vh] absolute font-VT323">
         <div className={styles.pageBackground2}></div>
         <div className="w-full  h-[100dvh] sm:h-[100vh] fixed bottom-[0%] z-50">
-        <h1 className="pt-20 font-VT323 text-white text-3xl lg:text-5xl text-center">
-        Your $EGGS balance: <br />{balances[2].toLocaleString()} $EGGS
+        <h1 style={{marginTop:20}} className="pt-20 font-VT323 text-white text-3xl lg:text-3xl text-center">
+          Your $EGGS balance: <br />{balances[2].toLocaleString()} $EGGS
           </h1>
           <HeaderCoop />
             {/* BUBBLE */}
@@ -193,7 +193,7 @@ export default function Coop() {
               sectionIndex === 0 ? "opacity-100" : "opacity-0"
             }`}
           >
-            <div class="flex items-center justify-start absolute lg:left-1/2 left-[20%] top-48">
+            <div className="flex items-center justify-start absolute lg:left-1/2 left-[20%] top-48">
               <div
                 className={`lg:text-lg xl:text-3xl max-w-[650px] px-12 py-6
                  text-center rounded-full ${styles.bubble} ${styles["bubble-bottom-left"]}`}
@@ -211,7 +211,7 @@ export default function Coop() {
                 width={150}
                 height={600}
                 alt="logo"
-                className="mx-4"
+                className="mx-4 mt-5"
               />
             </div>
         </div>
@@ -221,7 +221,7 @@ export default function Coop() {
             }`}
           >
             <div className="flex mx-6">
-                <Image src="/chicken.png" width={350} height={600} alt="logo" />
+                <img src="/chicken.png" alt="logo" class="mx-4 nft-icons"/>
             </div>
             {!account ? <p className="text-white text-3xl pt-4">First, connect your wallet</p> :   renderStakeButtons("chicken")}
             <button className="relative mx-auto mt-8 border-2 border-black bg-white rounded-lg text-2xl lg:text-4xl text-black px-8 flex items-center">
@@ -234,7 +234,7 @@ export default function Coop() {
             }`}
           >
               <div className="flex mx-6">
-                <Image src="/fox.png" width={350} height={600} alt="logo" />
+                <img src="/fox.png" width={350} height={600} alt="logo" class="mx-4 nft-icons"/>
             </div>
             {!account ? <p className="text-white text-3xl pt-4">First, connect your wallet</p> :   renderStakeButtons("fox")}
             <button className="relative mx-auto mt-8 border-2 border-black bg-white rounded-lg text-2xl lg:text-4xl text-black px-8 flex items-center">

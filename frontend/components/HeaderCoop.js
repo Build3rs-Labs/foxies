@@ -5,6 +5,8 @@ import { formatWallet, getBalances } from "../functions/index";
 import Image from "next/image";
 import Link from "next/link";
 
+import Sound from '@/components/Sound';
+
 export const ConnectWallet = ({ children }) => {
   const { account, connect, disconnect } = useWallet();
   const wallets = useAllWallets();
@@ -124,7 +126,7 @@ export default function HeaderCoop() {
   }
 
   return (
-    <header className="flex z-50 w-full h-20 absolute top-0 bg-transparent font-VT323">
+    <header className="flex z-50 w-full h-20 absolute top-0 bg-transparent font-VT323" style={{zIndex:100000}}>
       {/* ... Mobile menu code starts ... */}
       <section className="MOBILE-MENU flex lg:hidden overflow-y-hidden white text-white mt- mx-2">
         <div className="mt-4">
@@ -174,6 +176,10 @@ export default function HeaderCoop() {
                 <Image src="/discord.png" width={50} alt="discord" height={50} />
               </a>
             </li>
+
+            <li>
+              <Sound/>
+            </li>
           </ul>
         </div>
       </section>
@@ -196,6 +202,9 @@ export default function HeaderCoop() {
           <a href="" target="blank" rel="noreferrer" className="fill-white	">
             <Image src="/discord.png" alt="discord" width={50} height={50} />
           </a>
+
+          <Sound/>
+
         </div>
 
         <ConnectWallet />
