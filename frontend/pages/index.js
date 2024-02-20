@@ -1,6 +1,5 @@
 "use client";
 import Head from "next/head";
-import styles from "@/styles/Home.module.css";
 import Header from "@/components/Header";
 import Image from "next/image";
 import Link from "next/link";
@@ -34,10 +33,18 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div>
+        
+        <div className={"stage"}>
+          <div className={"top-dark-transition"}></div>
+          <div className={"bottom-dark-transition"}></div>
+        </div>
+        
         <div style={backgroundStyle} className="brightness-50 ">
           {/*  <div className="bg-blue-300"> */}
         </div>
+        
         <div className="absolute z-50 w-full h-full top-0 overflow-hidden">
+          
           <Header />
           <Image
               src="/aleph.png"
