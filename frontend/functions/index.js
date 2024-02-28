@@ -225,12 +225,14 @@ export const mint = async (api, account, type="random")=> {
         return; //Wallet and/or API not connected
     }
 
-    let mints = await getFoxMints(api, account);
+    if (type != "random") {
+        let mints = await getFoxMints(api, account);
 
-    if (mints == 2) {
-        return;
+        if (mints == 2) {
+            return;
+        }
     }
-
+    
     let gas = getGas(api);
     let contract = new ContractPromise(api, ABIs.factory, CAs.factory);
 
@@ -283,6 +285,23 @@ export const getBalance = async (api, account)=> {
 
 }
 
+export const getStaked = async (api, account)=> {
+    if (!api || !account) {
+        return; //Wallet and/or API not connected
+    }
+
+    let gas = getGas(api);
+
+    let contract = new ContractPromise(api, ABIs.staking, CAs.staking);
+    let staked_chickens_ = await contract.query["getStakedChickens"](query_address, gas, account.address);
+    let staked_chickens = staked_chickens_.output.toHuman().Ok.length;
+
+    let staked_foxes_ = await contract.query["getStakedFoxes"](query_address, gas, account.address);
+    let staked_foxes = staked_foxes_.output.toHuman().Ok.length;
+
+    return [staked_chickens, staked_foxes];
+
+}
 
 export const getBalances = async (api, account)=> {
     if (!api || !account) {

@@ -92,19 +92,19 @@ export default function Mint() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <div className="w-full font-VT323" style={{fontSize:12}}>
+
+      <Header />
+
+      <div className="font-VT323" style={{fontSize:12}}>
         <div className={styles.pageBackground}></div>
 
-        <div className="w-full  h-[100dvh] sm:h-[100vh] fixed bottom-[0%] z-50">
-
-          <Header />
-
+        <div className="">
 
             <div className="farmer">
-                <div className="flex items-center justify-start lg:left-1/2 left-[30%] top-10 lg:top-20 ml-5">
+                <div className="">
                   <div
                     style={{padding:30, fontSize:20}}
-                    className={`max-w-[650px] px-10 py-6 mr-2 lg:mr-0
+                    className={`max-w-[100%] px-10 py-6 mr-2 lg:mr-0
                     text-center rounded-full bubble-up ${styles.bubble} ${styles["bubble-bottom-left"]}`}
                   >
                     <div ref={el}></div>
@@ -135,15 +135,15 @@ export default function Mint() {
                   </div>
                   <h1 className="text-white text-4xl pt-8 pb-6">{nftLeft.toLocaleString()} NFTs left</h1>
                   <div className="flex z-10">
-                    <button  onClick={()=>handleMint(api, account, "random")} className="mx-2  border-[2px] border-black bg-white rounded-lg text-2xl lg:text-4xl  text-black px-4 flex items-center">
+                    <button  onClick={()=>handleMint(api, account, "random")} className="mx-2  border-[2px] border-black bg-white rounded-lg text-2xl lg:text-3xl  text-black px-4 py-1 flex items-center">
                       <span className=" font-VT323">
                         Mint now!
                         <span className="ml-1">
-                        &gt;
-                      </span>
+                          &gt;
+                        </span>
                       </span>
                     </button>
-                    <button style={(foxMints < 2 && foxMints != null)?{backgroundColor:"#FFFFFF", cursor:"pointer"}:{backgroundColor:"#A2A2A2", cursor:"not-allowed"}} onClick={()=>(foxMints < 2)?handleMint(api, account, "fox"):null} className="mx-2  border-[2px] border-black bg-white rounded-lg text-2xl lg:text-4xl  text-black px-4 flex items-center">
+                    <button style={(foxMints < 2 && foxMints != null)?{backgroundColor:"#FFFFFF", cursor:"pointer"}:{backgroundColor:"#A2A2A2", cursor:"not-allowed"}} onClick={()=>(foxMints < 2)?handleMint(api, account, "fox"):null} className="mx-2  border-[2px] border-black bg-white rounded-lg text-2xl lg:text-3xl  text-black px-4 py-1 flex items-center">
                       <span className=" font-VT323">
                         Mint a fox!
                         <span className="ml-1">
@@ -156,8 +156,8 @@ export default function Mint() {
             </div>
 
             <div style={{position:"fixed", width:"100vw", bottom:0, left:0, zIndex: 1000}}>
-              <a href="">
-                <button className="mx-auto border-[2px] my-8 border-black bg-white rounded-lg text-2xl text-black px-4 flex items-center">
+              <a target="_blank" rel="noreferrer noopener" href="https://medium.com/@foxiesgame/the-foxies-game-on-aleph-zero-3aed13c1b8b5">
+                <button className="mx-auto border-[2px] my-5 border-black bg-white rounded-lg text-2xl text-black px-4 flex items-center">
                   <span className=" font-VT323">
                     Learn more about the game mechanics
                   </span>
