@@ -96,14 +96,15 @@ button:active {
 .inner-body {
   width:100%;
   flex:1;
-  overflow-y:auto;
   z-index:4000;
 }
 
 .out-of-the-box {
-  z-index:5000;
+  z-index:10000;
   margin-top: 30px;
   margin-bottom: 30px;
+  position:fixed;
+  bottom:0px;
 }
 
 .nft-icons {
