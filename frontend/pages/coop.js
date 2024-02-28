@@ -206,7 +206,7 @@ export default function Coop() {
       <HeaderCoop />
 
       <div className="font-VT323" style={{fontSize:12}}>
-        <div className={styles.pageBackground}></div>
+        <div className={styles.pageBackground2}></div>
 
         <div className="">
 
