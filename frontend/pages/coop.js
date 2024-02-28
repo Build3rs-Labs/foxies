@@ -80,6 +80,8 @@ export default function Coop() {
       document.getElementsByClassName("coop-fox")[0].style.animation = 'entrance 0.3s ease-in-out forwards';
       setTimeout(()=>{
         document.getElementsByClassName("coop-chicken")[0].style.display = 'none';
+        document.getElementsByClassName("inner-body")[0].style.display = 'none';
+        document.getElementsByClassName("inner-body")[1].style.display = 'inline-block';
         document.getElementsByClassName("coop-fox")[0].style.display = "flex";
       }, 300);
     }
@@ -88,6 +90,8 @@ export default function Coop() {
       document.getElementsByClassName("coop-chicken")[0].style.animation = 'entrance 0.3s ease-in-out forwards';
       setTimeout(()=>{
         document.getElementsByClassName("coop-fox")[0].style.display = 'none';
+        document.getElementsByClassName("inner-body")[1].style.display = 'none';
+        document.getElementsByClassName("inner-body")[0].style.display = 'inline-block';
         document.getElementsByClassName("coop-chicken")[0].style.display = "flex";
       }, 300);
     }
@@ -148,12 +152,10 @@ export default function Coop() {
       call();
     }
   }, [account]);
+  
   const renderStakeButtons = (animalType) => {
-    const isAnimalApproved = animalType === "chicken" ? isApproved : isFoxApproved;
-    const approveFunction = animalType === "chicken" ? () => handleApprove('chickens') : () => handleApprove('foxes');
-    const stakeFunction = () => handleStake(animalType);
-    const unstakeFunction = animalType === "chicken" ? () => handleUnstake('chicken') : () => handleUnstake('fox');
-    
+
+    const isAnimalApproved = animalType === "chickens" ? isApproved : isFoxApproved;
   
     if (isLoading === true) {
       return <p className="text-center text-3xl text-white mt-3">Loading...</p>;
@@ -162,7 +164,7 @@ export default function Coop() {
     if (isAnimalApproved) {
       return (
         <>
-          <button onClick={stakeFunction} className="relative mx-auto mt-4 border-2 border-black bg-white rounded-full text-2xl lg:text-3xl text-black px-4 flex items-center">
+          <button onClick={()=>handleStake(animalType)} className="relative mx-auto mt-4 border-2 border-black bg-white rounded-full text-2xl lg:text-3xl text-black px-4 flex items-center">
             <span className="relative font-VT323">
               Stake now 
               <span className="ml-2">
@@ -170,7 +172,7 @@ export default function Coop() {
               </span>
             </span>
           </button>
-          <button onClick={unstakeFunction} className="relative mx-auto mt-4 border-2 border-black bg-white rounded-full text-2xl lg:text-3xl text-black px-4 flex items-center">
+          <button onClick={()=>handleUnstake(animalType)} className="relative mx-auto mt-4 border-2 border-black bg-white rounded-full text-2xl lg:text-3xl text-black px-4 flex items-center">
             <span className="relative font-VT323">
               Unstake
               <span className="ml-2">
@@ -182,7 +184,7 @@ export default function Coop() {
       );
     } else {
       return (
-        <button onClick={approveFunction} className="relative mx-auto mt-8 border-2 border-black bg-white rounded-lg text-2xl lg:text-3xl text-black px-8 flex items-center">
+        <button onClick={()=>handleApprove(animalType)} className="relative mx-auto mt-8 border-2 border-black bg-white rounded-lg text-2xl lg:text-3xl text-black px-8 flex items-center">
           <span className="relative font-VT323">Approve</span>
         </button>
       );
@@ -240,9 +242,9 @@ export default function Coop() {
                     
                     <span className="relative text-white text-2xl mt-4 font-VT323">You own {balances[0]} {(balances[0] === 1) ? "chicken" : "chickens"}. Chickens staked: {staked[0]}</span>
 
-                    {!account ? <p className="text-white text-3xl pt-2">First, connect your wallet</p> : renderStakeButtons("chicken")}
+                    {!account ? <p className="text-white text-3xl pt-2">First, connect your wallet</p> : renderStakeButtons("chickens")}
                     <button className="relative mx-auto mt-3 border-2 border-black bg-white rounded-lg text-2xl lg:text-3xl text-black px-8 flex items-center">
-                      <span className="relative font-VT323">Your eggs balance is {balances[2]} $EGGS.</span>
+                      <span className="relative font-VT323">Your eggs balance is {balances[2].toLocaleString()} $EGGS.</span>
                     </button>
                 </div>
                 
@@ -267,9 +269,9 @@ export default function Coop() {
                     
                     <span className="relative text-white text-2xl mt-4 font-VT323">You own {balances[1]} {(balances[1] === 1) ? "fox" : "foxes"}. Foxes staked: {staked[1]}</span>
 
-                    {!account ? <p className="text-white text-3xl pt-2">First, connect your wallet</p> : renderStakeButtons("fox")}
+                    {!account ? <p className="text-white text-3xl pt-2">First, connect your wallet</p> : renderStakeButtons("foxes")}
                     <button className="relative mx-auto mt-3 border-2 border-black bg-white rounded-lg text-2xl lg:text-3xl text-black px-8 flex items-center">
-                      <span className="relative font-VT323">Your eggs balance is {balances[2]} $EGGS.</span>
+                      <span className="relative font-VT323">Your eggs balance is {balances[2].toLocaleString()} $EGGS.</span>
                     </button>
                 </div>
                 

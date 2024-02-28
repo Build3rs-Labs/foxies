@@ -89,7 +89,7 @@ export const stake = async (api, account, token_type) => {
         }
 
         let gas = getGas(api);
-        let contractAddress = token_type === 'fox' ? CAs.foxes : CAs.chickens;
+        let contractAddress = token_type === 'foxes' ? CAs.foxes : CAs.chickens;
         let contract = new ContractPromise(api, ABIs.PSP34, contractAddress);
         let tokenIdToStake;
         try {
@@ -108,7 +108,7 @@ export const stake = async (api, account, token_type) => {
         }
 
         let stakingContract = new ContractPromise(api, ABIs.staking, CAs.staking);
-        let txName = token_type === 'fox' ? "stakeFox" : "stakeChicken";
+        let txName = token_type === 'foxes' ? "stakeFox" : "stakeChicken";
 
         await stakingContract.tx[txName](gas, tokenIdToStake).signAndSend(
             account.address,
@@ -141,10 +141,13 @@ export const unstake = async (api, account, token_type) => {
             return;
         }
 
+        console.log(token_type);
+
         let gas = getGas(api);
         let stakingContract = new ContractPromise(api, ABIs.staking, CAs.staking);
        
-        let txName = token_type === 'fox' ? "unstakeFoxes" : "unstakeChickens";
+        let txName = token_type === 'foxes' ? "unstakeFoxes" : "unstakeChickens";
+        
         await stakingContract.tx[txName](gas).signAndSend(
             account.address,
             { signer: account.signer },

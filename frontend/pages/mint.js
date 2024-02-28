@@ -143,7 +143,7 @@ export default function Mint() {
                         </span>
                       </span>
                     </button>
-                    <button style={(foxMints < 2 && foxMints != null)?{backgroundColor:"#FFFFFF", cursor:"pointer"}:{backgroundColor:"#A2A2A2", cursor:"not-allowed"}} onClick={()=>(foxMints < 2)?handleMint(api, account, "fox"):null} className="mx-2  border-[2px] border-black bg-white rounded-lg text-2xl lg:text-3xl  text-black px-4 py-1 flex items-center">
+                    <button style={(foxMints < 2 && foxMints != null)?{backgroundColor:"#FFFFFF", cursor:"pointer"}:{backgroundColor:"#A2A2A2", cursor:"not-allowed"}} onClick={()=>(foxMints < 2)?handleMint(api, account, "foxes"):null} className="mx-2  border-[2px] border-black bg-white rounded-lg text-2xl lg:text-3xl  text-black px-4 py-1 flex items-center">
                       <span className=" font-VT323">
                         Mint a fox!
                         <span className="ml-1">
