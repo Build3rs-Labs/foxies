@@ -126,6 +126,7 @@ export const stake = async (api, account, token_type) => {
                     if (failed) {
                         reject("Staking failed");
                     } else {
+                        toastSuccess("Successful Stake!");
                         resolve("Staking successful");
                     }
                 }
@@ -160,6 +161,7 @@ export const unstake = async (api, account, token_type) => {
                     if (failed) {
                         reject("Unstaking failed");
                     } else {
+                        toastSuccess("Successful unstake!");
                         resolve("Unstaking successful");
                     }
                 }
@@ -197,7 +199,7 @@ export const PSP34_approve = (api, account,  token_type) => {
                         reject("error");
                     }
                     else {
-                        toastSuccess();
+                        toastSuccess("Approval successful!");
                         resolve("success")
                     }
                 }
@@ -232,7 +234,7 @@ export const mint = async (api, account, type="random")=> {
             return;
         }
     }
-    
+
     let gas = getGas(api);
     let contract = new ContractPromise(api, ABIs.factory, CAs.factory);
 
@@ -265,7 +267,7 @@ export const mint = async (api, account, type="random")=> {
                     toastError();
                 }
                 else {
-                    toastSuccess();
+                    toastSuccess("Mint successful!");
                 }
             }
         }

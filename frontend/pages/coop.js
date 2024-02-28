@@ -102,6 +102,8 @@ export default function Coop() {
       const stakeStatus = await stake(api, account, animal);
      let result = await getBalances(api, account);
      setBalances(result);
+     let staked = await getStaked(api, account);
+     setStaked(staked);
     } catch (error) {
       toast.error("Failed: " + error);
     } 
@@ -116,6 +118,8 @@ export default function Coop() {
       const stakeStatus = await unstake(api, account, animal);
      let result = await getBalances(api, account);
      setBalances(result);
+     let staked = await getStaked(api, account);
+     setStaked(staked);
     } catch (error) {
       toast.error("Failed: " + error);
     } 
