@@ -34,7 +34,6 @@ export default function Sound() {
     }
     else {
         playing = parseFloat(sessionStorage.getItem("sound"));
-        console.log(playing);
         setSound(playing);
         if (playing == 1) {
           audioRef.current.loop = true;

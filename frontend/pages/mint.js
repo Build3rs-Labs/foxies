@@ -62,9 +62,9 @@ export default function Mint() {
   const handleMint = async (api, account, type) => {
     await mint(api, account, type);
     const nftCountValue = await getMintedNftCount(api);
-    console.log(nftCountValue + " nftCountValue")
     setNftLeft(12000 - nftCountValue);
-    setFoxMints(await getFoxMints());
+    let mints = await getFoxMints(api, account);
+    setFoxMints(mints);
   };
 
   useEffect(() => {
@@ -73,9 +73,14 @@ export default function Mint() {
       let _api = await ApiPromise.create({ provider: wsProvider });
       setAPI(_api);
       const nftCountValue = await getMintedNftCount(_api);
-      console.log(nftCountValue + " nftCountValue")
+
       setNftLeft(12000 - nftCountValue);
-      setFoxMints(await getFoxMints());
+
+      if (account) {
+        let mints = await getFoxMints(_api, account);
+        setFoxMints(mints);
+      }
+      
     };
     connect();
   }, []);
@@ -128,13 +133,23 @@ export default function Mint() {
                       <img src="/fox.png" className={"nft-icons"} alt="logo"/>
                     </div>
                   </div>
-                  <h1 className="text-white text-4xl pt-8">{nftLeft} NFTs left</h1>
+                  <h1 className="text-white text-4xl pt-8 pb-6">{nftLeft} NFTs left</h1>
                   <div className="flex z-10">
                     <button  onClick={()=>handleMint(api, account, "random")} className="mx-2  border-[2px] border-black bg-white rounded-lg text-2xl lg:text-4xl  text-black px-4 flex items-center">
-                      <span className=" font-VT323">Random mint</span>
+                      <span className=" font-VT323">
+                        Mint now!
+                        <span className="ml-1">
+                        &gt;
+                      </span>
+                      </span>
                     </button>
-                    <button onClick={()=>(foxMints < 2)?handleMint(api, account, "fox"):null} className="mx-2  border-[2px] border-black bg-white rounded-lg text-2xl lg:text-4xl  text-black px-4 flex items-center">
-                      <span className=" font-VT323">Fox mint</span>
+                    <button style={(foxMints < 2 && foxMints != null)?{backgroundColor:"#FFFFFF", cursor:"pointer"}:{backgroundColor:"#A2A2A2", cursor:"not-allowed"}} onClick={()=>(foxMints < 2)?handleMint(api, account, "fox"):null} className="mx-2  border-[2px] border-black bg-white rounded-lg text-2xl lg:text-4xl  text-black px-4 flex items-center">
+                      <span className=" font-VT323">
+                        Mint a fox!
+                        <span className="ml-1">
+                          &gt;
+                        </span>
+                      </span>
                     </button>
                   </div>
                 </div>
