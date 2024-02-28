@@ -133,7 +133,7 @@ export default function Mint() {
                       <img src="/fox.png" className={"nft-icons"} alt="logo"/>
                     </div>
                   </div>
-                  <h1 className="text-white text-4xl pt-8 pb-6">{nftLeft} NFTs left</h1>
+                  <h1 className="text-white text-4xl pt-8 pb-6">{nftLeft.toLocaleString()} NFTs left</h1>
                   <div className="flex z-10">
                     <button  onClick={()=>handleMint(api, account, "random")} className="mx-2  border-[2px] border-black bg-white rounded-lg text-2xl lg:text-4xl  text-black px-4 flex items-center">
                       <span className=" font-VT323">
@@ -153,6 +153,16 @@ export default function Mint() {
                     </button>
                   </div>
                 </div>
+            </div>
+
+            <div style={{position:"fixed", width:"100vw", bottom:0, left:0, zIndex: 1000}}>
+              <a href="">
+                <button className="mx-auto border-[2px] my-8 border-black bg-white rounded-lg text-2xl text-black px-4 flex items-center">
+                  <span className=" font-VT323">
+                    Learn more about the game mechanics
+                  </span>
+                </button>
+              </a>
             </div>
           </div>
 
