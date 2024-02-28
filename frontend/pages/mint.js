@@ -40,7 +40,7 @@ export default function Mint() {
     const timing = setTimeout(()=>{
       document.getElementsByClassName("farmer")[0].style.animation = 'exit 2s ease-in-out forwards';
       document.getElementsByClassName("minter")[0].style.animation = 'entrance 2s ease-in-out forwards';
-    }, 9000);
+    }, 6000);
 
     return () => {
       // Destroy Typed instance during cleanup to stop animation

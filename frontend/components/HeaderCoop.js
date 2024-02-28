@@ -195,7 +195,7 @@ export default function HeaderCoop() {
             </button>
           </Link>
 
-          <a href="https://twitter.com/foxiesgame" target="blank"  className="px-4 mt-2">
+          <a href="https://twitter.com/foxiesgame" target="blank"  className="px-4 ml-4 mt-2">
             <Image src="/twitter.png" alt="twitter" width={35} height={35} />
           </a>
 
