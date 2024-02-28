@@ -33,8 +33,16 @@ export const getGas = (api) => {
     }; 
 }
 
-
-
+export const getFoxMints = async (api) => {
+    if (!api) {
+        return;
+    }
+    let gas = getGas(api);
+    let factory = new ContractPromise(api, ABIs.factory, CAs.factory);
+    const mints_ = await factory.query["getDirectFoxMints"](query_address, gas);
+    const numberReturn = Number(mints_.output.toHuman().Ok);
+    return numberReturn;
+};
 
 export const getMintedNftCount = async (api) => {
     if (!api) {

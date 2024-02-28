@@ -5,7 +5,7 @@ import { ApiPromise, WsProvider } from "@polkadot/api";
 import { randomAsU8a } from "@polkadot/util-crypto";
 import React, { useEffect, useState, useRef } from "react";
 import { useWallet } from "useink";
-import { formatWallet, CallContract, mint, getMintedNftCount } from "../functions/index";
+import { formatWallet, CallContract, mint, getMintedNftCount, getFoxMints } from "../functions/index";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Image from "next/image";
@@ -26,6 +26,8 @@ export default function Mint() {
   
   const [nftLeft, setNftLeft] = useState('X');
 
+  const [foxMints, setFoxMints] = useState(null);
+
   useEffect(() => {
     const typed = new Typed(el.current, {
       strings: [`Welcome to the world of Foxies! 🌎
@@ -40,7 +42,7 @@ export default function Mint() {
     const timing = setTimeout(()=>{
       document.getElementsByClassName("farmer")[0].style.animation = 'exit 2s ease-in-out forwards';
       document.getElementsByClassName("minter")[0].style.animation = 'entrance 2s ease-in-out forwards';
-    }, 6000);
+    }, 7000);
 
     return () => {
       // Destroy Typed instance during cleanup to stop animation
@@ -62,6 +64,7 @@ export default function Mint() {
     const nftCountValue = await getMintedNftCount(api);
     console.log(nftCountValue + " nftCountValue")
     setNftLeft(12000 - nftCountValue);
+    setFoxMints(await getFoxMints());
   };
 
   useEffect(() => {
@@ -72,6 +75,7 @@ export default function Mint() {
       const nftCountValue = await getMintedNftCount(_api);
       console.log(nftCountValue + " nftCountValue")
       setNftLeft(12000 - nftCountValue);
+      setFoxMints(await getFoxMints());
     };
     connect();
   }, []);
@@ -129,7 +133,7 @@ export default function Mint() {
                     <button  onClick={()=>handleMint(api, account, "random")} className="mx-2  border-[2px] border-black bg-white rounded-lg text-2xl lg:text-4xl  text-black px-4 flex items-center">
                       <span className=" font-VT323">Random mint</span>
                     </button>
-                    <button  onClick={()=>handleMint(api, account, "fox")} className="mx-2  border-[2px] border-black bg-white rounded-lg text-2xl lg:text-4xl  text-black px-4 flex items-center">
+                    <button onClick={()=>(foxMints < 2)?handleMint(api, account, "fox"):null} className="mx-2  border-[2px] border-black bg-white rounded-lg text-2xl lg:text-4xl  text-black px-4 flex items-center">
                       <span className=" font-VT323">Fox mint</span>
                     </button>
                   </div>
