@@ -26,7 +26,7 @@ export default function Mint() {
   
   const [nftLeft, setNftLeft] = useState('X');
 
-  const [foxMints, setFoxMints] = useState(null);
+  const [foxMints, setFoxMints] = useState(0);
 
   useEffect(() => {
     const typed = new Typed(el.current, {
@@ -83,7 +83,7 @@ export default function Mint() {
       
     };
     connect();
-  }, []);
+  }, [account]);
 
   return (
     <>
