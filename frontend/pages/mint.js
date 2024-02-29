@@ -76,10 +76,8 @@ export default function Mint() {
 
       setNftLeft(12000 - nftCountValue);
 
-      if (account) {
-        let mints = await getFoxMints(_api, account);
-        setFoxMints(mints);
-      }
+      let mints = await getFoxMints(_api, account);
+      setFoxMints(mints);
       
     };
     connect();

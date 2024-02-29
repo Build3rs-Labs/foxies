@@ -240,7 +240,7 @@ export default function Coop() {
                         <img src="/chicken.png" alt="logo" className="mx-4 nft-icons"/>
                     </div>
                     
-                    <span className="relative text-white text-2xl mt-4 font-VT323">You own {balances[0]} {(balances[0] === 1) ? "chicken" : "chickens"}. Chickens staked: {staked[0]}</span>
+                    <span className="relative text-white text-2xl mt-4 font-VT323">You own {balances[0] + staked[0]} {(balances[0] + staked[0] === 1) ? "chicken" : "chickens"}. Chickens staked: {staked[0]}</span>
 
                     {!account ? <p className="text-white text-3xl pt-2">First, connect your wallet</p> : renderStakeButtons("chickens")}
                     <button className="relative mx-auto mt-3 border-2 border-black bg-white rounded-lg text-2xl lg:text-3xl text-black px-8 flex items-center">
@@ -267,7 +267,7 @@ export default function Coop() {
                         <img src="/fox.png" alt="logo" className="mx-4 nft-icons"/>
                     </div>
                     
-                    <span className="relative text-white text-2xl mt-4 font-VT323">You own {balances[1]} {(balances[1] === 1) ? "fox" : "foxes"}. Foxes staked: {staked[1]}</span>
+                    <span className="relative text-white text-2xl mt-4 font-VT323">You own {balances[1] + staked[1]} {(balances[1] + staked[1] === 1) ? "fox" : "foxes"}. Foxes staked: {staked[1]}</span>
 
                     {!account ? <p className="text-white text-3xl pt-2">First, connect your wallet</p> : renderStakeButtons("foxes")}
                     <button className="relative mx-auto mt-3 border-2 border-black bg-white rounded-lg text-2xl lg:text-3xl text-black px-8 flex items-center">

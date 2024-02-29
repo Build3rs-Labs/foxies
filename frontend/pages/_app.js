@@ -1,6 +1,6 @@
 import '@/styles/globals.css'
 import { UseInkProvider } from 'useink';
-import { RococoContractsTestnet, ShibuyaTestnet } from 'useink/chains'
+import { AlephTestnet } from 'useink/chains'
 
 
 export default function App({ Component, pageProps }) {
@@ -8,7 +8,7 @@ export default function App({ Component, pageProps }) {
       <UseInkProvider 
         config={{ 
           dappName: 'Foxies Game', 
-          chains: [RococoContractsTestnet, ShibuyaTestnet] ,
+          chains: [AlephTestnet] ,
         }}
       >
         <Component {...pageProps} />

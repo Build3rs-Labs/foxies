@@ -141,8 +141,6 @@ export const unstake = async (api, account, token_type) => {
             return;
         }
 
-        console.log(token_type);
-
         let gas = getGas(api);
         let stakingContract = new ContractPromise(api, ABIs.staking, CAs.staking);
        

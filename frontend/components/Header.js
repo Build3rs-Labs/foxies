@@ -7,8 +7,11 @@ import Link from "next/link";
 import Sound from "@/components/Sound";
 
 export const ConnectWallet = ({ children }) => {
+  
   const { account, connect, disconnect } = useWallet();
+
   const wallets = useAllWallets();
+
   const [shouldRender, setShouldRender] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -25,7 +28,7 @@ export const ConnectWallet = ({ children }) => {
     connect();
     const shouldRenderConnectWallet = true;
     setShouldRender(shouldRenderConnectWallet);
-  }, []);
+  }, [account]);
 
   const handleWalletConnect = (wallet) => {
     connect(wallet.extensionName);
