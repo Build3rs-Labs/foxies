@@ -1,8 +1,8 @@
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-export const toastError = () =>
-  toast.error("Something went wrong", {
+export const toastError = (message="Something went wrong!") =>
+  toast.error(message, {
     position: "bottom-right",
     autoClose: 5000,
     hideProgressBar: false,

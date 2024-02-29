@@ -57,6 +57,17 @@ export const getMintedNftCount = async (api) => {
     return numberReturn;
 };
 
+export const getLastMint = async (api, account)=> {
+    if (!api || !account) {
+        return;
+    }
+    let gas = getGas(api);
+    let factory = new ContractPromise(api, ABIs.factory, CAs.factory);
+    const last_mint_ = await factory.query["getLastMintByAccount"](query_address, gas, account.address);
+    const numberReturn = Number(last_mint_.output.toHuman().Ok[0]);
+    return numberReturn;
+}
+
 export const getTokenIdsForBoth = async (api, account, balances) => {
     if (!api || !account) {
         return;
@@ -145,6 +156,9 @@ export const unstake = async (api, account, token_type) => {
         let stakingContract = new ContractPromise(api, ABIs.staking, CAs.staking);
        
         let txName = token_type === 'foxes' ? "unstakeFoxes" : "unstakeChickens";
+
+        let balancesBefore = await getBalances(api, account);
+        let balanceBefore = balancesBefore[2];
         
         await stakingContract.tx[txName](gas).signAndSend(
             account.address,
@@ -162,8 +176,25 @@ export const unstake = async (api, account, token_type) => {
                     if (failed) {
                         reject("Unstaking failed");
                     } else {
-                        toastSuccess("Successful unstake!");
-                        resolve("Unstaking successful");
+                        if (token_type == "foxes") {
+                            toastSuccess("You have successfully unstaked your fox(es)!");
+                            resolve("Unstaking successful");
+                        }
+                        else {
+                            let balancesAfter = await getBalances(api, account);
+                            let balanceAfter = balancesAfter[2];
+                            if (balanceAfter > balanceBefore) {
+                                toastSuccess(`Hurray! You have unstaked and claimed ${(balanceAfter - balanceBefore).toLocaleString()} $EGGS`);
+                            }
+                            else {
+                                if (balancesBefore[4] > 0) {
+                                    toastError(`Ouch! All your layed $EGGS have been stolen!`);
+                                }
+                                else {
+                                    toastSuccess("You've unstaked your chickens successfully!");
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -268,7 +299,15 @@ export const mint = async (api, account, type="random")=> {
                     toastError();
                 }
                 else {
-                    toastSuccess("Mint successful!");
+                    let last_mint = await getLastMint(api, account);
+                    let msg;
+                    if (last_mint == 0) {
+                        msg = "Kudos! You have successfully minted a chicken!";
+                    }
+                    else {
+                        msg = "Way to go! You have successfully minted a fox!";
+                    }
+                    toastSuccess(msg);
                 }
             }
         }
@@ -285,7 +324,6 @@ export const getBalance = async (api, account)=> {
     let contract = new ContractPromise(api, ABIs.PSP22, CAs.eggs);
     let balance_ = await contract.query["psp22::balanceOf"](query_address, gas, account.address);
     let balance = balance_.output.toHuman().Ok;
-
 }
 
 export const getStaked = async (api, account)=> {
@@ -337,7 +375,7 @@ export const getBalances = async (api, account)=> {
     let balance5Raw = parseFloat(balance_5.output.toHuman().Ok.replace(/\,/g, ""));
     let balance5 = parseFloat(balance4Raw) / 1e6;
 
-    let balances = [balance, balance2, balance3];
+    let balances = [balance, balance2, balance3, balance4, balance5];
 
     return balances;
 
