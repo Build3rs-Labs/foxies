@@ -135,7 +135,7 @@ export default function Mint() {
                   <div className="flex z-10">
                     <button  onClick={()=>handleMint(api, account, "random")} className="mx-2  border-[2px] border-black bg-white rounded-lg text-2xl lg:text-3xl  text-black px-4 py-1 flex items-center">
                       <span className=" font-VT323">
-                        Mint now!
+                        Random mint!
                         <span className="ml-1">
                           &gt;
                         </span>
