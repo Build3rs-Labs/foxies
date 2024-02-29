@@ -194,6 +194,7 @@ export const unstake = async (api, account, token_type) => {
                                     toastSuccess("You've unstaked your chickens successfully!");
                                 }
                             }
+                            resolve("Unstaking successful");
                         }
                     }
                 }
@@ -259,59 +260,63 @@ export const mint = async (api, account, type="random")=> {
         return; //Wallet and/or API not connected
     }
 
-    if (type != "random") {
-        let mints = await getFoxMints(api, account);
-
-        if (mints == 2) {
-            return;
-        }
-    }
-
-    let gas = getGas(api);
-    let contract = new ContractPromise(api, ABIs.factory, CAs.factory);
-
-    let amount;
-  
-    if (type == "random") {
-        amount = 6 * (10 ** 12); // 6 AZERO: Random mint
-    }
-    else {
-        amount = 100 * (10 ** 12); // 100 AZERO: Precise fox mint
-    }
-
-    amount = api.createType("Balance", amount.toLocaleString("fullwide", {useGrouping:false}));
-    gas.value = amount;
-
-    await contract.tx["mintNft"](gas).signAndSend(
-        account.address,
-        { signer: account.signer },
-        async ({ events = [], status }) => {
-            if (status.isInBlock) {
-                //in block
-            } else if (status.isFinalized) {
-                let failed = false;
-                events.forEach(({ phase, event: { data, method, section } }) => {
-                    if (method == "ExtrinsicFailed") {
-                        failed = true;
-                    }
-                });
-                if (failed == true) {
-                    toastError();
-                }
-                else {
-                    let last_mint = await getLastMint(api, account);
-                    let msg;
-                    if (last_mint == 0) {
-                        msg = "Kudos! You have successfully minted a chicken!";
-                    }
-                    else {
-                        msg = "Way to go! You have successfully minted a fox!";
-                    }
-                    toastSuccess(msg);
-                }
+    return new Promise(async (resolve, reject)=> {
+        if (type != "random") {
+            let mints = await getFoxMints(api, account);
+    
+            if (mints == 2) {
+                return;
             }
         }
-    );
+    
+        let gas = getGas(api);
+        let contract = new ContractPromise(api, ABIs.factory, CAs.factory);
+    
+        let amount;
+      
+        if (type == "random") {
+            amount = 6 * (10 ** 12); // 6 AZERO: Random mint
+        }
+        else {
+            amount = 100 * (10 ** 12); // 100 AZERO: Precise fox mint
+        }
+    
+        amount = api.createType("Balance", amount.toLocaleString("fullwide", {useGrouping:false}));
+        gas.value = amount;
+    
+        await contract.tx["mintNft"](gas).signAndSend(
+            account.address,
+            { signer: account.signer },
+            async ({ events = [], status }) => {
+                if (status.isInBlock) {
+                    //in block
+                } else if (status.isFinalized) {
+                    let failed = false;
+                    events.forEach(({ phase, event: { data, method, section } }) => {
+                        if (method == "ExtrinsicFailed") {
+                            failed = true;
+                        }
+                    });
+                    if (failed == true) {
+                        toastError();
+                        reject("Mint failed");
+                    }
+                    else {
+                        let last_mint = await getLastMint(api, account);
+                        let msg;
+                        if (last_mint == 0) {
+                            msg = "Kudos! You have successfully minted a chicken!";
+                        }
+                        else {
+                            msg = "Way to go! You have successfully minted a fox!";
+                        }
+                        toastSuccess(msg);
+                        resolve('Minted');
+                    }
+                }
+            }
+        );
+    });
     
 }
 
