@@ -35,7 +35,7 @@ export const getGas = (api) => {
 
 export const getFoxMints = async (api, account) => {
     if (!api || !account) {
-        return;
+        return 2;
     }
     let gas = getGas(api);
     let factory = new ContractPromise(api, ABIs.factory, CAs.factory);
