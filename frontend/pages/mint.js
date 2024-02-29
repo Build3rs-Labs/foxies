@@ -5,7 +5,7 @@ import { ApiPromise, WsProvider } from "@polkadot/api";
 import { randomAsU8a } from "@polkadot/util-crypto";
 import React, { useEffect, useState, useRef } from "react";
 import { useWallet } from "useink";
-import { formatWallet, CallContract, mint, getMintedNftCount, getFoxMints } from "../functions/index";
+import { formatWallet, CallContract, mint, getMintedNftCount, getFoxMints, getLastMint } from "../functions/index";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Image from "next/image";
@@ -49,11 +49,11 @@ export default function Mint() {
       typed.destroy();
       clearTimeout(timing);
     };
-  }, []);
+  }, [account]);
 
   useEffect(() => {
     
-  }, []);
+  }, [account]);
 
   const [api, setAPI] = useState(null);
 
@@ -62,7 +62,7 @@ export default function Mint() {
   const handleMint = async (api, account, type) => {
     await mint(api, account, type);
     const nftCountValue = await getMintedNftCount(api);
-    setNftLeft(12000 - nftCountValue);
+    setNftLeft(15000 - nftCountValue);
     let mints = await getFoxMints(api, account);
     setFoxMints(mints);
   };
@@ -74,7 +74,7 @@ export default function Mint() {
       setAPI(_api);
       const nftCountValue = await getMintedNftCount(_api);
 
-      setNftLeft(12000 - nftCountValue);
+      setNftLeft(15000 - nftCountValue);
 
       let mints = await getFoxMints(_api, account);
       setFoxMints(mints);
