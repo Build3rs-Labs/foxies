@@ -18,6 +18,7 @@ export const ConnectWallet = ({ children }) => {
   var wsProvider;
 
   useEffect(() => {
+    
     let connect = async () => {
       let wsProvider = new WsProvider("wss://ws.test.azero.dev");
       let _api = await ApiPromise.create({ provider: wsProvider });
@@ -26,7 +27,7 @@ export const ConnectWallet = ({ children }) => {
     connect();
     const shouldRenderConnectWallet = true;
     setShouldRender(shouldRenderConnectWallet);
-  }, []);
+  }, [wallets, account]);
 
   const handleWalletConnect = (wallet) => {
     connect(wallet.extensionName);
@@ -195,7 +196,7 @@ export default function HeaderCoop() {
             </button>
           </Link>
 
-          <a href="https://twitter.com/foxiesgame" target="blank"  className="px-4 mt-2">
+          <a href="https://twitter.com/foxiesgame" target="blank"  className="px-4 ml-4 mt-2">
             <Image src="/twitter.png" alt="twitter" width={35} height={35} />
           </a>
 

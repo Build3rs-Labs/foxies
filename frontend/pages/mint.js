@@ -5,7 +5,7 @@ import { ApiPromise, WsProvider } from "@polkadot/api";
 import { randomAsU8a } from "@polkadot/util-crypto";
 import React, { useEffect, useState, useRef } from "react";
 import { useWallet } from "useink";
-import { formatWallet, CallContract, mint, getMintedNftCount } from "../functions/index";
+import { formatWallet, CallContract, mint, getMintedNftCount, getFoxMints } from "../functions/index";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Image from "next/image";
@@ -26,6 +26,8 @@ export default function Mint() {
   
   const [nftLeft, setNftLeft] = useState('X');
 
+  const [foxMints, setFoxMints] = useState(0);
+
   useEffect(() => {
     const typed = new Typed(el.current, {
       strings: [`Welcome to the world of Foxies! 🌎
@@ -40,7 +42,7 @@ export default function Mint() {
     const timing = setTimeout(()=>{
       document.getElementsByClassName("farmer")[0].style.animation = 'exit 2s ease-in-out forwards';
       document.getElementsByClassName("minter")[0].style.animation = 'entrance 2s ease-in-out forwards';
-    }, 9000);
+    }, 7000);
 
     return () => {
       // Destroy Typed instance during cleanup to stop animation
@@ -60,8 +62,9 @@ export default function Mint() {
   const handleMint = async (api, account, type) => {
     await mint(api, account, type);
     const nftCountValue = await getMintedNftCount(api);
-    console.log(nftCountValue + " nftCountValue")
     setNftLeft(12000 - nftCountValue);
+    let mints = await getFoxMints(api, account);
+    setFoxMints(mints);
   };
 
   useEffect(() => {
@@ -70,11 +73,15 @@ export default function Mint() {
       let _api = await ApiPromise.create({ provider: wsProvider });
       setAPI(_api);
       const nftCountValue = await getMintedNftCount(_api);
-      console.log(nftCountValue + " nftCountValue")
+
       setNftLeft(12000 - nftCountValue);
+
+      let mints = await getFoxMints(_api, account);
+      setFoxMints(mints);
+      
     };
     connect();
-  }, []);
+  }, [account]);
 
   return (
     <>
@@ -83,19 +90,19 @@ export default function Mint() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <div className="w-full font-VT323" style={{fontSize:12}}>
+
+      <Header />
+
+      <div className="font-VT323" style={{fontSize:12}}>
         <div className={styles.pageBackground}></div>
 
-        <div className="w-full  h-[100dvh] sm:h-[100vh] fixed bottom-[0%] z-50">
-
-          <Header />
-
+        <div className="">
 
             <div className="farmer">
-                <div className="flex items-center justify-start lg:left-1/2 left-[30%] top-10 lg:top-20 ml-5">
+                <div className="">
                   <div
                     style={{padding:30, fontSize:20}}
-                    className={`max-w-[650px] px-10 py-6 mr-2 lg:mr-0
+                    className={`max-w-[100%] px-10 py-6 mr-2 lg:mr-0
                     text-center rounded-full bubble-up ${styles.bubble} ${styles["bubble-bottom-left"]}`}
                   >
                     <div ref={el}></div>
@@ -124,16 +131,36 @@ export default function Mint() {
                       <img src="/fox.png" className={"nft-icons"} alt="logo"/>
                     </div>
                   </div>
-                  <h1 className="text-white text-4xl pt-8">{nftLeft} NFTs left</h1>
+                  <h1 className="text-white text-4xl pt-8 pb-6">{nftLeft.toLocaleString()} NFTs left</h1>
                   <div className="flex z-10">
-                    <button  onClick={()=>handleMint(api, account, "random")} className="mx-2  border-[2px] border-black bg-white rounded-lg text-2xl lg:text-4xl  text-black px-4 flex items-center">
-                      <span className=" font-VT323">Random mint</span>
+                    <button  onClick={()=>handleMint(api, account, "random")} className="mx-2  border-[2px] border-black bg-white rounded-lg text-2xl lg:text-3xl  text-black px-4 py-1 flex items-center">
+                      <span className=" font-VT323">
+                        Random mint!
+                        <span className="ml-1">
+                          &gt;
+                        </span>
+                      </span>
                     </button>
-                    <button  onClick={()=>handleMint(api, account, "fox")} className="mx-2  border-[2px] border-black bg-white rounded-lg text-2xl lg:text-4xl  text-black px-4 flex items-center">
-                      <span className=" font-VT323">Fox mint</span>
+                    <button style={(foxMints < 2 && foxMints != null)?{backgroundColor:"#FFFFFF", cursor:"pointer"}:{backgroundColor:"#A2A2A2", cursor:"not-allowed"}} onClick={()=>(foxMints < 2)?handleMint(api, account, "foxes"):null} className="mx-2  border-[2px] border-black bg-white rounded-lg text-2xl lg:text-3xl  text-black px-4 py-1 flex items-center">
+                      <span className=" font-VT323">
+                        Mint a fox!
+                        <span className="ml-1">
+                          &gt;
+                        </span>
+                      </span>
                     </button>
                   </div>
                 </div>
+            </div>
+
+            <div style={{position:"fixed", width:"100vw", bottom:0, left:0, zIndex: 1000}}>
+              <a target="_blank" rel="noreferrer noopener" href="https://medium.com/@foxiesgame/the-foxies-game-on-aleph-zero-3aed13c1b8b5">
+                <button className="mx-auto border-[2px] my-5 border-black bg-white rounded-lg text-2xl text-black px-4 flex items-center">
+                  <span className=" font-VT323">
+                    Learn more about the game mechanics
+                  </span>
+                </button>
+              </a>
             </div>
           </div>
 

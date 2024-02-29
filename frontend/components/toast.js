@@ -13,8 +13,8 @@ export const toastError = () =>
     theme: "colored",
   });
 
-export const toastSuccess = () =>
-  toast.success("Success !", {
+export const toastSuccess = (message="Success!") =>
+  toast.success(message, {
     position: "bottom-right",
     autoClose: 5000,
     hideProgressBar: false,

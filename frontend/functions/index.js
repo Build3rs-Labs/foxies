@@ -33,8 +33,16 @@ export const getGas = (api) => {
     }; 
 }
 
-
-
+export const getFoxMints = async (api, account) => {
+    if (!api || !account) {
+        return 2;
+    }
+    let gas = getGas(api);
+    let factory = new ContractPromise(api, ABIs.factory, CAs.factory);
+    const mints_ = await factory.query["getDirectFoxMints"](query_address, gas, account.address);
+    const numberReturn = Number(mints_.output.toHuman().Ok);
+    return numberReturn;
+};
 
 export const getMintedNftCount = async (api) => {
     if (!api) {
@@ -46,7 +54,6 @@ export const getMintedNftCount = async (api) => {
     const chickens = await chickens_.query["psp34::totalSupply"](query_address , gas);
     const foxes = await foxes_.query["psp34::totalSupply"](query_address , gas);
     const numberReturn = Number(chickens.output.toHuman().Ok) + Number(foxes.output.toHuman().Ok);
-    console.log(numberReturn);
     return numberReturn;
 };
 
@@ -71,7 +78,6 @@ export const getTokenIdsForBoth = async (api, account, balances) => {
         const tokenIdFoxes = tokenIdResponseFoxes.output.toHuman().Ok;
         tokenIds.foxes.push(tokenIdFoxes);
     }
-    console.log(tokenIds);
     return tokenIds;
 };
 
@@ -79,15 +85,13 @@ export const getTokenIdsForBoth = async (api, account, balances) => {
 export const stake = async (api, account, token_type) => {
     return new Promise(async (resolve, reject) => {
         if (!api || !account || !token_type) {
-            console.log("API, account, or token type not provided.");
             return;
         }
 
         let gas = getGas(api);
-        let contractAddress = token_type === 'fox' ? CAs.foxes : CAs.chickens;
+        let contractAddress = token_type === 'foxes' ? CAs.foxes : CAs.chickens;
         let contract = new ContractPromise(api, ABIs.PSP34, contractAddress);
         let tokenIdToStake;
-        console.log(token_type)
         try {
             const tokenIdResponse = await contract.query["psp34Enumerable::ownersTokenByIndex"](
                 query_address, gas, account.address, "0"
@@ -99,13 +103,12 @@ export const stake = async (api, account, token_type) => {
                 throw new Error(`No ${token_type} token found to stake.`);
             }
         } catch (error) {
-            console.error(error.message);
             reject(error.message);
             return;
         }
 
         let stakingContract = new ContractPromise(api, ABIs.staking, CAs.staking);
-        let txName = token_type === 'fox' ? "stakeFox" : "stakeChicken";
+        let txName = token_type === 'foxes' ? "stakeFox" : "stakeChicken";
 
         await stakingContract.tx[txName](gas, tokenIdToStake).signAndSend(
             account.address,
@@ -121,10 +124,9 @@ export const stake = async (api, account, token_type) => {
                         }
                     });
                     if (failed) {
-                        console.log("Staking failed");
                         reject("Staking failed");
                     } else {
-                        console.log("Staking successful");
+                        toastSuccess("Successful Stake!");
                         resolve("Staking successful");
                     }
                 }
@@ -136,15 +138,14 @@ export const stake = async (api, account, token_type) => {
 export const unstake = async (api, account, token_type) => {
     return new Promise(async (resolve, reject) => {
         if (!api || !account || !token_type) {
-            console.log("API, account, or token type not provided.");
             return;
         }
 
         let gas = getGas(api);
         let stakingContract = new ContractPromise(api, ABIs.staking, CAs.staking);
        
-        let txName = token_type === 'fox' ? "unstakeFoxes" : "unstakeChickens";
-        console.log(token_type)
+        let txName = token_type === 'foxes' ? "unstakeFoxes" : "unstakeChickens";
+        
         await stakingContract.tx[txName](gas).signAndSend(
             account.address,
             { signer: account.signer },
@@ -159,10 +160,9 @@ export const unstake = async (api, account, token_type) => {
                         }
                     });
                     if (failed) {
-                        console.log("Unstaking failed");
                         reject("Unstaking failed");
                     } else {
-                        console.log("Unstaking successful");
+                        toastSuccess("Successful unstake!");
                         resolve("Unstaking successful");
                     }
                 }
@@ -175,7 +175,6 @@ export const unstake = async (api, account, token_type) => {
 export const PSP34_approve = (api, account,  token_type) => {
     return new Promise(async (resolve, reject)=> {
         if (!api || !account) {
-            console.log("API, account not provided.");
             return;
         }
     
@@ -198,12 +197,10 @@ export const PSP34_approve = (api, account,  token_type) => {
                     });
                     if (failed == true) {
                         toastError();
-                        console.log("failed");
                         reject("error");
                     }
                     else {
-                        toastSuccess();
-                        console.log("worked")
+                        toastSuccess("Approval successful!");
                         resolve("success")
                     }
                 }
@@ -214,7 +211,6 @@ export const PSP34_approve = (api, account,  token_type) => {
 
 export const PSP34_allowance = async (api, account,  token_type) => {
     if (!api || !account) {
-        console.log("API, account not provided.");
         return;
     }
 
@@ -224,13 +220,20 @@ export const PSP34_allowance = async (api, account,  token_type) => {
     
     let query_ = await contract.query["psp34::allowance"](query_address, gas, account.address, CAs.staking, null);
     let query = query_.output.toHuman().Ok;
-    console.log('Is the staking allowed for ' + token_type + ' : ' + query);
     return query;
 };
 
 export const mint = async (api, account, type="random")=> {
     if (!api || !account) {
         return; //Wallet and/or API not connected
+    }
+
+    if (type != "random") {
+        let mints = await getFoxMints(api, account);
+
+        if (mints == 2) {
+            return;
+        }
     }
 
     let gas = getGas(api);
@@ -263,11 +266,9 @@ export const mint = async (api, account, type="random")=> {
                 });
                 if (failed == true) {
                     toastError();
-                    console.log('fail !')
                 }
                 else {
-                    toastSuccess();
-                    console.log('minted !')
+                    toastSuccess("Mint successful!");
                 }
             }
         }
@@ -283,11 +284,27 @@ export const getBalance = async (api, account)=> {
     let gas = getGas(api);
     let contract = new ContractPromise(api, ABIs.PSP22, CAs.eggs);
     let balance_ = await contract.query["psp22::balanceOf"](query_address, gas, account.address);
-    let balance = balance_.output.toHuman().Ok;    
-    console.log('the balance is :' + balance)
+    let balance = balance_.output.toHuman().Ok;
 
 }
 
+export const getStaked = async (api, account)=> {
+    if (!api || !account) {
+        return; //Wallet and/or API not connected
+    }
+
+    let gas = getGas(api);
+
+    let contract = new ContractPromise(api, ABIs.staking, CAs.staking);
+    let staked_chickens_ = await contract.query["getStakedChickens"](query_address, gas, account.address);
+    let staked_chickens = staked_chickens_.output.toHuman().Ok.length;
+
+    let staked_foxes_ = await contract.query["getStakedFoxes"](query_address, gas, account.address);
+    let staked_foxes = staked_foxes_.output.toHuman().Ok.length;
+
+    return [staked_chickens, staked_foxes];
+
+}
 
 export const getBalances = async (api, account)=> {
     if (!api || !account) {
@@ -298,31 +315,26 @@ export const getBalances = async (api, account)=> {
     let contract = new ContractPromise(api, ABIs.PSP34, CAs.chickens);
     let balance_ = await contract.query["psp34::balanceOf"](query_address, gas, account.address);
     let balance = parseFloat(balance_.output.toHuman().Ok.replace(/\,/g, ""));
-    console.log('the balance of chickens is :' + balance);
 
     let contract2 = new ContractPromise(api, ABIs.PSP34, CAs.foxes);
     let balance_2 = await contract2.query["psp34::balanceOf"](query_address, gas, account.address);
     let balance2 = parseFloat(balance_2.output.toHuman().Ok.replace(/\,/g, ""));
-    console.log('the balance of foxes is :' + balance2)
 
     let contract3 = new ContractPromise(api, ABIs.PSP22, CAs.eggs);
     let balance_3 = await contract3.query["psp22::balanceOf"](query_address, gas, account.address);
     let balance3Raw = parseFloat(balance_3.output.toHuman().Ok.replace(/\,/g, ""));
     let balance3 = parseFloat(balance3Raw) / 1e6;
-    console.log('The balance of eggs is: ' + balance3Raw);
     
 
 
     let contract4 = new ContractPromise(api, ABIs.staking, CAs.staking);
     let balance_4 = await contract4.query["getClaimableForFox"](query_address, gas, account.address);
     let balance4Raw = parseFloat(balance_4.output.toHuman().Ok.replace(/\,/g, ""));
-    console.log('The getClaimableForFox is: ' + balance4Raw);
     let balance4 = parseFloat(balance4Raw) / 1e6;
 
     let contract5 = new ContractPromise(api, ABIs.staking, CAs.staking);
     let balance_5 = await contract5.query["getClaimableEggs"](query_address, gas, account.address);
     let balance5Raw = parseFloat(balance_5.output.toHuman().Ok.replace(/\,/g, ""));
-    console.log('The getClaimableEggs is: ' + balance5Raw);
     let balance5 = parseFloat(balance4Raw) / 1e6;
 
     let balances = [balance, balance2, balance3];
