@@ -20,6 +20,7 @@ export const ConnectWallet = ({ children }) => {
   var wsProvider;
 
   useEffect(() => {
+
     let connect = async () => {
       let wsProvider = new WsProvider("wss://ws.test.azero.dev");
       let _api = await ApiPromise.create({ provider: wsProvider });
@@ -28,7 +29,7 @@ export const ConnectWallet = ({ children }) => {
     connect();
     const shouldRenderConnectWallet = true;
     setShouldRender(shouldRenderConnectWallet);
-  }, [account]);
+  }, [account, wallets]);
 
   const handleWalletConnect = (wallet) => {
     connect(wallet.extensionName);
