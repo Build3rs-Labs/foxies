@@ -15,7 +15,7 @@ export default function Coop() {
   const el = React.useRef(null);
   const scrollSections = [0, 1, 2];
   const { account, connect, disconnect } = useWallet();
-  const [balances, setBalances] = useState([0, 0, 0]);
+  const [balances, setBalances] = useState([0, 0, 0, 0, 0]);
 
   const [staked, setStaked] = useState([0, 0]);
 
