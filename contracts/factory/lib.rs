@@ -141,7 +141,7 @@ mod factory {
             let total_supply = nft.total_supply();
             let denom = 10u128.pow(12);
             let mut price = 0;
-            if total_supply >= 1 && total_supply < 2000 {
+            if total_supply >= 0 && total_supply < 2000 {
                 price = 5 * denom;
             }
             else if total_supply >= 2000 && total_supply < 5000 {
@@ -150,8 +150,11 @@ mod factory {
             else if total_supply >= 5000 && total_supply < 10000 {
                 price = 15 * denom;
             }
-            else if total_supply >= 10000 && total_supply <= 12000 {
+            else if total_supply >= 10000 && total_supply < 12000 {
                 price = 20 * denom;
+            }
+            else {
+                price = 25 * denom;
             }
             price
         }
