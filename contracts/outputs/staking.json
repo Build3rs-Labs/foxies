@@ -1,0 +1,1212 @@
+{
+  "source": {
+    "hash": "0x2ef433c8ac16db46ca9481ff6e797245171cabada17b80c0c84aa418a361fc18",
+    "language": "ink! 4.3.0",
+    "compiler": "rustc 1.78.0-nightly",
+    "build_info": {
+      "build_mode": "Release",
+      "cargo_contract_version": "3.2.0",
+      "rust_toolchain": "nightly-x86_64-unknown-linux-gnu",
+      "wasm_opt_settings": {
+        "keep_debug_symbols": false,
+        "optimization_passes": "Z"
+      }
+    }
+  },
+  "contract": {
+    "name": "staking",
+    "version": "0.2.1",
+    "authors": [
+      "Edinyanga Ottoho",
+      "Build3rs"
+    ],
+    "description": "Staking contract to stake chicken and earn $EGGS",
+    "repository": "https://github.com/Build3rs-Labs/foxies",
+    "homepage": "https://github.com/Build3rs-Labs/foxies",
+    "license": "Apache-2.0"
+  },
+  "spec": {
+    "constructors": [
+      {
+        "args": [
+          {
+            "label": "factory",
+            "type": {
+              "displayName": [
+                "AccountId"
+              ],
+              "type": 0
+            }
+          },
+          {
+            "label": "foxes",
+            "type": {
+              "displayName": [
+                "AccountId"
+              ],
+              "type": 0
+            }
+          },
+          {
+            "label": "chickens",
+            "type": {
+              "displayName": [
+                "AccountId"
+              ],
+              "type": 0
+            }
+          },
+          {
+            "label": "daily_azero_per_chicken",
+            "type": {
+              "displayName": [
+                "u128"
+              ],
+              "type": 3
+            }
+          },
+          {
+            "label": "cap_per_account",
+            "type": {
+              "displayName": [
+                "u128"
+              ],
+              "type": 3
+            }
+          }
+        ],
+        "default": false,
+        "docs": [],
+        "label": "new",
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink_primitives",
+            "ConstructorResult"
+          ],
+          "type": 5
+        },
+        "selector": "0x9bae9d5e"
+      }
+    ],
+    "docs": [],
+    "environment": {
+      "accountId": {
+        "displayName": [
+          "AccountId"
+        ],
+        "type": 0
+      },
+      "balance": {
+        "displayName": [
+          "Balance"
+        ],
+        "type": 3
+      },
+      "blockNumber": {
+        "displayName": [
+          "BlockNumber"
+        ],
+        "type": 19
+      },
+      "chainExtension": {
+        "displayName": [
+          "ChainExtension"
+        ],
+        "type": 20
+      },
+      "hash": {
+        "displayName": [
+          "Hash"
+        ],
+        "type": 18
+      },
+      "maxEventTopics": 4,
+      "timestamp": {
+        "displayName": [
+          "Timestamp"
+        ],
+        "type": 4
+      }
+    },
+    "events": [],
+    "lang_error": {
+      "displayName": [
+        "ink",
+        "LangError"
+      ],
+      "type": 7
+    },
+    "messages": [
+      {
+        "args": [],
+        "default": false,
+        "docs": [],
+        "label": "get_account_id",
+        "mutates": false,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 8
+        },
+        "selector": "0x79718546"
+      },
+      {
+        "args": [
+          {
+            "label": "id",
+            "type": {
+              "displayName": [
+                "u128"
+              ],
+              "type": 3
+            }
+          }
+        ],
+        "default": false,
+        "docs": [],
+        "label": "stake_chicken",
+        "mutates": true,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 9
+        },
+        "selector": "0x51642ef3"
+      },
+      {
+        "args": [
+          {
+            "label": "account",
+            "type": {
+              "displayName": [
+                "AccountId"
+              ],
+              "type": 0
+            }
+          }
+        ],
+        "default": false,
+        "docs": [],
+        "label": "get_staked_chickens",
+        "mutates": false,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 13
+        },
+        "selector": "0xbe5cc8f7"
+      },
+      {
+        "args": [
+          {
+            "label": "account",
+            "type": {
+              "displayName": [
+                "AccountId"
+              ],
+              "type": 0
+            }
+          }
+        ],
+        "default": false,
+        "docs": [],
+        "label": "get_staked_foxes",
+        "mutates": false,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 13
+        },
+        "selector": "0xa63f2aff"
+      },
+      {
+        "args": [
+          {
+            "label": "account",
+            "type": {
+              "displayName": [
+                "AccountId"
+              ],
+              "type": 0
+            }
+          }
+        ],
+        "default": false,
+        "docs": [],
+        "label": "get_last_fox_for_stolen_eggs",
+        "mutates": false,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 15
+        },
+        "selector": "0xd1638bc1"
+      },
+      {
+        "args": [
+          {
+            "label": "account",
+            "type": {
+              "displayName": [
+                "AccountId"
+              ],
+              "type": 0
+            }
+          }
+        ],
+        "default": false,
+        "docs": [],
+        "label": "get_claimable_azero",
+        "mutates": false,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 17
+        },
+        "selector": "0x1f16e5dd"
+      },
+      {
+        "args": [],
+        "default": false,
+        "docs": [],
+        "label": "unstake_chickens",
+        "mutates": true,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 9
+        },
+        "selector": "0xfb97b871"
+      },
+      {
+        "args": [],
+        "default": false,
+        "docs": [],
+        "label": "get_azero_in_pool",
+        "mutates": false,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 17
+        },
+        "selector": "0xed732ac1"
+      },
+      {
+        "args": [
+          {
+            "label": "account",
+            "type": {
+              "displayName": [
+                "AccountId"
+              ],
+              "type": 0
+            }
+          }
+        ],
+        "default": false,
+        "docs": [],
+        "label": "get_claimable_for_fox",
+        "mutates": false,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 17
+        },
+        "selector": "0x73336d30"
+      },
+      {
+        "args": [
+          {
+            "label": "id",
+            "type": {
+              "displayName": [
+                "u128"
+              ],
+              "type": 3
+            }
+          }
+        ],
+        "default": false,
+        "docs": [],
+        "label": "stake_fox",
+        "mutates": true,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 9
+        },
+        "selector": "0xc7738e66"
+      },
+      {
+        "args": [],
+        "default": false,
+        "docs": [],
+        "label": "unstake_foxes",
+        "mutates": true,
+        "payable": false,
+        "returnType": {
+          "displayName": [
+            "ink",
+            "MessageResult"
+          ],
+          "type": 9
+        },
+        "selector": "0xd786eb86"
+      }
+    ]
+  },
+  "storage": {
+    "root": {
+      "layout": {
+        "struct": {
+          "fields": [
+            {
+              "layout": {
+                "enum": {
+                  "dispatchKey": "0x00000000",
+                  "name": "Option",
+                  "variants": {
+                    "0": {
+                      "fields": [],
+                      "name": "None"
+                    },
+                    "1": {
+                      "fields": [
+                        {
+                          "layout": {
+                            "leaf": {
+                              "key": "0x00000000",
+                              "ty": 0
+                            }
+                          },
+                          "name": "0"
+                        }
+                      ],
+                      "name": "Some"
+                    }
+                  }
+                }
+              },
+              "name": "factory"
+            },
+            {
+              "layout": {
+                "enum": {
+                  "dispatchKey": "0x00000000",
+                  "name": "Option",
+                  "variants": {
+                    "0": {
+                      "fields": [],
+                      "name": "None"
+                    },
+                    "1": {
+                      "fields": [
+                        {
+                          "layout": {
+                            "leaf": {
+                              "key": "0x00000000",
+                              "ty": 0
+                            }
+                          },
+                          "name": "0"
+                        }
+                      ],
+                      "name": "Some"
+                    }
+                  }
+                }
+              },
+              "name": "foxes"
+            },
+            {
+              "layout": {
+                "enum": {
+                  "dispatchKey": "0x00000000",
+                  "name": "Option",
+                  "variants": {
+                    "0": {
+                      "fields": [],
+                      "name": "None"
+                    },
+                    "1": {
+                      "fields": [
+                        {
+                          "layout": {
+                            "leaf": {
+                              "key": "0x00000000",
+                              "ty": 0
+                            }
+                          },
+                          "name": "0"
+                        }
+                      ],
+                      "name": "Some"
+                    }
+                  }
+                }
+              },
+              "name": "chickens"
+            },
+            {
+              "layout": {
+                "root": {
+                  "layout": {
+                    "leaf": {
+                      "key": "0x783f1d8b",
+                      "ty": 3
+                    }
+                  },
+                  "root_key": "0x783f1d8b"
+                }
+              },
+              "name": "staked_chickens"
+            },
+            {
+              "layout": {
+                "root": {
+                  "layout": {
+                    "leaf": {
+                      "key": "0x27ad14a5",
+                      "ty": 3
+                    }
+                  },
+                  "root_key": "0x27ad14a5"
+                }
+              },
+              "name": "number_of_chickens_staked"
+            },
+            {
+              "layout": {
+                "root": {
+                  "layout": {
+                    "leaf": {
+                      "key": "0x17c755b3",
+                      "ty": 4
+                    }
+                  },
+                  "root_key": "0x17c755b3"
+                }
+              },
+              "name": "last_chickens_stake_time"
+            },
+            {
+              "layout": {
+                "root": {
+                  "layout": {
+                    "leaf": {
+                      "key": "0xc4e2fc5f",
+                      "ty": 3
+                    }
+                  },
+                  "root_key": "0xc4e2fc5f"
+                }
+              },
+              "name": "staked_foxes"
+            },
+            {
+              "layout": {
+                "root": {
+                  "layout": {
+                    "leaf": {
+                      "key": "0x5cad1138",
+                      "ty": 3
+                    }
+                  },
+                  "root_key": "0x5cad1138"
+                }
+              },
+              "name": "number_of_foxes_staked"
+            },
+            {
+              "layout": {
+                "root": {
+                  "layout": {
+                    "leaf": {
+                      "key": "0x80988a54",
+                      "ty": 4
+                    }
+                  },
+                  "root_key": "0x80988a54"
+                }
+              },
+              "name": "last_foxes_stake_time"
+            },
+            {
+              "layout": {
+                "leaf": {
+                  "key": "0x00000000",
+                  "ty": 3
+                }
+              },
+              "name": "daily_azero_per_chicken"
+            },
+            {
+              "layout": {
+                "leaf": {
+                  "key": "0x00000000",
+                  "ty": 3
+                }
+              },
+              "name": "cap_per_account"
+            },
+            {
+              "layout": {
+                "enum": {
+                  "dispatchKey": "0x00000000",
+                  "name": "Option",
+                  "variants": {
+                    "0": {
+                      "fields": [],
+                      "name": "None"
+                    },
+                    "1": {
+                      "fields": [
+                        {
+                          "layout": {
+                            "leaf": {
+                              "key": "0x00000000",
+                              "ty": 0
+                            }
+                          },
+                          "name": "0"
+                        }
+                      ],
+                      "name": "Some"
+                    }
+                  }
+                }
+              },
+              "name": "owner"
+            },
+            {
+              "layout": {
+                "root": {
+                  "layout": {
+                    "leaf": {
+                      "key": "0xca629984",
+                      "ty": 0
+                    }
+                  },
+                  "root_key": "0xca629984"
+                }
+              },
+              "name": "fox_staked_by"
+            },
+            {
+              "layout": {
+                "root": {
+                  "layout": {
+                    "enum": {
+                      "dispatchKey": "0x8226a561",
+                      "name": "Option",
+                      "variants": {
+                        "0": {
+                          "fields": [],
+                          "name": "None"
+                        },
+                        "1": {
+                          "fields": [
+                            {
+                              "layout": {
+                                "leaf": {
+                                  "key": "0x8226a561",
+                                  "ty": 0
+                                }
+                              },
+                              "name": "0"
+                            }
+                          ],
+                          "name": "Some"
+                        }
+                      }
+                    }
+                  },
+                  "root_key": "0x8226a561"
+                }
+              },
+              "name": "azero_last_stolen_by"
+            }
+          ],
+          "name": "Staking"
+        }
+      },
+      "root_key": "0x00000000"
+    }
+  },
+  "types": [
+    {
+      "id": 0,
+      "type": {
+        "def": {
+          "composite": {
+            "fields": [
+              {
+                "type": 1,
+                "typeName": "[u8; 32]"
+              }
+            ]
+          }
+        },
+        "path": [
+          "ink_primitives",
+          "types",
+          "AccountId"
+        ]
+      }
+    },
+    {
+      "id": 1,
+      "type": {
+        "def": {
+          "array": {
+            "len": 32,
+            "type": 2
+          }
+        }
+      }
+    },
+    {
+      "id": 2,
+      "type": {
+        "def": {
+          "primitive": "u8"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "type": {
+        "def": {
+          "primitive": "u128"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "type": {
+        "def": {
+          "primitive": "u64"
+        }
+      }
+    },
+    {
+      "id": 5,
+      "type": {
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "fields": [
+                  {
+                    "type": 6
+                  }
+                ],
+                "index": 0,
+                "name": "Ok"
+              },
+              {
+                "fields": [
+                  {
+                    "type": 7
+                  }
+                ],
+                "index": 1,
+                "name": "Err"
+              }
+            ]
+          }
+        },
+        "params": [
+          {
+            "name": "T",
+            "type": 6
+          },
+          {
+            "name": "E",
+            "type": 7
+          }
+        ],
+        "path": [
+          "Result"
+        ]
+      }
+    },
+    {
+      "id": 6,
+      "type": {
+        "def": {
+          "tuple": []
+        }
+      }
+    },
+    {
+      "id": 7,
+      "type": {
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "index": 1,
+                "name": "CouldNotReadInput"
+              }
+            ]
+          }
+        },
+        "path": [
+          "ink_primitives",
+          "LangError"
+        ]
+      }
+    },
+    {
+      "id": 8,
+      "type": {
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "fields": [
+                  {
+                    "type": 0
+                  }
+                ],
+                "index": 0,
+                "name": "Ok"
+              },
+              {
+                "fields": [
+                  {
+                    "type": 7
+                  }
+                ],
+                "index": 1,
+                "name": "Err"
+              }
+            ]
+          }
+        },
+        "params": [
+          {
+            "name": "T",
+            "type": 0
+          },
+          {
+            "name": "E",
+            "type": 7
+          }
+        ],
+        "path": [
+          "Result"
+        ]
+      }
+    },
+    {
+      "id": 9,
+      "type": {
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "fields": [
+                  {
+                    "type": 10
+                  }
+                ],
+                "index": 0,
+                "name": "Ok"
+              },
+              {
+                "fields": [
+                  {
+                    "type": 7
+                  }
+                ],
+                "index": 1,
+                "name": "Err"
+              }
+            ]
+          }
+        },
+        "params": [
+          {
+            "name": "T",
+            "type": 10
+          },
+          {
+            "name": "E",
+            "type": 7
+          }
+        ],
+        "path": [
+          "Result"
+        ]
+      }
+    },
+    {
+      "id": 10,
+      "type": {
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "fields": [
+                  {
+                    "type": 6
+                  }
+                ],
+                "index": 0,
+                "name": "Ok"
+              },
+              {
+                "fields": [
+                  {
+                    "type": 11
+                  }
+                ],
+                "index": 1,
+                "name": "Err"
+              }
+            ]
+          }
+        },
+        "params": [
+          {
+            "name": "T",
+            "type": 6
+          },
+          {
+            "name": "E",
+            "type": 11
+          }
+        ],
+        "path": [
+          "Result"
+        ]
+      }
+    },
+    {
+      "id": 11,
+      "type": {
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "fields": [
+                  {
+                    "type": 12,
+                    "typeName": "String"
+                  }
+                ],
+                "index": 0,
+                "name": "Custom"
+              },
+              {
+                "index": 1,
+                "name": "ChickenNotStaked"
+              },
+              {
+                "index": 2,
+                "name": "TokenNotExists"
+              },
+              {
+                "index": 3,
+                "name": "TokenNotOwnedByCaller"
+              },
+              {
+                "index": 4,
+                "name": "AllowanceInexistent"
+              },
+              {
+                "index": 5,
+                "name": "ExceededMaxStakes"
+              },
+              {
+                "index": 6,
+                "name": "TransferFailed"
+              },
+              {
+                "index": 7,
+                "name": "FailedUnstake"
+              },
+              {
+                "index": 8,
+                "name": "OnlyOwnerAllowed"
+              },
+              {
+                "index": 9,
+                "name": "NotAFoxHolder"
+              },
+              {
+                "index": 10,
+                "name": "HasNotStaked"
+              },
+              {
+                "index": 11,
+                "name": "UnableToClaimAzero"
+              },
+              {
+                "index": 12,
+                "name": "MintFailed"
+              }
+            ]
+          }
+        },
+        "path": [
+          "staking",
+          "staking",
+          "StakingError"
+        ]
+      }
+    },
+    {
+      "id": 12,
+      "type": {
+        "def": {
+          "primitive": "str"
+        }
+      }
+    },
+    {
+      "id": 13,
+      "type": {
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "fields": [
+                  {
+                    "type": 14
+                  }
+                ],
+                "index": 0,
+                "name": "Ok"
+              },
+              {
+                "fields": [
+                  {
+                    "type": 7
+                  }
+                ],
+                "index": 1,
+                "name": "Err"
+              }
+            ]
+          }
+        },
+        "params": [
+          {
+            "name": "T",
+            "type": 14
+          },
+          {
+            "name": "E",
+            "type": 7
+          }
+        ],
+        "path": [
+          "Result"
+        ]
+      }
+    },
+    {
+      "id": 14,
+      "type": {
+        "def": {
+          "sequence": {
+            "type": 3
+          }
+        }
+      }
+    },
+    {
+      "id": 15,
+      "type": {
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "fields": [
+                  {
+                    "type": 16
+                  }
+                ],
+                "index": 0,
+                "name": "Ok"
+              },
+              {
+                "fields": [
+                  {
+                    "type": 7
+                  }
+                ],
+                "index": 1,
+                "name": "Err"
+              }
+            ]
+          }
+        },
+        "params": [
+          {
+            "name": "T",
+            "type": 16
+          },
+          {
+            "name": "E",
+            "type": 7
+          }
+        ],
+        "path": [
+          "Result"
+        ]
+      }
+    },
+    {
+      "id": 16,
+      "type": {
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "index": 0,
+                "name": "None"
+              },
+              {
+                "fields": [
+                  {
+                    "type": 0
+                  }
+                ],
+                "index": 1,
+                "name": "Some"
+              }
+            ]
+          }
+        },
+        "params": [
+          {
+            "name": "T",
+            "type": 0
+          }
+        ],
+        "path": [
+          "Option"
+        ]
+      }
+    },
+    {
+      "id": 17,
+      "type": {
+        "def": {
+          "variant": {
+            "variants": [
+              {
+                "fields": [
+                  {
+                    "type": 3
+                  }
+                ],
+                "index": 0,
+                "name": "Ok"
+              },
+              {
+                "fields": [
+                  {
+                    "type": 7
+                  }
+                ],
+                "index": 1,
+                "name": "Err"
+              }
+            ]
+          }
+        },
+        "params": [
+          {
+            "name": "T",
+            "type": 3
+          },
+          {
+            "name": "E",
+            "type": 7
+          }
+        ],
+        "path": [
+          "Result"
+        ]
+      }
+    },
+    {
+      "id": 18,
+      "type": {
+        "def": {
+          "composite": {
+            "fields": [
+              {
+                "type": 1,
+                "typeName": "[u8; 32]"
+              }
+            ]
+          }
+        },
+        "path": [
+          "ink_primitives",
+          "types",
+          "Hash"
+        ]
+      }
+    },
+    {
+      "id": 19,
+      "type": {
+        "def": {
+          "primitive": "u32"
+        }
+      }
+    },
+    {
+      "id": 20,
+      "type": {
+        "def": {
+          "variant": {}
+        },
+        "path": [
+          "ink_env",
+          "types",
+          "NoChainExtension"
+        ]
+      }
+    }
+  ],
+  "version": "4"
+}

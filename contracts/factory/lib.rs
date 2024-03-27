@@ -1,6 +1,5 @@
 #![cfg_attr(not(feature = "std"), no_std, no_main)]
 
-const AZERO_FOR_RANDOM:u128 = 6 * 10u128.pow(12); // 6 AZERO for random
 const AZERO_FOR_DIRECT_FOX_MINT:u128 = 100 * 10u128.pow(12); // 100 AZERO for defined fox mint
 
 #[ink::contract]
@@ -11,7 +10,6 @@ mod factory {
         string::String
     };
 
-    use crate::AZERO_FOR_RANDOM;
     use crate::AZERO_FOR_DIRECT_FOX_MINT;
 
     use random::Source;
@@ -70,15 +68,15 @@ mod factory {
         direct_fox_mints: Mapping<AccountId, u8>,
         // AZERO for direct fox mints: Mutable
         azero_for_direct_fox_mints: u128,
-        // AZERO for random mints: Mutable
-        azero_for_random_mints: u128,
         // Account for minting fees to be sent to
-        fees_account: Option<AccountId>
+        fees_account: Option<AccountId>,
+        // Rewards to staking pool
+        rewards_pool: Option<AccountId>
     }
 
     impl Factory {
         #[ink(constructor)]
-        pub fn new(fees_account: AccountId) -> Self {
+        pub fn new(fees_account: AccountId, staking_address: AccountId) -> Self {
             let caller = Self::env().caller();
             Self {
                 rarities: Mapping::default(),
@@ -91,8 +89,8 @@ mod factory {
                 chickens_minted: 0,
                 direct_fox_mints: Mapping::default(),
                 azero_for_direct_fox_mints: AZERO_FOR_DIRECT_FOX_MINT,
-                azero_for_random_mints: AZERO_FOR_RANDOM,
-                fees_account: Some(fees_account)
+                fees_account: Some(fees_account),
+                rewards_pool: Some(staking_address)
             }
         }
 
@@ -131,14 +129,31 @@ mod factory {
             Ok(())
         }
 
-        // Set the amount of AZERO for random mints: Only manager can call this method
         #[ink(message)]
-        pub fn set_azero_for_random_mints(&mut self, amount: u128) -> Result<(), FactoryError> {
-            if self.env().caller() != self.owner.unwrap() {
-                return Err(FactoryError::OnlyOwnerAllowed);
+        pub fn get_azero_for_direct_fox_mints(&mut self) -> Balance {
+            self.azero_for_direct_fox_mints
+        }
+
+        // Gets the amount of AZERO for random mints
+        #[ink(message)]
+        pub fn get_azero_for_random_mints(&mut self) -> Balance {
+            let nft: contract_ref!(PSP34) = self.chickens_nft_address.unwrap().into();
+            let total_supply = nft.total_supply();
+            let denom = 10u128.pow(12);
+            let mut price = 0;
+            if total_supply >= 1 && total_supply < 2000 {
+                price = 5 * denom;
             }
-            self.azero_for_random_mints = amount;
-            Ok(())
+            else if total_supply >= 2000 && total_supply < 5000 {
+                price = 10 * denom;
+            }
+            else if total_supply >= 5000 && total_supply < 10000 {
+                price = 15 * denom;
+            }
+            else if total_supply >= 10000 && total_supply <= 12000 {
+                price = 20 * denom;
+            }
+            price
         }
 
         #[ink(message)]
@@ -175,7 +190,7 @@ mod factory {
 
             let azero_sent = self.env().transferred_value();
 
-            if azero_sent != self.azero_for_random_mints && azero_sent != self.azero_for_direct_fox_mints {
+            if azero_sent != self.get_azero_for_random_mints() && azero_sent != self.get_azero_for_direct_fox_mints() {
                 return Err(FactoryError::InvalidMintPayment);
             }
 
@@ -183,7 +198,7 @@ mod factory {
 
             // Random mint pays AZERO_FOR_RANDOM
 
-            if azero_sent == self.azero_for_random_mints {
+            if azero_sent == self.get_azero_for_random_mints() {
                 let random_number = self.random_int_from_range(1, 10000);
                 // Generates a random number and places chances for 80% against 20%
                 if random_number >= 1 && random_number < 8000 {
@@ -228,7 +243,14 @@ mod factory {
 
             // Transfer AZERO to fees account
 
-            if self.env().transfer(self.fees_account.unwrap(), azero_sent).is_err() {
+            let mint_to_admin = (7 * azero_sent) / 100;
+            let mint_to_pool = azero_sent - mint_to_admin;
+
+            if self.env().transfer(self.fees_account.unwrap(), mint_to_admin).is_err() {
+                return Err(FactoryError::FailedAZEROTransfer);
+            }
+
+            if self.env().transfer(self.rewards_pool.unwrap(), mint_to_pool).is_err() {
                 return Err(FactoryError::FailedAZEROTransfer);
             }
 
