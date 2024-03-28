@@ -1,7 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std, no_main)]
 
-//const DAYS:u64 = 86400000; // Milliseconds in a day
-const DAYS:u64 = 120000; // Milliseconds in a day (Testnet dummy)
+const DAYS:u64 = 86400000; // Milliseconds in a day
+//const DAYS:u64 = 120000; // Milliseconds in a day (Testnet dummy)
 
 #[ink::contract]
 mod staking {

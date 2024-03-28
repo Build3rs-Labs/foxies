@@ -76,7 +76,7 @@ mod factory {
 
     impl Factory {
         #[ink(constructor)]
-        pub fn new(fees_account: AccountId, staking_address: AccountId) -> Self {
+        pub fn new(fees_account: AccountId) -> Self {
             let caller = Self::env().caller();
             Self {
                 rarities: Mapping::default(),
@@ -90,13 +90,23 @@ mod factory {
                 direct_fox_mints: Mapping::default(),
                 azero_for_direct_fox_mints: AZERO_FOR_DIRECT_FOX_MINT,
                 fees_account: Some(fees_account),
-                rewards_pool: Some(staking_address)
+                rewards_pool: None
             }
         }
 
         #[ink(message)]
         pub fn get_account_id(&self) -> AccountId {
             Self::env().account_id()
+        }
+
+        // Set staking contract address: Only manager can call this method
+        #[ink(message)]
+        pub fn set_staking_address(&mut self, address: AccountId) -> Result<(), FactoryError> {
+            if self.env().caller() != self.owner.unwrap() {
+                return Err(FactoryError::OnlyOwnerAllowed);
+            }
+            self.rewards_pool = Some(address);
+            Ok(())
         }
 
         // Set chickens NFT address: Only manager can call this method
@@ -262,6 +272,10 @@ mod factory {
 
         #[ink(message)]
         pub fn pick_random_fox_holder_with_rarity(&self) -> (AccountId, u128) {
+
+            if self.env().caller() != self.rewards_pool.unwrap() {
+                return (AccountId::from([0u8; 32]), 0);
+            }
 
             // Generate random number
             
