@@ -6,6 +6,10 @@ export const formatWallet = (address) => {
     return `${address.substring(0, 6)}...${address.substring(address.length - 6)}`;
 }
 
+const doFormatNumber = (num)=> {
+    return Number(num.replace(/\,/g, ""));
+}
+
 const ABIs = {
     factory:{"source":{"hash":"0xb4d4c7c5b587b0ae87b8e70d48d53ac6ceaf46e9fcb9139cf44894fa150b3aff","language":"ink! 4.3.0","compiler":"rustc 1.78.0-nightly","build_info":{"build_mode":"Release","cargo_contract_version":"3.2.0","rust_toolchain":"nightly-x86_64-unknown-linux-gnu","wasm_opt_settings":{"keep_debug_symbols":false,"optimization_passes":"Z"}}},"contract":{"name":"factory","version":"0.2.1","authors":["Edinyanga Ottoho","Build3rs"],"description":"Factory contract that mints foxes or chickens","repository":"https://github.com/Build3rs-Labs/foxies","homepage":"https://github.com/Build3rs-Labs/foxies","license":"Apache-2.0"},"spec":{"constructors":[{"args":[{"label":"fees_account","type":{"displayName":["AccountId"],"type":2}}],"default":false,"docs":[],"label":"new","payable":false,"returnType":{"displayName":["ink_primitives","ConstructorResult"],"type":5},"selector":"0x9bae9d5e"}],"docs":[],"environment":{"accountId":{"displayName":["AccountId"],"type":2},"balance":{"displayName":["Balance"],"type":1},"blockNumber":{"displayName":["BlockNumber"],"type":22},"chainExtension":{"displayName":["ChainExtension"],"type":23},"hash":{"displayName":["Hash"],"type":20},"maxEventTopics":4,"timestamp":{"displayName":["Timestamp"],"type":21}},"events":[],"lang_error":{"displayName":["ink","LangError"],"type":7},"messages":[{"args":[],"default":false,"docs":[],"label":"get_account_id","mutates":false,"payable":false,"returnType":{"displayName":["ink","MessageResult"],"type":8},"selector":"0x79718546"},{"args":[{"label":"address","type":{"displayName":["AccountId"],"type":2}}],"default":false,"docs":[],"label":"set_staking_address","mutates":true,"payable":false,"returnType":{"displayName":["ink","MessageResult"],"type":9},"selector":"0xf719335e"},{"args":[{"label":"address","type":{"displayName":["AccountId"],"type":2}}],"default":false,"docs":[],"label":"set_chickens_nft_address","mutates":true,"payable":false,"returnType":{"displayName":["ink","MessageResult"],"type":9},"selector":"0x6bc4bc7e"},{"args":[{"label":"address","type":{"displayName":["AccountId"],"type":2}}],"default":false,"docs":[],"label":"set_foxes_nft_address","mutates":true,"payable":false,"returnType":{"displayName":["ink","MessageResult"],"type":9},"selector":"0x210e80e5"},{"args":[{"label":"amount","type":{"displayName":["u128"],"type":1}}],"default":false,"docs":[],"label":"set_azero_for_direct_fox_mints","mutates":true,"payable":false,"returnType":{"displayName":["ink","MessageResult"],"type":9},"selector":"0x864d61c0"},{"args":[],"default":false,"docs":[],"label":"get_azero_for_direct_fox_mints","mutates":true,"payable":false,"returnType":{"displayName":["ink","MessageResult"],"type":13},"selector":"0x49a8680d"},{"args":[],"default":false,"docs":[],"label":"get_azero_for_random_mints","mutates":true,"payable":false,"returnType":{"displayName":["ink","MessageResult"],"type":13},"selector":"0x5108e1e1"},{"args":[{"label":"mint_type","type":{"displayName":["u8"],"type":4}},{"label":"account","type":{"displayName":["AccountId"],"type":2}}],"default":false,"docs":[],"label":"mint_by_admin","mutates":true,"payable":false,"returnType":{"displayName":["ink","MessageResult"],"type":9},"selector":"0xb3f4e790"},{"args":[],"default":false,"docs":[],"label":"mint_nft","mutates":true,"payable":true,"returnType":{"displayName":["ink","MessageResult"],"type":9},"selector":"0x219a113e"},{"args":[],"default":false,"docs":[],"label":"pick_random_fox_holder_with_rarity","mutates":false,"payable":false,"returnType":{"displayName":["ink","MessageResult"],"type":14},"selector":"0x230aeaa1"},{"args":[{"label":"account","type":{"displayName":["AccountId"],"type":2}}],"default":false,"docs":[],"label":"get_last_mint_by_account","mutates":false,"payable":false,"returnType":{"displayName":["ink","MessageResult"],"type":16},"selector":"0x1a7d8b69"},{"args":[{"label":"account","type":{"displayName":["AccountId"],"type":2}}],"default":false,"docs":[],"label":"get_direct_fox_mints","mutates":false,"payable":false,"returnType":{"displayName":["ink","MessageResult"],"type":19},"selector":"0x81ce1659"},{"args":[{"label":"index","type":{"displayName":["u128"],"type":1}}],"default":false,"docs":[],"label":"get_fox_rarity","mutates":false,"payable":false,"returnType":{"displayName":["ink","MessageResult"],"type":13},"selector":"0x9f060b73"}]},"storage":{"root":{"layout":{"struct":{"fields":[{"layout":{"root":{"layout":{"leaf":{"key":"0x533e17ba","ty":0}},"root_key":"0x533e17ba"}},"name":"rarities"},{"layout":{"leaf":{"key":"0x00000000","ty":0}},"name":"nfts"},{"layout":{"root":{"layout":{"leaf":{"key":"0x2fc38212","ty":1}},"root_key":"0x2fc38212"}},"name":"nfts_rarity"},{"layout":{"enum":{"dispatchKey":"0x00000000","name":"Option","variants":{"0":{"fields":[],"name":"None"},"1":{"fields":[{"layout":{"leaf":{"key":"0x00000000","ty":2}},"name":"0"}],"name":"Some"}}}},"name":"chickens_nft_address"},{"layout":{"enum":{"dispatchKey":"0x00000000","name":"Option","variants":{"0":{"fields":[],"name":"None"},"1":{"fields":[{"layout":{"leaf":{"key":"0x00000000","ty":2}},"name":"0"}],"name":"Some"}}}},"name":"foxes_nft_address"},{"layout":{"enum":{"dispatchKey":"0x00000000","name":"Option","variants":{"0":{"fields":[],"name":"None"},"1":{"fields":[{"layout":{"leaf":{"key":"0x00000000","ty":2}},"name":"0"}],"name":"Some"}}}},"name":"owner"},{"layout":{"root":{"layout":{"enum":{"dispatchKey":"0x334323a4","name":"Option","variants":{"0":{"fields":[],"name":"None"},"1":{"fields":[{"layout":{"struct":{"fields":[{"layout":{"leaf":{"key":"0x334323a4","ty":4}},"name":"0"},{"layout":{"leaf":{"key":"0x334323a4","ty":1}},"name":"1"}],"name":"(A, B)"}},"name":"0"}],"name":"Some"}}}},"root_key":"0x334323a4"}},"name":"last_mint"},{"layout":{"leaf":{"key":"0x00000000","ty":1}},"name":"chickens_minted"},{"layout":{"root":{"layout":{"leaf":{"key":"0x3f710c0b","ty":4}},"root_key":"0x3f710c0b"}},"name":"direct_fox_mints"},{"layout":{"leaf":{"key":"0x00000000","ty":1}},"name":"azero_for_direct_fox_mints"},{"layout":{"enum":{"dispatchKey":"0x00000000","name":"Option","variants":{"0":{"fields":[],"name":"None"},"1":{"fields":[{"layout":{"leaf":{"key":"0x00000000","ty":2}},"name":"0"}],"name":"Some"}}}},"name":"fees_account"},{"layout":{"enum":{"dispatchKey":"0x00000000","name":"Option","variants":{"0":{"fields":[],"name":"None"},"1":{"fields":[{"layout":{"leaf":{"key":"0x00000000","ty":2}},"name":"0"}],"name":"Some"}}}},"name":"rewards_pool"}],"name":"Factory"}},"root_key":"0x00000000"}},"types":[{"id":0,"type":{"def":{"sequence":{"type":1}}}},{"id":1,"type":{"def":{"primitive":"u128"}}},{"id":2,"type":{"def":{"composite":{"fields":[{"type":3,"typeName":"[u8; 32]"}]}},"path":["ink_primitives","types","AccountId"]}},{"id":3,"type":{"def":{"array":{"len":32,"type":4}}}},{"id":4,"type":{"def":{"primitive":"u8"}}},{"id":5,"type":{"def":{"variant":{"variants":[{"fields":[{"type":6}],"index":0,"name":"Ok"},{"fields":[{"type":7}],"index":1,"name":"Err"}]}},"params":[{"name":"T","type":6},{"name":"E","type":7}],"path":["Result"]}},{"id":6,"type":{"def":{"tuple":[]}}},{"id":7,"type":{"def":{"variant":{"variants":[{"index":1,"name":"CouldNotReadInput"}]}},"path":["ink_primitives","LangError"]}},{"id":8,"type":{"def":{"variant":{"variants":[{"fields":[{"type":2}],"index":0,"name":"Ok"},{"fields":[{"type":7}],"index":1,"name":"Err"}]}},"params":[{"name":"T","type":2},{"name":"E","type":7}],"path":["Result"]}},{"id":9,"type":{"def":{"variant":{"variants":[{"fields":[{"type":10}],"index":0,"name":"Ok"},{"fields":[{"type":7}],"index":1,"name":"Err"}]}},"params":[{"name":"T","type":10},{"name":"E","type":7}],"path":["Result"]}},{"id":10,"type":{"def":{"variant":{"variants":[{"fields":[{"type":6}],"index":0,"name":"Ok"},{"fields":[{"type":11}],"index":1,"name":"Err"}]}},"params":[{"name":"T","type":6},{"name":"E","type":11}],"path":["Result"]}},{"id":11,"type":{"def":{"variant":{"variants":[{"fields":[{"type":12,"typeName":"String"}],"index":0,"name":"Custom"},{"index":1,"name":"FailedMint"},{"index":2,"name":"OnlyOwnerAllowed"},{"index":3,"name":"InvalidMintPayment"},{"index":4,"name":"ExceededDirectFoxMintAllowance"},{"index":5,"name":"FailedAZEROTransfer"},{"index":6,"name":"InvalidMintType"}]}},"path":["factory","factory","FactoryError"]}},{"id":12,"type":{"def":{"primitive":"str"}}},{"id":13,"type":{"def":{"variant":{"variants":[{"fields":[{"type":1}],"index":0,"name":"Ok"},{"fields":[{"type":7}],"index":1,"name":"Err"}]}},"params":[{"name":"T","type":1},{"name":"E","type":7}],"path":["Result"]}},{"id":14,"type":{"def":{"variant":{"variants":[{"fields":[{"type":15}],"index":0,"name":"Ok"},{"fields":[{"type":7}],"index":1,"name":"Err"}]}},"params":[{"name":"T","type":15},{"name":"E","type":7}],"path":["Result"]}},{"id":15,"type":{"def":{"tuple":[2,1]}}},{"id":16,"type":{"def":{"variant":{"variants":[{"fields":[{"type":17}],"index":0,"name":"Ok"},{"fields":[{"type":7}],"index":1,"name":"Err"}]}},"params":[{"name":"T","type":17},{"name":"E","type":7}],"path":["Result"]}},{"id":17,"type":{"def":{"variant":{"variants":[{"index":0,"name":"None"},{"fields":[{"type":18}],"index":1,"name":"Some"}]}},"params":[{"name":"T","type":18}],"path":["Option"]}},{"id":18,"type":{"def":{"tuple":[4,1]}}},{"id":19,"type":{"def":{"variant":{"variants":[{"fields":[{"type":4}],"index":0,"name":"Ok"},{"fields":[{"type":7}],"index":1,"name":"Err"}]}},"params":[{"name":"T","type":4},{"name":"E","type":7}],"path":["Result"]}},{"id":20,"type":{"def":{"composite":{"fields":[{"type":3,"typeName":"[u8; 32]"}]}},"path":["ink_primitives","types","Hash"]}},{"id":21,"type":{"def":{"primitive":"u64"}}},{"id":22,"type":{"def":{"primitive":"u32"}}},{"id":23,"type":{"def":{"variant":{}},"path":["ink_env","types","NoChainExtension"]}}],"version":"4"},
     staking:{"source":{"hash":"0xf114f62a521ccfabc68fa0ccd7e46be93c5e6566428b10a4f8b295468079d173","language":"ink! 4.3.0","compiler":"rustc 1.78.0-nightly","build_info":{"build_mode":"Release","cargo_contract_version":"3.2.0","rust_toolchain":"nightly-x86_64-unknown-linux-gnu","wasm_opt_settings":{"keep_debug_symbols":false,"optimization_passes":"Z"}}},"contract":{"name":"staking","version":"0.2.1","authors":["Edinyanga Ottoho","Build3rs"],"description":"Staking contract to stake chicken and earn $EGGS","repository":"https://github.com/Build3rs-Labs/foxies","homepage":"https://github.com/Build3rs-Labs/foxies","license":"Apache-2.0"},"spec":{"constructors":[{"args":[{"label":"factory","type":{"displayName":["AccountId"],"type":0}},{"label":"foxes","type":{"displayName":["AccountId"],"type":0}},{"label":"chickens","type":{"displayName":["AccountId"],"type":0}},{"label":"daily_azero_per_chicken","type":{"displayName":["u128"],"type":3}},{"label":"cap_per_account","type":{"displayName":["u128"],"type":3}}],"default":false,"docs":[],"label":"new","payable":false,"returnType":{"displayName":["ink_primitives","ConstructorResult"],"type":5},"selector":"0x9bae9d5e"}],"docs":[],"environment":{"accountId":{"displayName":["AccountId"],"type":0},"balance":{"displayName":["Balance"],"type":3},"blockNumber":{"displayName":["BlockNumber"],"type":19},"chainExtension":{"displayName":["ChainExtension"],"type":20},"hash":{"displayName":["Hash"],"type":18},"maxEventTopics":4,"timestamp":{"displayName":["Timestamp"],"type":4}},"events":[],"lang_error":{"displayName":["ink","LangError"],"type":7},"messages":[{"args":[],"default":false,"docs":[],"label":"get_account_id","mutates":false,"payable":false,"returnType":{"displayName":["ink","MessageResult"],"type":8},"selector":"0x79718546"},{"args":[{"label":"id","type":{"displayName":["u128"],"type":3}}],"default":false,"docs":[],"label":"stake_chicken","mutates":true,"payable":false,"returnType":{"displayName":["ink","MessageResult"],"type":9},"selector":"0x51642ef3"},{"args":[{"label":"account","type":{"displayName":["AccountId"],"type":0}}],"default":false,"docs":[],"label":"get_staked_chickens","mutates":false,"payable":false,"returnType":{"displayName":["ink","MessageResult"],"type":13},"selector":"0xbe5cc8f7"},{"args":[{"label":"account","type":{"displayName":["AccountId"],"type":0}}],"default":false,"docs":[],"label":"get_staked_foxes","mutates":false,"payable":false,"returnType":{"displayName":["ink","MessageResult"],"type":13},"selector":"0xa63f2aff"},{"args":[{"label":"account","type":{"displayName":["AccountId"],"type":0}}],"default":false,"docs":[],"label":"get_last_fox_for_stolen_eggs","mutates":false,"payable":false,"returnType":{"displayName":["ink","MessageResult"],"type":15},"selector":"0xd1638bc1"},{"args":[{"label":"account","type":{"displayName":["AccountId"],"type":0}}],"default":false,"docs":[],"label":"get_claimable_azero","mutates":false,"payable":false,"returnType":{"displayName":["ink","MessageResult"],"type":17},"selector":"0x1f16e5dd"},{"args":[],"default":false,"docs":[],"label":"unstake_chickens","mutates":true,"payable":false,"returnType":{"displayName":["ink","MessageResult"],"type":9},"selector":"0xfb97b871"},{"args":[],"default":false,"docs":[],"label":"get_azero_in_pool","mutates":false,"payable":false,"returnType":{"displayName":["ink","MessageResult"],"type":17},"selector":"0xed732ac1"},{"args":[{"label":"account","type":{"displayName":["AccountId"],"type":0}}],"default":false,"docs":[],"label":"get_claimable_for_fox","mutates":false,"payable":false,"returnType":{"displayName":["ink","MessageResult"],"type":17},"selector":"0x73336d30"},{"args":[{"label":"id","type":{"displayName":["u128"],"type":3}}],"default":false,"docs":[],"label":"stake_fox","mutates":true,"payable":false,"returnType":{"displayName":["ink","MessageResult"],"type":9},"selector":"0xc7738e66"},{"args":[],"default":false,"docs":[],"label":"unstake_foxes","mutates":true,"payable":false,"returnType":{"displayName":["ink","MessageResult"],"type":9},"selector":"0xd786eb86"}]},"storage":{"root":{"layout":{"struct":{"fields":[{"layout":{"enum":{"dispatchKey":"0x00000000","name":"Option","variants":{"0":{"fields":[],"name":"None"},"1":{"fields":[{"layout":{"leaf":{"key":"0x00000000","ty":0}},"name":"0"}],"name":"Some"}}}},"name":"factory"},{"layout":{"enum":{"dispatchKey":"0x00000000","name":"Option","variants":{"0":{"fields":[],"name":"None"},"1":{"fields":[{"layout":{"leaf":{"key":"0x00000000","ty":0}},"name":"0"}],"name":"Some"}}}},"name":"foxes"},{"layout":{"enum":{"dispatchKey":"0x00000000","name":"Option","variants":{"0":{"fields":[],"name":"None"},"1":{"fields":[{"layout":{"leaf":{"key":"0x00000000","ty":0}},"name":"0"}],"name":"Some"}}}},"name":"chickens"},{"layout":{"root":{"layout":{"leaf":{"key":"0x783f1d8b","ty":3}},"root_key":"0x783f1d8b"}},"name":"staked_chickens"},{"layout":{"root":{"layout":{"leaf":{"key":"0x27ad14a5","ty":3}},"root_key":"0x27ad14a5"}},"name":"number_of_chickens_staked"},{"layout":{"root":{"layout":{"leaf":{"key":"0x17c755b3","ty":4}},"root_key":"0x17c755b3"}},"name":"last_chickens_stake_time"},{"layout":{"root":{"layout":{"leaf":{"key":"0xc4e2fc5f","ty":3}},"root_key":"0xc4e2fc5f"}},"name":"staked_foxes"},{"layout":{"root":{"layout":{"leaf":{"key":"0x5cad1138","ty":3}},"root_key":"0x5cad1138"}},"name":"number_of_foxes_staked"},{"layout":{"root":{"layout":{"leaf":{"key":"0x80988a54","ty":4}},"root_key":"0x80988a54"}},"name":"last_foxes_stake_time"},{"layout":{"leaf":{"key":"0x00000000","ty":3}},"name":"daily_azero_per_chicken"},{"layout":{"leaf":{"key":"0x00000000","ty":3}},"name":"cap_per_account"},{"layout":{"enum":{"dispatchKey":"0x00000000","name":"Option","variants":{"0":{"fields":[],"name":"None"},"1":{"fields":[{"layout":{"leaf":{"key":"0x00000000","ty":0}},"name":"0"}],"name":"Some"}}}},"name":"owner"},{"layout":{"root":{"layout":{"leaf":{"key":"0xca629984","ty":0}},"root_key":"0xca629984"}},"name":"fox_staked_by"},{"layout":{"root":{"layout":{"enum":{"dispatchKey":"0x8226a561","name":"Option","variants":{"0":{"fields":[],"name":"None"},"1":{"fields":[{"layout":{"leaf":{"key":"0x8226a561","ty":0}},"name":"0"}],"name":"Some"}}}},"root_key":"0x8226a561"}},"name":"azero_last_stolen_by"}],"name":"Staking"}},"root_key":"0x00000000"}},"types":[{"id":0,"type":{"def":{"composite":{"fields":[{"type":1,"typeName":"[u8; 32]"}]}},"path":["ink_primitives","types","AccountId"]}},{"id":1,"type":{"def":{"array":{"len":32,"type":2}}}},{"id":2,"type":{"def":{"primitive":"u8"}}},{"id":3,"type":{"def":{"primitive":"u128"}}},{"id":4,"type":{"def":{"primitive":"u64"}}},{"id":5,"type":{"def":{"variant":{"variants":[{"fields":[{"type":6}],"index":0,"name":"Ok"},{"fields":[{"type":7}],"index":1,"name":"Err"}]}},"params":[{"name":"T","type":6},{"name":"E","type":7}],"path":["Result"]}},{"id":6,"type":{"def":{"tuple":[]}}},{"id":7,"type":{"def":{"variant":{"variants":[{"index":1,"name":"CouldNotReadInput"}]}},"path":["ink_primitives","LangError"]}},{"id":8,"type":{"def":{"variant":{"variants":[{"fields":[{"type":0}],"index":0,"name":"Ok"},{"fields":[{"type":7}],"index":1,"name":"Err"}]}},"params":[{"name":"T","type":0},{"name":"E","type":7}],"path":["Result"]}},{"id":9,"type":{"def":{"variant":{"variants":[{"fields":[{"type":10}],"index":0,"name":"Ok"},{"fields":[{"type":7}],"index":1,"name":"Err"}]}},"params":[{"name":"T","type":10},{"name":"E","type":7}],"path":["Result"]}},{"id":10,"type":{"def":{"variant":{"variants":[{"fields":[{"type":6}],"index":0,"name":"Ok"},{"fields":[{"type":11}],"index":1,"name":"Err"}]}},"params":[{"name":"T","type":6},{"name":"E","type":11}],"path":["Result"]}},{"id":11,"type":{"def":{"variant":{"variants":[{"fields":[{"type":12,"typeName":"String"}],"index":0,"name":"Custom"},{"index":1,"name":"ChickenNotStaked"},{"index":2,"name":"TokenNotExists"},{"index":3,"name":"TokenNotOwnedByCaller"},{"index":4,"name":"AllowanceInexistent"},{"index":5,"name":"ExceededMaxStakes"},{"index":6,"name":"TransferFailed"},{"index":7,"name":"FailedUnstake"},{"index":8,"name":"OnlyOwnerAllowed"},{"index":9,"name":"NotAFoxHolder"},{"index":10,"name":"HasNotStaked"},{"index":11,"name":"UnableToClaimAzero"},{"index":12,"name":"MintFailed"}]}},"path":["staking","staking","StakingError"]}},{"id":12,"type":{"def":{"primitive":"str"}}},{"id":13,"type":{"def":{"variant":{"variants":[{"fields":[{"type":14}],"index":0,"name":"Ok"},{"fields":[{"type":7}],"index":1,"name":"Err"}]}},"params":[{"name":"T","type":14},{"name":"E","type":7}],"path":["Result"]}},{"id":14,"type":{"def":{"sequence":{"type":3}}}},{"id":15,"type":{"def":{"variant":{"variants":[{"fields":[{"type":16}],"index":0,"name":"Ok"},{"fields":[{"type":7}],"index":1,"name":"Err"}]}},"params":[{"name":"T","type":16},{"name":"E","type":7}],"path":["Result"]}},{"id":16,"type":{"def":{"variant":{"variants":[{"index":0,"name":"None"},{"fields":[{"type":0}],"index":1,"name":"Some"}]}},"params":[{"name":"T","type":0}],"path":["Option"]}},{"id":17,"type":{"def":{"variant":{"variants":[{"fields":[{"type":3}],"index":0,"name":"Ok"},{"fields":[{"type":7}],"index":1,"name":"Err"}]}},"params":[{"name":"T","type":3},{"name":"E","type":7}],"path":["Result"]}},{"id":18,"type":{"def":{"composite":{"fields":[{"type":1,"typeName":"[u8; 32]"}]}},"path":["ink_primitives","types","Hash"]}},{"id":19,"type":{"def":{"primitive":"u32"}}},{"id":20,"type":{"def":{"variant":{}},"path":["ink_env","types","NoChainExtension"]}}],"version":"4"},
@@ -38,8 +42,19 @@ export const getFoxMints = async (api, account) => {
     let gas = getGas(api);
     let factory = new ContractPromise(api, ABIs.factory, CAs.factory);
     const mints_ = await factory.query["getDirectFoxMints"](query_address, gas, account.address);
-    const numberReturn = Number(mints_.output.toHuman().Ok);
+    const numberReturn = doFormatNumber(mints_.output.toHuman().Ok);
     return numberReturn;
+};
+
+export const getMintPrices = async (api) => {
+    if (!api) {
+        return false;
+    }
+    let gas = getGas(api);
+    let factory = new ContractPromise(api, ABIs.factory, CAs.factory);
+    const direct_mints_ = await factory.query["getAzeroForDirectFoxMints"](query_address, gas);
+    const random_mints_ = await factory.query["getAzeroForRandomMints"](query_address, gas);
+    return [doFormatNumber(random_mints_.output.toHuman().Ok) / (10 ** 12), doFormatNumber(direct_mints_.output.toHuman().Ok) / (10 ** 12)];
 };
 
 export const getMintedNftCount = async (api) => {
@@ -51,7 +66,7 @@ export const getMintedNftCount = async (api) => {
     let foxes_ = new ContractPromise(api, ABIs.PSP34, CAs.foxes);
     const chickens = await chickens_.query["psp34::totalSupply"](query_address , gas);
     const foxes = await foxes_.query["psp34::totalSupply"](query_address , gas);
-    const numberReturn = Number(chickens.output.toHuman().Ok) + Number(foxes.output.toHuman().Ok);
+    const numberReturn = doFormatNumber(chickens.output.toHuman().Ok) + doFormatNumber(foxes.output.toHuman().Ok);
     return numberReturn;
 };
 
@@ -62,7 +77,7 @@ export const getLastMint = async (api, account)=> {
     let gas = getGas(api);
     let factory = new ContractPromise(api, ABIs.factory, CAs.factory);
     const last_mint_ = await factory.query["getLastMintByAccount"](query_address, gas, account.address);
-    const numberReturn = Number(last_mint_.output.toHuman().Ok[0]);
+    const numberReturn = doFormatNumber(last_mint_.output.toHuman().Ok[0]);
     return numberReturn;
 }
 
@@ -182,11 +197,11 @@ export const unstake = async (api, account, token_type) => {
                             let balancesAfter = await getBalances(api, account);
                             let balanceAfter = balancesAfter[2];
                             if (balanceAfter > balanceBefore) {
-                                toastSuccess(`Hurray! You have unstaked and claimed ${(balanceAfter - balanceBefore).toLocaleString()} $EGGS`);
+                                toastSuccess(`Hurray! You have unstaked and claimed ${(balanceAfter - balanceBefore).toLocaleString(undefined, {maximumFractionDigits:18})} $AZERO`);
                             }
                             else {
                                 if (balancesBefore[4] > 0) {
-                                    toastError(`Ouch! All your layed $EGGS have been stolen!`);
+                                    toastError(`Ouch! All your layed $AZERO have been stolen!`);
                                 }
                                 else {
                                     toastSuccess("You've unstaked your chickens successfully!");
@@ -253,7 +268,7 @@ export const PSP34_allowance = async (api, account,  token_type) => {
     return query;
 };
 
-export const mint = async (api, account, type="random")=> {
+export const mint = async (api, account, type="random", amount)=> {
     if (!api || !account) {
         return; //Wallet and/or API not connected
     }
@@ -269,15 +284,6 @@ export const mint = async (api, account, type="random")=> {
     
         let gas = getGas(api);
         let contract = new ContractPromise(api, ABIs.factory, CAs.factory);
-    
-        let amount;
-      
-        if (type == "random") {
-            amount = 6 * (10 ** 12); // 6 AZERO: Random mint
-        }
-        else {
-            amount = 100 * (10 ** 12); // 100 AZERO: Precise fox mint
-        }
     
         amount = api.createType("Balance", amount.toLocaleString("fullwide", {useGrouping:false}));
         gas.value = amount;
@@ -318,17 +324,6 @@ export const mint = async (api, account, type="random")=> {
     
 }
 
-export const getBalance = async (api, account)=> {
-    if (!api || !account) {
-        return; //Wallet and/or API not connected
-    }
-
-    let gas = getGas(api);
-    let contract = new ContractPromise(api, ABIs.PSP22, CAs.eggs);
-    let balance_ = await contract.query["psp22::balanceOf"](query_address, gas, account.address);
-    let balance = balance_.output.toHuman().Ok;
-}
-
 export const getStaked = async (api, account)=> {
     if (!api || !account) {
         return; //Wallet and/or API not connected
@@ -355,71 +350,28 @@ export const getBalances = async (api, account)=> {
     let gas = getGas(api);
     let contract = new ContractPromise(api, ABIs.PSP34, CAs.chickens);
     let balance_ = await contract.query["psp34::balanceOf"](query_address, gas, account.address);
-    let balance = parseFloat(balance_.output.toHuman().Ok.replace(/\,/g, ""));
+    let balance = doFormatNumber(balance_.output.toHuman().Ok);
 
     let contract2 = new ContractPromise(api, ABIs.PSP34, CAs.foxes);
     let balance_2 = await contract2.query["psp34::balanceOf"](query_address, gas, account.address);
-    let balance2 = parseFloat(balance_2.output.toHuman().Ok.replace(/\,/g, ""));
+    let balance2 = doFormatNumber(balance_2.output.toHuman().Ok);
 
-    let contract3 = new ContractPromise(api, ABIs.PSP22, CAs.eggs);
-    let balance_3 = await contract3.query["psp22::balanceOf"](query_address, gas, account.address);
-    let balance3Raw = parseFloat(balance_3.output.toHuman().Ok.replace(/\,/g, ""));
-    let balance3 = parseFloat(balance3Raw) / 1e6;
-    
-
+    let { data: balance_3 } = await api.query.system.account(account.address);
+    let balance3Raw = doFormatNumber(balance_3.free.toHuman());
+    let balance3 = balance3Raw / 1e12;
 
     let contract4 = new ContractPromise(api, ABIs.staking, CAs.staking);
     let balance_4 = await contract4.query["getClaimableForFox"](query_address, gas, account.address);
-    let balance4Raw = parseFloat(balance_4.output.toHuman().Ok.replace(/\,/g, ""));
-    let balance4 = parseFloat(balance4Raw) / 1e6;
+    let balance4Raw = doFormatNumber(balance_4.output.toHuman().Ok);
+    let balance4 = balance4Raw / 1e12;
 
     let contract5 = new ContractPromise(api, ABIs.staking, CAs.staking);
-    let balance_5 = await contract5.query["getClaimableEggs"](query_address, gas, account.address);
-    let balance5Raw = parseFloat(balance_5.output.toHuman().Ok.replace(/\,/g, ""));
-    let balance5 = parseFloat(balance4Raw) / 1e6;
+    let balance_5 = await contract5.query["getClaimableAzero"](query_address, gas, account.address);
+    let balance5Raw = doFormatNumber(balance_5.output.toHuman().Ok);
+    let balance5 = balance5Raw / 1e12;
 
     let balances = [balance, balance2, balance3, balance4, balance5];
 
     return balances;
-
-}
-
-
-export const transfer = async (api, account)=> {
-    if (!api || !account) {
-        return; //Wallet and/or API not connected
-    }
-
-    let gas = getGas(api);
-
-    let contract = new ContractPromise(api, ABIs.PSP22, CAs.eggs);
-
-    let amount = 10 * (10 ** 12); // 10 AZERO
-    amount = api.createType("Balance", amount.toLocaleString("fullwide", {useGrouping:false}));
-
-    //to make the method payable (with AZERO), you use gas.value = amount
-
-    await contract.tx["psp22::transfer"](gas, query_address, amount, []).signAndSend(
-        account.address,
-        { signer: account.signer },
-        async ({ events = [], status }) => {
-            if (status.isInBlock) {
-                //in block
-            } else if (status.isFinalized) {
-                let failed = false;
-                events.forEach(({ phase, event: { data, method, section } }) => {
-                    if (method == "ExtrinsicFailed") {
-                        failed = true;
-                    }
-                });
-                if (failed == true) {
-                    //failed
-                }
-                else {
-                    //completed
-                }
-            }
-        }
-    );
 
 }

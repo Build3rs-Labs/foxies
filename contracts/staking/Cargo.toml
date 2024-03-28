@@ -7,7 +7,7 @@ homepage = "https://github.com/Build3rs-Labs/foxies"
 repository = "https://github.com/Build3rs-Labs/foxies"
 license = "Apache-2.0"
 readme = "README.md"
-description = "Staking contract to stake chicken and earn $EGGS"
+description = "Staking contract to stake chicken and earn $AZERO"
 exclude = [ ".github/*" ]
 
 [dependencies]

@@ -5,7 +5,7 @@ import { ApiPromise, WsProvider } from "@polkadot/api";
 import { randomAsU8a } from "@polkadot/util-crypto";
 import React, { useEffect, useState, useRef } from "react";
 import { useWallet } from "useink";
-import { formatWallet, CallContract, mint, getMintedNftCount, getFoxMints, getLastMint } from "../functions/index";
+import { mint, getMintedNftCount, getFoxMints, getMintPrices } from "../functions/index";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Image from "next/image";
@@ -57,10 +57,12 @@ export default function Mint() {
 
   const [api, setAPI] = useState(null);
 
+  const [ mintPrice, setMintPrice ] = useState([0, 0]);
+
   const el = React.useRef(null);
 
   const handleMint = async (api, account, type) => {
-    await mint(api, account, type);
+    await mint(api, account, type, (type == "random")?mintPrice[0] * (10 ** 12):mintPrice[1] * (10 ** 12));
     const nftCountValue = await getMintedNftCount(api);
     setNftLeft(15000 - nftCountValue);
     let mints = await getFoxMints(api, account);
@@ -75,6 +77,10 @@ export default function Mint() {
       const nftCountValue = await getMintedNftCount(_api);
 
       setNftLeft(15000 - nftCountValue);
+
+      let mintCosts = await getMintPrices(_api);
+
+      setMintPrice(mintCosts);
 
       let mints = await getFoxMints(_api, account);
       setFoxMints(mints);
@@ -131,9 +137,12 @@ export default function Mint() {
                       <img src="/fox.png" className={"nft-icons"} alt="logo"/>
                     </div>
                   </div>
-                  <h1 className="text-white text-4xl pt-8 pb-6">{nftLeft.toLocaleString()} NFTs left</h1>
+                  <h1 className="text-white text-4xl pt-5 pb-3">{nftLeft.toLocaleString()} NFTs left</h1>
+                  <span className="d-block mt-0 mb-3" style={{color:'#FFFFFF', fontSize:16}}>
+                    ⓘ Random mints cost {mintPrice[0]} AZERO and direct Fox mints cost {mintPrice[1]} AZERO
+                  </span>
                   <div className="flex z-10">
-                    <button  onClick={()=>handleMint(api, account, "random")} className="mx-2  border-[2px] border-black bg-white rounded-lg text-2xl lg:text-3xl  text-black px-4 py-1 flex items-center">
+                    <button onClick={()=>handleMint(api, account, "random")} className="mx-2  border-[2px] border-black bg-white rounded-lg text-2xl lg:text-3xl  text-black px-4 py-1 flex items-center">
                       <span className=" font-VT323">
                         Random mint!
                         <span className="ml-1">
