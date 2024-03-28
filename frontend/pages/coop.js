@@ -26,8 +26,8 @@ export default function Coop() {
 
   useEffect(() => {
     const typed = new Typed(el.current, {
-      strings: [`Here, you can stake your NFTs to earn $EGGS rewards!<br/>
-      $EGGS can be used to mint more NFTs<br/>and increase your chances of getting a fox!<br/>
+      strings: [`Here, you can stake your NFTs to earn $AZERO rewards!<br/>
+      $AZERO can be used to mint more NFTs<br/>and increase your chances of getting a fox!<br/>
       They can also be sold for profit.`],
       typeSpeed: 10,
       showCursor: false
@@ -98,6 +98,7 @@ export default function Coop() {
   }
 
   const handleStake = async (animal) => {
+
     try {
 
       wsProvider = new WsProvider('wss://ws.test.azero.dev');
@@ -114,6 +115,24 @@ export default function Coop() {
   };
   
   const handleUnstake = async (animal) => {
+
+    let allowedToStake = true;
+
+    if (animal == "foxes") {
+      if (staked[1] == 0) {
+        allowedToStake = false;
+      }
+    }
+    else {
+      if (staked[0] == 0) {
+        allowedToStake = false;
+      }
+    }
+    
+    if (allowedToStake == false) {
+      return false;
+    }
+
     try {
 
       wsProvider = new WsProvider('wss://ws.test.azero.dev');
