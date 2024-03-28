@@ -27,13 +27,12 @@ There are 2 types of playable characters :
 
 The following contracts exist within this project:
 
-- Eggs_Contract
 - Chickens Contract
 - Foxes Contract
 - Staking_Contract
 - Factory Contract
 
-## Code standar
+## Code standard
 
 ink! is an EDSL based on Rust, therefore, we use clippy and rustfmt to make sure code is in compliance with Rust idioms.
 
@@ -86,9 +85,5 @@ Careful of your input into the u128 fields for max supply for both contracts, kn
 4. Set the address of the chickens and foxes contracts within the Factory using the set_chickens_nft_address() and set_foxes_nft_address() methods respectively.
 
 5. Deploy the Staking contract, providing useful fields.
-
-6. Deploy the Eggs contract, while providing deployed staking contract address as one of the required call arguments. (Name: Eggs, Symbol: EGGS, decimals: 6).
-
-7. Set the address of $EGGS contract within the staking contract using the set_eggs_address() method.
 
 8. Voila! Deployment done! Make sure to provide all other arguments appropriately.

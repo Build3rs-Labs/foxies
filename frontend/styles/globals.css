@@ -122,9 +122,29 @@ button:active {
   width:30px;
 }
 
+.claimable-btn {
+  display:inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0px 10px 0px 10px;
+  border-radius: 20px;
+  background-color: black;
+  font-size: 25px;
+  color:#FFFFFF;
+  margin-left:5px;
+}
+
+.unstake-btn {
+  flex-direction: row!important;
+  display: flex;
+  align-items: center!important;
+  justify-content: space-between!important;
+  padding:5px 10px 5px 10px;
+}
+
 @media(max-width:800px) {
   .nft-icons {
-    width:35vw;
+    width:30vw;
     height:auto
   }
 }

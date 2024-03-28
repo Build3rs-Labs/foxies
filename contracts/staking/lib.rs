@@ -30,10 +30,6 @@ mod staking {
 
     use psp34::PSP34;
 
-    use psp22::PSP22;
-
-    use psp22::PSP22Mintable;
-
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub enum StakingError {
@@ -59,8 +55,8 @@ mod staking {
         NotAFoxHolder,
         /// Thrown when an account hasn't staked any NFT
         HasNotStaked,
-        /// Thrown when a failure happens when trying to claim eggs from vault
-        UnableToClaimEggs,
+        /// Thrown when a failure happens when trying to claim AZERO from vault
+        UnableToClaimAzero,
         /// Thrown when a mint fails
         MintFailed
     }
@@ -69,8 +65,6 @@ mod staking {
     pub struct Staking {
         // Contract address of factory contract
         factory: Option<AccountId>,
-        // Contract address of eggs token
-        eggs: Option<AccountId>,
         // Contract address of foxes NFT collection
         foxes: Option<AccountId>,
         // Contract address of chickens NFT collection
@@ -91,26 +85,25 @@ mod staking {
         // UNIX timestamp in milliseconds from last time account
         // initiated a fox staking schedule
         last_foxes_stake_time: Mapping<AccountId, u64>,
-        // Amount of eggs mintable per chicken per day
-        daily_eggs_per_chicken: u128,
-        // Maximum number of egg rewards that can be generated per account
+        // Amount of azero mintable per chicken per day
+        daily_azero_per_chicken: u128,
+        // Maximum number of azero rewards that can be generated per account
         // regardless of duration
         cap_per_account: u128,
         // Address of the manager
         owner: Option<AccountId>,
         // Get address of person staking a fox
         fox_staked_by: Mapping<u128, AccountId>,
-        // Get address of fox who last stole all EGGS from a given account
-        eggs_last_stolen_by: Mapping<AccountId, Option<AccountId>>
+        // Get address of fox who last stole all azero from a given account
+        azero_last_stolen_by: Mapping<AccountId, Option<AccountId>>
     }
 
     impl Staking {
         #[ink(constructor)]
-        pub fn new(factory:AccountId, foxes: AccountId, chickens: AccountId, daily_eggs_per_chicken: u128, cap_per_account: u128) -> Self {
+        pub fn new(factory:AccountId, foxes: AccountId, chickens: AccountId, daily_azero_per_chicken: u128, cap_per_account: u128) -> Self {
             let owner = Self::env().caller();
             Self {
                 factory: Some(factory),
-                eggs: None,
                 chickens: Some(chickens),
                 foxes: Some(foxes),
                 owner: Some(owner),
@@ -118,28 +111,18 @@ mod staking {
                 number_of_foxes_staked: Default::default(),
                 last_foxes_stake_time: Default::default(),
                 staked_chickens: Default::default(),
-                daily_eggs_per_chicken,
+                daily_azero_per_chicken,
                 cap_per_account,
                 last_chickens_stake_time: Default::default(),
                 number_of_chickens_staked: Default::default(),
                 fox_staked_by: Default::default(),
-                eggs_last_stolen_by: Default::default()
+                azero_last_stolen_by: Default::default()
             }
         }
         
         #[ink(message)]
         pub fn get_account_id(&self) -> AccountId {
             Self::env().account_id()
-        }
-
-        // Set eggs contract address: Only manager can call this method
-        #[ink(message)]
-        pub fn set_eggs_address(&mut self, address: AccountId) -> Result<(), StakingError> {
-            if self.env().caller() != self.owner.unwrap() {
-                return Err(StakingError::OnlyOwnerAllowed);
-            }
-            self.eggs = Some(address);
-            Ok(())
         }
 
         // Stake a chicken of given Id from chickens NFT collection
@@ -255,12 +238,12 @@ mod staking {
         // Get address of fox who last stole all EGGS from a given account
         #[ink(message)]
         pub fn get_last_fox_for_stolen_eggs(&self, account: AccountId) -> Option<AccountId> {
-            self.eggs_last_stolen_by.get(account).unwrap_or(None)
+            self.azero_last_stolen_by.get(account).unwrap_or(None)
         }
 
         // Get number of potentially claimable eggs by chicken staker
         #[ink(message)]
-        pub fn get_claimable_eggs(&self, account: AccountId) -> u128 {
+        pub fn get_claimable_azero(&self, account: AccountId) -> u128 {
             
             // Get count of stakes
             let number_of_chickens_staked = self.number_of_chickens_staked.get(account).unwrap_or(0);
@@ -276,13 +259,17 @@ mod staking {
             let days_past:u128 = (time_past / DAYS).try_into().unwrap();
             // Number of days past -> divide difference by seconds in a day
 
-            _claimable = days_past * self.daily_eggs_per_chicken * number_of_chickens_staked;
-            // Get claimable by multiplying days past by daily eggs supposedly earned by 
+            _claimable = days_past * self.daily_azero_per_chicken * number_of_chickens_staked;
+            // Get claimable by multiplying days past by daily azero supposedly earned by 
             // Number of chickens staked
 
             if _claimable >= self.cap_per_account {
                 // Claimable rewards must not exceed earning cap per account
                 _claimable = self.cap_per_account
+            }
+
+            if _claimable >= self.env().balance() {
+                _claimable = self.env().balance();
             }
 
             _claimable
@@ -295,7 +282,7 @@ mod staking {
 
             let caller = self.env().caller(); // caller
 
-            let claimable = self.get_claimable_eggs(caller); // Get claimable eggs
+            let claimable = self.get_claimable_azero(caller); // Get claimable azero
 
             // Get number of chicken NFTs staked
             let number_of_chickens_staked = self.number_of_chickens_staked.get(caller).unwrap_or(0);
@@ -324,21 +311,21 @@ mod staking {
                     let amount_for_account = (80 * claimable) / 100;
 
                     // Mint 80% to caller
-                    let _ = self.mint_and_transfer_eggs_to_account(caller, amount_for_account);
-                    // Mint 20% to fox eggs vault
-                    let _ = self.mint_and_transfer_eggs_to_account(Self::env().account_id(), amount_for_pool);
+                    let _ = self.mint_and_transfer_azero_to_account(caller, amount_for_account);
+                    // Mint 20% to fox vault
+                    let _ = self.mint_and_transfer_azero_to_account(Self::env().account_id(), amount_for_pool);
                 }
                 else { // Instance B
                     // Get random fox by calling factory
                     let random_fox = self.call_factory_for_random_fox_holder();
                     if random_fox == zero_account {
-                        // If no fox exists, mint all to fox eggs vault
-                        let _ = self.mint_and_transfer_eggs_to_account(Self::env().account_id(), claimable);
+                        // If no fox exists, mint all to fox vault
+                        let _ = self.mint_and_transfer_azero_to_account(Self::env().account_id(), claimable);
                     }
                     else {
                         // If a fox is returned, mint all to selected fox
-                        let _ = self.mint_and_transfer_eggs_to_account(random_fox, claimable);
-                        self.eggs_last_stolen_by.insert(caller, &Some(random_fox));
+                        let _ = self.mint_and_transfer_azero_to_account(random_fox, claimable);
+                        self.azero_last_stolen_by.insert(caller, &Some(random_fox));
                     }
                 }
 
@@ -409,24 +396,26 @@ mod staking {
 
         }
 
-        // Get amount of eggs in foxes vault
+        // Get amount of azero in foxes vault
         #[ink(message)]
-        pub fn get_eggs_in_pool(&self) -> Balance {
-            let eggs: contract_ref!(PSP22) = self.eggs.unwrap().into();
-            eggs.balance_of(Self::env().account_id())
+        pub fn get_azero_in_pool(&self) -> Balance {
+            self.env().balance()
         }
 
-        // Get claimable amount per foxes based on amount of eggs in foxes vault
+        // Get claimable amount per foxes based on amount of azero in foxes vault
         #[inline]
         pub fn get_base_claim_per_fox(&self) -> Balance {
-            let eggs: contract_ref!(PSP22) = self.eggs.unwrap().into(); // Ref {} of eggs contract
             let foxes: contract_ref!(PSP34) = self.foxes.unwrap().into(); // Ref {} of foxes contract
-
             // Evenly distribute eggs amongst the number of fox NFT holders
-            eggs.balance_of(Self::env().account_id()) / foxes.total_supply()
+            if self.env().balance() > foxes.total_supply() {
+                self.env().balance() / foxes.total_supply()
+            }
+            else {
+                foxes.total_supply()
+            }
         }
 
-        // Determine claimable eggs for fox staker
+        // Determine claimable azero for fox staker
         #[ink(message)]
         pub fn get_claimable_for_fox(&self, account: AccountId) -> Balance {
 
@@ -455,11 +444,11 @@ mod staking {
                 _claimable += self.get_base_claim_per_fox() * rarity * days_past * 1000;
             }
 
-            if _claimable >= self.get_eggs_in_pool() {
-                _claimable = self.get_eggs_in_pool();
+            if _claimable >= self.get_azero_in_pool() {
+                _claimable = self.get_azero_in_pool();
             }
             
-            // Return potentially claimable eggs
+            // Return potentially claimable azero
             _claimable
 
         }
@@ -547,9 +536,6 @@ mod staking {
             // Ref {} foxes NFT contract
             let mut _foxes: contract_ref!(PSP34) = self.foxes.unwrap().into();
 
-            // Ref {} eggs contract
-            let mut _eggs: contract_ref!(PSP22) = self.eggs.unwrap().into();
-
             for nfts in 0..number_of_foxes_staked {
 
                 let nft_id = self.staked_foxes.get((account, u128::from(nfts))).unwrap_or(0);
@@ -566,9 +552,9 @@ mod staking {
             }
 
             if claimable > 0 {
-                if _eggs.transfer(account, claimable, vec![]).is_err() {
-                    // Transfer claimable eggs to fox holder
-                    return Err(StakingError::UnableToClaimEggs);
+                // Transfer claimable azero to fox holder
+                if self.env().transfer(account, claimable).is_err() {
+                    return Err(StakingError::UnableToClaimAzero);
                 }
             }
             // Reinitialize last stake time and number of stakes to 0
@@ -578,32 +564,15 @@ mod staking {
             Ok(())
         }
 
-        // Get the balance of an egg holder
-        #[ink(message)]
-        pub fn get_eggs_balance(&mut self, account: AccountId) -> Balance {
-
-            let mut _eggs: contract_ref!(PSP22) = self.eggs.unwrap().into(); // Ref {} eggs contract
-
-            // Balance of account $EGGS
-            _eggs.balance_of(account)
-
-        }
-
         #[inline]
-        pub fn mint_and_transfer_eggs_to_account(&mut self, account: AccountId, amount: u128) -> Result<(), StakingError> {
+        pub fn mint_and_transfer_azero_to_account(&mut self, account: AccountId, amount: u128) -> Result<(), StakingError> {
 
-            let mut eggs_mintable: contract_ref!(PSP22Mintable) = self.eggs.unwrap().into(); // Ref {} eggs contract
-
-            let mut eggs_data: contract_ref!(PSP22) = self.eggs.unwrap().into(); // Ref {} eggs contract
-
-            if eggs_mintable.mint(amount).is_err() {
-                return Err(StakingError::MintFailed);
+            if account == self.env().account_id() {
+                return Ok(());
             }
-            else {
-                if account != Self::env().account_id() {
-                    if eggs_data.transfer(account, amount, vec![]).is_err() {
-                        return Err(StakingError::TransferFailed);
-                    }
+            if account != Self::env().account_id() {
+                if self.env().transfer(account, amount).is_err() {
+                    return Err(StakingError::TransferFailed);
                 }
             }
 

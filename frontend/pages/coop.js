@@ -26,8 +26,8 @@ export default function Coop() {
 
   useEffect(() => {
     const typed = new Typed(el.current, {
-      strings: [`Here, you can stake your NFTs to earn $EGGS rewards!<br/>
-      $EGGS can be used to mint more NFTs<br/>and increase your chances of getting a fox!<br/>
+      strings: [`Here, you can stake your NFTs to earn $AZERO rewards!<br/>
+      $AZERO can be used to mint more NFTs<br/>and increase your chances of getting a fox!<br/>
       They can also be sold for profit.`],
       typeSpeed: 10,
       showCursor: false
@@ -98,6 +98,7 @@ export default function Coop() {
   }
 
   const handleStake = async (animal) => {
+
     try {
 
       wsProvider = new WsProvider('wss://ws.test.azero.dev');
@@ -114,6 +115,24 @@ export default function Coop() {
   };
   
   const handleUnstake = async (animal) => {
+
+    let allowedToStake = true;
+
+    if (animal == "foxes") {
+      if (staked[1] == 0) {
+        allowedToStake = false;
+      }
+    }
+    else {
+      if (staked[0] == 0) {
+        allowedToStake = false;
+      }
+    }
+    
+    if (allowedToStake == false) {
+      return false;
+    }
+
     try {
 
       wsProvider = new WsProvider('wss://ws.test.azero.dev');
@@ -172,9 +191,23 @@ export default function Coop() {
               </span>
             </span>
           </button>
-          <button onClick={()=>handleUnstake(animalType)} className="relative mx-auto mt-4 border-2 border-black bg-white rounded-full text-2xl lg:text-3xl text-black px-4 flex items-center">
+          <button onClick={()=>handleUnstake(animalType)} className="unstake-btn relative mx-auto mt-4 border-2 border-black bg-white rounded-full text-2xl lg:text-3xl text-black px-4 flex items-center">
             <span className="relative font-VT323">
-              Unstake
+              Unstake{(animalType == "foxes")?
+                <>
+                  {(balances[3] == 0)?
+                  null:
+                  <div className="claimable-btn">{balances[3].toLocaleString(undefined, {maximumFractionDigits:12})}</div>
+                  }
+                </>
+                :
+                <>
+                  {(balances[4] == 0)?
+                  null:
+                  <div className="claimable-btn">{balances[4].toLocaleString(undefined, {maximumFractionDigits:12})}</div>
+                  }
+                </>
+                }
               <span className="ml-2">
                 &gt;
               </span>
@@ -244,7 +277,7 @@ export default function Coop() {
 
                     {!account ? <p className="text-white text-3xl pt-2">First, connect your wallet</p> : renderStakeButtons("chickens")}
                     <button className="relative mx-auto mt-3 border-2 border-black bg-white rounded-lg text-2xl lg:text-3xl text-black px-8 flex items-center">
-                      <span className="relative font-VT323">Your eggs balance is {balances[2].toLocaleString()} $EGGS.</span>
+                      <span className="relative font-VT323">Your $AZERO balance is {balances[2].toLocaleString()}</span>
                     </button>
                 </div>
                 
@@ -271,7 +304,7 @@ export default function Coop() {
 
                     {!account ? <p className="text-white text-3xl pt-2">First, connect your wallet</p> : renderStakeButtons("foxes")}
                     <button className="relative mx-auto mt-3 border-2 border-black bg-white rounded-lg text-2xl lg:text-3xl text-black px-8 flex items-center">
-                      <span className="relative font-VT323">Your eggs balance is {balances[2].toLocaleString()} $EGGS.</span>
+                      <span className="relative font-VT323">Your $AZERO balance is {balances[2].toLocaleString()}</span>
                     </button>
                 </div>
                 
