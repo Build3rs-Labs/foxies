@@ -73,6 +73,9 @@ export default function Mint() {
   const el = React.useRef(null);
 
   const handleMint = async (api, account, type) => {
+    if (nftLeft == 0) {
+      return false;
+    }
     await mint(api, account, type, (type == "random")?mintPrice[0] * (10 ** 12):mintPrice[1] * (10 ** 12));
     const nftCountValue = await getMintedNftCount(api);
     setNftLeft(15000 - nftCountValue);
@@ -206,7 +209,7 @@ export default function Mint() {
                   <h1 className="text-white text-4xl mt-1 pb-3">{nftLeft.toLocaleString()} NFTs left</h1>
 
                   <span className="d-block mt-4 mb-3" style={{color:'#FFFFFF', fontSize:16}}>
-                    ⓘ Random mints cost {mintPrice[0]} AZERO and direct Fox mints cost {mintPrice[1]} AZERO
+                    ⓘ Random mints cost {mintPrice[0]} AZERO and Direct fox mints cost {mintPrice[1]} AZERO
                   </span>
                   <div className="flex z-10">
                     <button onClick={()=>handleMint(api, account, "random")} className="mx-2  border-[2px] border-black bg-white rounded-full text-2xl lg:text-3xl  text-black px-4 py-1 flex items-center">
