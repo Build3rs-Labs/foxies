@@ -4,6 +4,7 @@ import { ApiPromise, WsProvider } from "@polkadot/api";
 import { formatWallet, getBalances } from "../functions/index";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from 'next/navigation';
 
 import Sound from '@/components/Sound';
 
@@ -18,7 +19,7 @@ export const ConnectWallet = ({ children }) => {
   var wsProvider;
 
   useEffect(() => {
-    
+
     let connect = async () => {
       let wsProvider = new WsProvider("wss://ws.test.azero.dev");
       let _api = await ApiPromise.create({ provider: wsProvider });
@@ -112,6 +113,8 @@ export const ConnectWallet = ({ children }) => {
 export default function HeaderCoop() {
   const [isNavOpen, setIsNavOpen] = useState(false);
 
+  const pathname = usePathname();
+
   useEffect(() => {
     if (isNavOpen) {
       document.body.style.height = "100vh";
@@ -168,6 +171,10 @@ export default function HeaderCoop() {
               <Link href="/coop">COOP</Link>
             </li>
 
+            <li className="my-8 hover:underline">
+              <Link href="/lastnight">RECAP</Link>
+            </li>
+
             <li className=" my-8 flex">
               <a href="https://twitter.com/foxiesgame" target="blank"  className="px-4 mt-2">
                 <Image src="/twitter.png" width={35} alt="twitter" height={35} />
@@ -190,11 +197,6 @@ export default function HeaderCoop() {
 
       <div className=" w-full justify-between items-end mx-8 pt-8 relative hidden lg:flex">
         <div className="flex">
-          <Link href="/mint">
-            <button className="mt-1 mx-auto h-11  bg-white rounded-full text-2xl text-black px-6 flex items-center">
-              <span className=" ">Bring me to the mint !</span>
-            </button>
-          </Link>
 
           <a href="https://twitter.com/foxiesgame" target="blank"  className="px-4 ml-4 mt-2">
             <Image src="/twitter.png" alt="twitter" width={35} height={35} />
@@ -205,6 +207,22 @@ export default function HeaderCoop() {
           </a>
 
           <Sound/>
+
+          <Link href="/mint">
+            <button className={`mt-1 mx-auto h-11 ms-5 bg-white rounded-full text-2xl text-black px-6 flex items-center`}>
+              <span className=" ">Bring me to the mint !</span>
+            </button>
+          </Link>
+
+          {(pathname != '/lastnight')?
+          <Link href="/lastnight">
+            <button className="mt-1 mx-auto h-11 ms-3 secondary rounded-full text-2xl text-black px-6 flex items-center">
+              <span className=" ">Last night recap !</span>
+            </button>
+          </Link>
+          :null
+          }
+          
 
         </div>
 

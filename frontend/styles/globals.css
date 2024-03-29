@@ -55,6 +55,105 @@ button:active {
   opacity:1
 }
 
+.lastnight {
+  position:absolute;
+  top:0px;
+  left:0px;
+  width:100vw;
+  height:100vh;
+  z-index:1000;
+  padding:20px;
+  padding-top: 100px;
+  overflow-y:auto;
+}
+
+.bars-h {
+  width:33.33333333333333%;
+  display: inline-block;
+  box-sizing: border-box;
+  padding:30px;
+}
+
+.msg {
+  width:100%;
+  border-radius:10px;
+  border:1px solid black;
+  padding:20px;
+  background-color: white;
+  text-align: left;
+}
+
+.farmer-right {
+  position:fixed;
+  bottom:5%;
+  right:10%;
+  z-index:1000;
+  opacity:1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.farmer-right-alt {
+  position:fixed;
+  top:30%;
+  right:10%;
+  z-index:1000;
+  opacity:1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.wooden {
+  width:35vw;
+  background-image: url('/wooden-box.png');
+  background-size: 100% 100%;
+  box-sizing: border-box;
+  padding:30px;
+}
+
+.mobile {
+  display:none;
+}
+
+.not-mobile {
+  display:block;
+}
+
+.game-stats {
+  border-radius:10px;
+  border:1px solid black;
+  width:25vw;
+  position: relative;
+  background-color: #E4F1F8;
+}
+
+.bluey {
+  background-color:#82A5F3
+}
+
+.azero-ticker-small {
+  width:16px;
+  height:16px;
+}
+
+.azero-ticker-tiny {
+  width:22px;
+  height:22px;
+}
+
+.azero-ticker-large {
+  width:25px;
+  height:25px;
+}
+
+.farmer-img {
+  position:relative;
+  top:-15px;
+  margin-bottom: -15px;
+}
+
 .minter {
   z-index:2000;
   position:fixed;
@@ -73,7 +172,7 @@ button:active {
   width:100vw;
   padding-top:80px;
   opacity:0;
-  display:flex;
+  display:none;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
@@ -87,7 +186,7 @@ button:active {
   width:100vw;
   padding-top:80px;
   opacity:0;
-  display:flex;
+  display:none;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
@@ -108,14 +207,29 @@ button:active {
 }
 
 .nft-icons {
-  width:12vw;
+  width:13vw;
   height:auto
+}
+
+.flexy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .bubble-up {
   opacity:0;
   transform:translateY(20px);
   animation:bubbleIn 0.5s forwards ease-in-out;
+}
+
+.icon-nfts {
+  width:40px;
+  height:auto;
+}
+
+.flexicon {
+  display: inline-block;
 }
 
 .arrows {
@@ -132,6 +246,156 @@ button:active {
   font-size: 25px;
   color:#FFFFFF;
   margin-left:5px;
+}
+
+.heart {
+  width:40px;
+  height:40px;
+  position: relative;
+  left:25px;
+  margin-left: -25px;
+  z-index:2000;
+}
+
+.pixel-corners,
+.pixel-corners--wrapper {
+  clip-path: polygon(0px calc(100% - 6px),
+    3px calc(100% - 6px),
+    3px calc(100% - 3px),
+    6px calc(100% - 3px),
+    6px 100%,
+    calc(100% - 6px) 100%,
+    calc(100% - 6px) calc(100% - 3px),
+    calc(100% - 3px) calc(100% - 3px),
+    calc(100% - 3px) calc(100% - 6px),
+    100% calc(100% - 6px),
+    100% 6px,
+    calc(100% - 3px) 6px,
+    calc(100% - 3px) 3px,
+    calc(100% - 6px) 3px,
+    calc(100% - 6px) 0px,
+    6px 0px,
+    6px 3px,
+    3px 3px,
+    3px 6px,
+    0px 6px);
+  position: relative;
+}
+.pixel-corners {
+  border: 2px solid transparent;
+}
+.pixel-corners--wrapper {
+  width: fit-content;
+  height: fit-content;
+}
+.pixel-corners--wrapper .pixel-corners {
+  display: block;
+  clip-path: polygon(3px 6px,
+    6px 6px,
+    6px 3px,
+    calc(100% - 6px) 3px,
+    calc(100% - 6px) 6px,
+    calc(100% - 3px) 6px,
+    calc(100% - 3px) calc(100% - 6px),
+    calc(100% - 6px) calc(100% - 6px),
+    calc(100% - 6px) calc(100% - 3px),
+    6px calc(100% - 3px),
+    6px calc(100% - 6px),
+    3px calc(100% - 6px));
+}
+.pixel-corners::after,
+.pixel-corners--wrapper::after {
+  content: "";
+  position: absolute;
+  clip-path: polygon(0px calc(100% - 6px),
+    3px calc(100% - 6px),
+    3px calc(100% - 3px),
+    6px calc(100% - 3px),
+    6px 100%,
+    calc(100% - 6px) 100%,
+    calc(100% - 6px) calc(100% - 3px),
+    calc(100% - 3px) calc(100% - 3px),
+    calc(100% - 3px) calc(100% - 6px),
+    100% calc(100% - 6px),
+    100% 6px,
+    calc(100% - 3px) 6px,
+    calc(100% - 3px) 3px,
+    calc(100% - 6px) 3px,
+    calc(100% - 6px) 0px,
+    6px 0px,
+    6px 3px,
+    3px 3px,
+    3px 6px,
+    0px 6px,
+    0px 50%,
+    3px 50%,
+    3px 6px,
+    6px 6px,
+    6px 3px,
+    calc(100% - 6px) 3px,
+    calc(100% - 6px) 6px,
+    calc(100% - 3px) 6px,
+    calc(100% - 3px) calc(100% - 6px),
+    calc(100% - 6px) calc(100% - 6px),
+    calc(100% - 6px) calc(100% - 3px),
+    6px calc(100% - 3px),
+    6px calc(100% - 6px),
+    3px calc(100% - 6px),
+    3px 50%,
+    0px 50%);
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #000000;
+  display: block;
+  pointer-events: none;
+}
+.pixel-corners::after {
+  margin: -3px;
+}
+
+.loader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  z-index:1
+}
+
+.loader-bar {
+  border-radius: 30px;
+  width:180px;
+  max-width:40vw;
+  height:25px;
+  background-color: white;
+  box-sizing: border-box;
+  z-index:1
+}
+
+.loader-progress {
+  background-color: #E2BE70;
+  width:0%;
+  height:25px;
+}
+
+.game-stats-text {
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+}
+
+.centralized {
+  justify-content: center;
+  align-items: center;
+}
+
+.underline {
+  text-decoration: underline;
+}
+
+.secondary {
+  background-color: #EDBF8E!important;
 }
 
 .unstake-btn {
@@ -186,5 +450,33 @@ button:active {
   }
   to {
     opacity:0
+  }
+}
+
+.block-parent {
+  display: flex;
+}
+
+@media(max-width:900px) {
+  .farmer-right {
+    display: none;
+  }
+  .farmer-right-alt {
+    display: none;
+  }
+  .mobile {
+    display: block;
+  }
+  .not-mobile {
+    display: none;
+  }
+  .bars-h {
+    width:100%;
+  }
+  .block-parent {
+    display: block!important;
+  }
+  .block-small {
+    width:100%
   }
 }

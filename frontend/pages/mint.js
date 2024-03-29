@@ -5,7 +5,7 @@ import { ApiPromise, WsProvider } from "@polkadot/api";
 import { randomAsU8a } from "@polkadot/util-crypto";
 import React, { useEffect, useState, useRef } from "react";
 import { useWallet } from "useink";
-import { mint, getMintedNftCount, getFoxMints, getMintPrices } from "../functions/index";
+import { mint, getMintedNftCount, getFoxMints, getMintPrices, gameStats } from "../functions/index";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Image from "next/image";
@@ -28,21 +28,35 @@ export default function Mint() {
 
   const [foxMints, setFoxMints] = useState(0);
 
+  const [ stats, setGameStats ] = useState([0, 0, 0, 0, 0]);
+
   useEffect(() => {
     const typed = new Typed(el.current, {
       strings: [`Welcome to the world of Foxies! 🌎
       <br/>
-      Chickens peacefully produce $EGGS 🥚
+      Chickens peacefully produce $AZERO 🥚
       <br/>
-      Foxes are sneaky, they steal $EGGS 🥚`],
+      Foxes are sneaky, they steal $AZERO 🥚`],
       typeSpeed: 10,
       showCursor: false
     });
 
     const timing = setTimeout(()=>{
-      document.getElementsByClassName("farmer")[0].style.animation = 'exit 2s ease-in-out forwards';
-      document.getElementsByClassName("minter")[0].style.animation = 'entrance 2s ease-in-out forwards';
-    }, 7000);
+      try {
+        document.getElementsByClassName("farmer")[0].style.animation = 'exit 2s ease-in-out forwards';
+        document.getElementsByClassName("farmer-right")[0].style.animation = 'exit 2s ease-in-out forwards';
+        document.getElementsByClassName("minter")[0].style.animation = 'entrance 2s ease-in-out forwards';
+        document.getElementsByClassName("learn")[0].style.animation = 'exit 2s ease-in-out forwards';
+        let timeout = setTimeout(()=>{
+          try {
+            document.getElementsByClassName("learn")[0].remove();
+            clearTimeout(timeout);
+          }
+          catch(error){}
+        }, 2000);
+      }
+      catch (error) {}
+    }, 10000);
 
     return () => {
       // Destroy Typed instance during cleanup to stop animation
@@ -62,6 +76,9 @@ export default function Mint() {
   const el = React.useRef(null);
 
   const handleMint = async (api, account, type) => {
+    if (nftLeft == 0) {
+      return false;
+    }
     await mint(api, account, type, (type == "random")?mintPrice[0] * (10 ** 12):mintPrice[1] * (10 ** 12));
     const nftCountValue = await getMintedNftCount(api);
     setNftLeft(15000 - nftCountValue);
@@ -71,9 +88,16 @@ export default function Mint() {
 
   useEffect(() => {
     let connect = async () => {
+
       let wsProvider = new WsProvider("wss://ws.test.azero.dev");
       let _api = await ApiPromise.create({ provider: wsProvider });
+
       setAPI(_api);
+
+      const status = await gameStats(_api);
+
+      setGameStats(status);
+
       const nftCountValue = await getMintedNftCount(_api);
 
       setNftLeft(15000 - nftCountValue);
@@ -105,24 +129,63 @@ export default function Mint() {
         <div className="">
 
             <div className="farmer">
-                <div className="">
-                  <div
-                    style={{padding:30, fontSize:20}}
-                    className={`max-w-[100%] px-10 py-6 mr-2 lg:mr-0
-                    text-center rounded-full bubble-up ${styles.bubble} ${styles["bubble-bottom-left"]}`}
-                  >
-                    <div ref={el}></div>
-                  </div>
+              <div className="">
+                <div
+                  style={{padding:30, fontSize:20}}
+                  className={`max-w-[100%] px-10 py-6 mr-2 lg:mr-0
+                  text-center rounded-full bubble-up ${styles.bubble} ${styles["bubble-bottom-left"]}`}
+                >
+                  <div ref={el}></div>
                 </div>
-                <div className="bottom-20 lg:right-1/2">
-                  <Image
-                    src="/farmer1.png"
-                    width={150}
-                    height={600}
-                    alt="logo"
-                    className="mx-4"
-                  />
+              </div>
+              <div className="bottom-20 lg:right-1/2">
+                <Image
+                  src="/farmer1.png"
+                  width={150}
+                  height={600}
+                  alt="logo"
+                  className="mx-4"
+                />
+              </div>
+            </div>
+
+            <div className="farmer-right">
+              <div className="">
+                <div
+                  style={{padding:'20px 30px 20px 30px', fontSize:20}}
+                  className={`game-stats`}
+                >
+                  <center>
+                    <div className="game-stats-text centralized underline w-100">Game Status:</div>
+                    <div className="mt-3">
+                      <div className="game-stats-text">
+                        <span className="underline me-2">{stats[0].toLocaleString()}</span> NFTs Minted
+                      </div>
+                      <div className="game-stats-text mt-1">
+                        <span className="underline me-2">{stats[1].toLocaleString()}</span> Foxes Minted
+                      </div>
+                      <div className="game-stats-text mt-1">
+                        <span className="underline me-2">{stats[2].toLocaleString()}</span> Chickens Minted
+                      </div>
+                      <div className="game-stats-text mt-1">
+                        <span className="underline me-2">{stats[3].toLocaleString()}</span> $AZERO <img src="/azero.png" className=" mx-1 azero-ticker-small"/> Traded
+                      </div>
+                      <div className="game-stats-text mt-1">
+                        <span className="underline me-2">{stats[4].toLocaleString()}</span> $AZERO <img src="/azero.png" className=" mx-1 azero-ticker-small"/> Claimed
+                      </div>
+                    </div>
+                  </center>
                 </div>
+              </div>
+              <div className="bottom-20 lg:right-1/2">
+                <Image
+                  src="/farmer3.png"
+                  width={150}
+                  height={600}
+                  alt="logo"
+                  className="mx-4 farmer-img"
+                />
+              </div>
             </div>
 
             <div className="minter">
@@ -137,12 +200,22 @@ export default function Mint() {
                       <img src="/fox.png" className={"nft-icons"} alt="logo"/>
                     </div>
                   </div>
-                  <h1 className="text-white text-4xl pt-5 pb-3">{nftLeft.toLocaleString()} NFTs left</h1>
-                  <span className="d-block mt-0 mb-3" style={{color:'#FFFFFF', fontSize:16}}>
-                    ⓘ Random mints cost {mintPrice[0]} AZERO and direct Fox mints cost {mintPrice[1]} AZERO
+
+                  <div className="loader mt-5 pt-4 px-5">
+                    <img src="/heart.png" className="heart"/>
+                    <div className="loader-bar pixel-corners--wrapper">
+                      <div className="loader-progress pixel-corners--wrapper"
+                      style={{width:`${((15000 - nftLeft) / 15000) * 100}%`}}></div>
+                    </div>
+                  </div>
+
+                  <h1 className="text-white text-2xl mt-1 pb-3">{nftLeft.toLocaleString()} NFT{(nftLeft == 1)?"":"s"} left</h1>
+
+                  <span className="d-block px-5 mt-4 mb-3" style={{color:'#FFFFFF', fontSize:16}}>
+                    ⓘ Random mints cost {mintPrice[0]} AZERO and Direct fox mints cost {mintPrice[1]} AZERO
                   </span>
                   <div className="flex z-10">
-                    <button onClick={()=>handleMint(api, account, "random")} className="mx-2  border-[2px] border-black bg-white rounded-lg text-2xl lg:text-3xl  text-black px-4 py-1 flex items-center">
+                    <button onClick={()=>handleMint(api, account, "random")} className="mx-2  border-[2px] border-black bg-white rounded-full text-2xl lg:text-3xl  text-black px-4 py-1 flex items-center">
                       <span className=" font-VT323">
                         Random mint!
                         <span className="ml-1">
@@ -150,9 +223,9 @@ export default function Mint() {
                         </span>
                       </span>
                     </button>
-                    <button style={(foxMints < 2 && foxMints != null)?{backgroundColor:"#FFFFFF", cursor:"pointer"}:{backgroundColor:"#A2A2A2", cursor:"not-allowed"}} onClick={()=>(foxMints < 2)?handleMint(api, account, "foxes"):null} className="mx-2  border-[2px] border-black bg-white rounded-lg text-2xl lg:text-3xl  text-black px-4 py-1 flex items-center">
+                    <button style={(foxMints < 2 && foxMints != null)?{backgroundColor:"#EDBF8E", cursor:"pointer"}:{backgroundColor:"#EDBF8E99", cursor:"not-allowed"}} onClick={()=>(foxMints < 2)?handleMint(api, account, "foxes"):null} className="mx-2  border-[2px] border-black bg-white rounded-full text-2xl lg:text-3xl  text-black px-4 py-1 flex items-center">
                       <span className=" font-VT323">
-                        Mint a fox!
+                        Mint Fox!
                         <span className="ml-1">
                           &gt;
                         </span>
@@ -162,9 +235,9 @@ export default function Mint() {
                 </div>
             </div>
 
-            <div style={{position:"fixed", width:"100vw", bottom:0, left:0, zIndex: 1000}}>
+            <div style={{position:"fixed", width:"100vw", bottom:0, left:0, zIndex: 1000}} className="learn">
               <a target="_blank" rel="noreferrer noopener" href="https://medium.com/@foxiesgame/the-foxies-game-on-aleph-zero-3aed13c1b8b5">
-                <button className="mx-auto border-[2px] my-5 border-black bg-white rounded-lg text-2xl text-black px-4 flex items-center">
+                <button className="mx-auto border-[2px] my-5 border-black secondary rounded-full text-2xl text-black px-4 flex items-center">
                   <span className=" font-VT323">
                     Learn more about the game mechanics
                   </span>

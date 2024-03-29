@@ -5,8 +5,9 @@ import HeaderCoop from "@/components/HeaderCoop";
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import React, { useEffect, useState } from "react";
 import { useWallet } from "useink";
-import { getBalances, getTokenIdsForBoth, PSP34_approve, PSP34_allowance, getStaked, stake, unstake } from "../functions/index";
+import { getBalances, PSP34_approve, PSP34_allowance, getStaked, stake, unstake, shuffle } from "../functions/index";
 import { ToastContainer, toast } from "react-toastify";
+import Link from "next/link";
 import "react-toastify/dist/ReactToastify.css";
 
 import Typed from 'typed.js';
@@ -24,6 +25,26 @@ export default function Coop() {
   const [isLoading, setIsLoading] = useState(false);
   const [isFoxApproved, setIsFoxApproved] = useState(false);
 
+  const [ unstakedNFTs, setUnstakedNFTs ] = useState([]);
+
+  const [ stakedNFTs, setStakedNFTs ] = useState([]);
+
+  const dosetBalances = (balances_)=> {
+    setBalances(balances_);
+    let chickens = Array.from({length:balances_[0]}, ()=>0);
+    let foxes = Array.from({length:balances_[1]}, ()=>1);
+    let nfts = shuffle(chickens.concat(foxes));
+    setUnstakedNFTs(nfts);
+  }
+
+  const dosetStaked = (staked_)=> {
+    setStaked(staked_);
+    let chickens = Array.from({length:staked_[0]}, ()=>0);
+    let foxes = Array.from({length:staked_[1]}, ()=>1);
+    let nfts = shuffle(chickens.concat(foxes));
+    setStakedNFTs(nfts);
+  }
+
   useEffect(() => {
     const typed = new Typed(el.current, {
       strings: [`Here, you can stake your NFTs to earn $AZERO rewards!<br/>
@@ -32,12 +53,19 @@ export default function Coop() {
       typeSpeed: 10,
       showCursor: false
     });
-
-    const timing = setTimeout(()=>{
-      document.getElementsByClassName("farmer")[0].style.animation = 'exit 2s ease-in-out forwards';
-      document.getElementsByClassName("coop-chicken")[0].style.animation = 'entrance 2s ease-in-out forwards';
-    }, 8000);
   }, []);
+
+  const toggleInfo = ()=> {
+    document.getElementsByClassName("farmer")[0].style.animation = 'exit 2s ease-in-out forwards';
+    document.getElementsByClassName("coop-chicken")[0].style.display = 'flex';
+    document.getElementsByClassName("coop-fox")[0].style.display = 'flex';
+    document.getElementsByClassName("coop-chicken")[0].style.animation = 'entrance 2s ease-in-out forwards';
+    document.getElementsByClassName("farmer-right-alt")[0].style.animation = 'exit 2s ease-in-out forwards';
+    document.getElementsByClassName("mobile")[0].style.animation = 'exit 2s ease-in-out forwards';
+    setTimeout(() => {
+      document.getElementsByClassName("mobile")[0].remove();
+    }, 2000);
+  }
 
   const [isVisible, setIsVisible] = useState(true);
 
@@ -51,8 +79,6 @@ export default function Coop() {
 
   var api;
   var wsProvider;
-
-
 
   const handleApprove = async (animal) => {
 
@@ -99,32 +125,15 @@ export default function Coop() {
 
   const handleStake = async (animal) => {
 
-    try {
-
-      wsProvider = new WsProvider('wss://ws.test.azero.dev');
-      api = await ApiPromise.create({ provider: wsProvider });
-     
-      const stakeStatus = await stake(api, account, animal);
-     let result = await getBalances(api, account);
-     setBalances(result);
-     let staked = await getStaked(api, account);
-     setStaked(staked);
-    } catch (error) {
-      toast.error("Failed: " + error);
-    } 
-  };
-  
-  const handleUnstake = async (animal) => {
-
     let allowedToStake = true;
 
     if (animal == "foxes") {
-      if (staked[1] == 0) {
+      if (staked[1] >= 5) {
         allowedToStake = false;
       }
     }
     else {
-      if (staked[0] == 0) {
+      if (staked[0] >= 5) {
         allowedToStake = false;
       }
     }
@@ -138,11 +147,45 @@ export default function Coop() {
       wsProvider = new WsProvider('wss://ws.test.azero.dev');
       api = await ApiPromise.create({ provider: wsProvider });
      
+      const stakeStatus = await stake(api, account, animal);
+     let result = await getBalances(api, account);
+     dosetBalances(result);
+     let staked = await getStaked(api, account);
+     dosetStaked(staked);
+    } catch (error) {
+      toast.error("Failed: " + error);
+    } 
+  };
+  
+  const handleUnstake = async (animal) => {
+
+    let allowedToUnstake = true;
+
+    if (animal == "foxes") {
+      if (staked[1] == 0) {
+        allowedToUnstake = false;
+      }
+    }
+    else {
+      if (staked[0] == 0) {
+        allowedToUnstake = false;
+      }
+    }
+    
+    if (allowedToUnstake == false) {
+      return false;
+    }
+
+    try {
+
+      wsProvider = new WsProvider('wss://ws.test.azero.dev');
+      api = await ApiPromise.create({ provider: wsProvider });
+     
       const stakeStatus = await unstake(api, account, animal);
      let result = await getBalances(api, account);
-     setBalances(result);
+     dosetBalances(result);
      let staked = await getStaked(api, account);
-     setStaked(staked);
+     dosetStaked(staked);
     } catch (error) {
       toast.error("Failed: " + error);
     } 
@@ -157,11 +200,11 @@ export default function Coop() {
         let result = await getBalances(api, account);
 
         let staked = await getStaked(api, account);
-        setStaked(staked);
+        dosetStaked(staked);
 
         let approvalStatus = await PSP34_allowance(api, account, 'chickens');
         setIsApproved(approvalStatus);
-        setBalances(result);
+        dosetBalances(result);
         let foxApprovalStatus = await PSP34_allowance(api, account, 'foxes'); 
 
         setIsFoxApproved(foxApprovalStatus);
@@ -183,7 +226,8 @@ export default function Coop() {
     if (isAnimalApproved) {
       return (
         <>
-          <button onClick={()=>handleStake(animalType)} className="relative mx-auto mt-4 border-2 border-black bg-white rounded-full text-2xl lg:text-3xl text-black px-4 flex items-center">
+        <div style={{display:"flex", justifyContent:"space-around"}}>
+          <button onClick={()=>handleStake(animalType)} className="relative mx-2 mt-4 border-2 border-black bg-white rounded-full text-2xl lg:text-3xl text-black px-4 flex items-center">
             <span className="relative font-VT323">
               Stake now 
               <span className="ml-2">
@@ -191,28 +235,15 @@ export default function Coop() {
               </span>
             </span>
           </button>
-          <button onClick={()=>handleUnstake(animalType)} className="unstake-btn relative mx-auto mt-4 border-2 border-black bg-white rounded-full text-2xl lg:text-3xl text-black px-4 flex items-center">
+          <button onClick={()=>handleUnstake(animalType)} className="unstake-btn relative mx-2 secondary mt-4 border-2 border-black bg-white rounded-full text-2xl lg:text-3xl text-black px-4 flex items-center">
             <span className="relative font-VT323">
-              Unstake{(animalType == "foxes")?
-                <>
-                  {(balances[3] == 0)?
-                  null:
-                  <div className="claimable-btn">{balances[3].toLocaleString(undefined, {maximumFractionDigits:12})}</div>
-                  }
-                </>
-                :
-                <>
-                  {(balances[4] == 0)?
-                  null:
-                  <div className="claimable-btn">{balances[4].toLocaleString(undefined, {maximumFractionDigits:12})}</div>
-                  }
-                </>
-                }
+              Unstake 
               <span className="ml-2">
                 &gt;
               </span>
             </span>
           </button>
+        </div>
         </>
       );
     } else {
@@ -244,24 +275,64 @@ export default function Coop() {
         <div className="">
 
             <div className="farmer">
-                <div className="">
-                  <div
-                    style={{padding:30, fontSize:20}}
-                    className={`max-w-[100%] px-10 py-6 mr-2 lg:mr-0
-                    text-center rounded-full bubble-up ${styles.bubble} ${styles["bubble-bottom-left"]}`}
-                  >
-                    <div ref={el}></div>
+              <div className="">
+                <div
+                  style={{padding:30, fontSize:20}}
+                  className={`max-w-[100%] px-10 py-6 mr-2 lg:mr-0
+                  text-center rounded-full bubble-up ${styles.bubble} ${styles["bubble-bottom-left"]}`}
+                >
+                  <div ref={el}></div>
+                </div>
+              </div>
+              <div className="bottom-20 lg:right-1/2">
+                <Image
+                  src="/farmer2.png"
+                  width={150}
+                  height={600}
+                  alt="logo"
+                  className="mx-4 farmer-img"
+                />
+              </div>
+            </div>
+
+            <div className="farmer-right-alt">
+              <div className="bottom-20 lg:right-1">
+                <div className="wooden">
+                  <span className="text-2xl">STAKED</span>
+                  <div>
+                    {(stakedNFTs.length == 0)?
+                    <div style={{height:30}}>...</div>:
+                    <div style={{display:"inline-block"}}>
+                      {(stakedNFTs.map((value, index)=>{
+                        return <div key={index} style={{padding:5}} className="flexicon">
+                          <img src={`${(value == 0)?'/chicken-icon.png':'/fox-icon.png'}`} className="icon-nfts"/>
+                        </div>
+                      }))}
+                    </div>}
+                  </div>
+                  <span className="text-2xl">UNSTAKED</span>
+                  <div>
+                    {(unstakedNFTs.length == 0)?
+                    <div style={{height:50}}>...</div>:
+                    <div style={{display:"inline-block"}}>
+                      {(unstakedNFTs.map((value, index)=>{
+                        return <div key={index} style={{padding:5}} className="flexicon">
+                        <img src={`${(value == 0)?'/chicken-icon.png':'/fox-icon.png'}`} className="icon-nfts"/>
+                      </div>
+                      }))}
+                    </div>}
                   </div>
                 </div>
-                <div className="bottom-20 lg:right-1/2">
-                  <Image
-                    src="/farmer2.png"
-                    width={150}
-                    height={600}
-                    alt="logo"
-                    className="mx-4"
-                  />
+                
+                <div className="px-3">
+                  <button onClick={()=>toggleInfo()} style={{width:"100%"}} className="border-[2px] my-5 secondary border-black rounded-full text-2xl text-black px-4">
+                    <span className=" font-VT323">
+                      Stake my NFTs now!
+                    </span>
+                  </button>
                 </div>
+
+              </div>
             </div>
 
             <div className="coop-chicken">
@@ -276,9 +347,17 @@ export default function Coop() {
                     <span className="relative text-white text-2xl mt-4 font-VT323">You own {balances[0] + staked[0]} {(balances[0] + staked[0] === 1) ? "chicken" : "chickens"}. Chickens staked: {staked[0]}</span>
 
                     {!account ? <p className="text-white text-3xl pt-2">First, connect your wallet</p> : renderStakeButtons("chickens")}
-                    <button className="relative mx-auto mt-3 border-2 border-black bg-white rounded-lg text-2xl lg:text-3xl text-black px-8 flex items-center">
-                      <span className="relative font-VT323">Your $AZERO balance is {balances[2].toLocaleString()}</span>
+
+                    <button className="relative mx-auto mt-3 mb-3 w-100 border-2 border-black bg-white rounded-full text-2xl lg:text-3xl text-black px-8 flex items-center">
+                      <span className="relative font-VT323 flexy">Your balance is {balances[2].toLocaleString()} $AZERO <img src="/azero.png" className=" mx-1 azero-ticker-large"/></span>
                     </button>
+
+                    <Link href="/lastnight">
+                      <button className="relative mx-auto mt-4 border-2 border-black bluey rounded-full text-2xl lg:text-3xl text-black px-8 flex items-center">
+                        <span className="relative font-VT323 flexy">What happened last night?</span>
+                      </button>
+                    </Link>
+
                 </div>
                 
               </div>
@@ -303,14 +382,31 @@ export default function Coop() {
                     <span className="relative text-white text-2xl mt-4 font-VT323">You own {balances[1] + staked[1]} {(balances[1] + staked[1] === 1) ? "fox" : "foxes"}. Foxes staked: {staked[1]}</span>
 
                     {!account ? <p className="text-white text-3xl pt-2">First, connect your wallet</p> : renderStakeButtons("foxes")}
-                    <button className="relative mx-auto mt-3 border-2 border-black bg-white rounded-lg text-2xl lg:text-3xl text-black px-8 flex items-center">
-                      <span className="relative font-VT323">Your $AZERO balance is {balances[2].toLocaleString()}</span>
+
+                    <button className="relative mx-auto mt-3 mb-3 w-100 border-2 border-black bg-white rounded-full text-2xl lg:text-3xl text-black px-8 flex items-center">
+                      <span className="relative font-VT323 flexy">Your balance is {balances[2].toLocaleString()} $AZERO <img src="/azero.png" className=" mx-1 azero-ticker-large"/></span>
                     </button>
+
+                    <Link href="/lastnight">
+                      <button className="relative mx-auto mt-4 border-2 border-black bluey rounded-full text-2xl lg:text-3xl text-black px-8 flex items-center">
+                        <span className="relative font-VT323 flexy">What happened last night?</span>
+                      </button>
+                    </Link>
+
                 </div>
                 
               </div>
               
             </div>
+
+            <div style={{position:"fixed", width:"100vw", bottom:0, left:0, zIndex: 5000}} className="mobile">
+              <button onClick={()=>toggleInfo()} className="mx-auto border-[2px] my-5 border-black secondary rounded-full text-2xl text-black px-4 flex items-center">
+                <span className=" font-VT323">
+                  Stake my NFTs now!
+                </span>
+              </button>
+            </div>
+
           </div>
 
         <ToastContainer />

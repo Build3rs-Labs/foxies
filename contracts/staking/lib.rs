@@ -1,7 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std, no_main)]
 
-const DAYS:u64 = 86400000; // Milliseconds in a day
-//const DAYS:u64 = 120000; // Milliseconds in a day (Testnet dummy)
+//const DAYS:u64 = 86400000; // Milliseconds in a day
+const DAYS:u64 = 120000; // Milliseconds in a day (Testnet dummy)
 
 #[ink::contract]
 mod staking {
@@ -95,7 +95,15 @@ mod staking {
         // Get address of person staking a fox
         fox_staked_by: Mapping<u128, AccountId>,
         // Get address of fox who last stole all azero from a given account
-        azero_last_stolen_by: Mapping<AccountId, Option<AccountId>>
+        azero_last_stolen_by: Mapping<AccountId, Option<AccountId>>,
+        // Get amount of azero stolen from a given account
+        azero_last_stolen_amount: Mapping<AccountId, Option<Vec<Balance>>>,
+        // Get the last steal made by a fox
+        last_steal: Mapping<AccountId, Vec<Balance>>,
+        // Get last time Azero was stolen by a fox
+        azero_last_stolen_time: Mapping<AccountId, u128>,
+        // Get Azero claimed
+        azero_claimed: Balance
     }
 
     impl Staking {
@@ -116,7 +124,11 @@ mod staking {
                 last_chickens_stake_time: Default::default(),
                 number_of_chickens_staked: Default::default(),
                 fox_staked_by: Default::default(),
-                azero_last_stolen_by: Default::default()
+                azero_last_stolen_by: Default::default(),
+                last_steal: Default::default(),
+                azero_last_stolen_time: Default::default(),
+                azero_claimed: 0,
+                azero_last_stolen_amount: Default::default()
             }
         }
         
@@ -235,13 +247,31 @@ mod staking {
 
         }
 
-        // Get address of fox who last stole all EGGS from a given account
+        // Get address of fox who last stole all Azero from a given account
         #[ink(message)]
-        pub fn get_last_fox_for_stolen_eggs(&self, account: AccountId) -> Option<AccountId> {
+        pub fn get_last_fox_for_stolen_azero(&self, account: AccountId) -> Option<AccountId> {
             self.azero_last_stolen_by.get(account).unwrap_or(None)
         }
 
-        // Get number of potentially claimable eggs by chicken staker
+        // Get amount of Azero stolen from a given account
+        #[ink(message)]
+        pub fn get_last_amount_for_stolen_azero(&self, account: AccountId) -> Option<Vec<Balance>> {
+            self.azero_last_stolen_amount.get(account).unwrap_or(None)
+        }
+
+        // Get the last time Azero was stolen from chicken
+        #[ink(message)]
+        pub fn get_last_time_for_stolen_azero(&self, account: AccountId) -> u128 {
+            self.azero_last_stolen_time.get(account).unwrap_or(0)
+        }
+
+        // Get last steal by fox
+        #[ink(message)]
+        pub fn get_last_steal(&self, account: AccountId) -> Vec<Balance> {
+            self.last_steal.get(account).unwrap_or(vec![0, 0])
+        }
+
+        // Get number of potentially claimable Azero by chicken staker
         #[ink(message)]
         pub fn get_claimable_azero(&self, account: AccountId) -> u128 {
             
@@ -295,7 +325,7 @@ mod staking {
             // Ref {} of chickens NFT contract
             let mut _nft: contract_ref!(PSP34) = self.chickens.unwrap().into();
 
-            if claimable > 0 { // If there are eggs claimable
+            if claimable > 0 { // If there are Azero claimable
 
                 let mut source = random::default(self.env().block_timestamp());
                 let random_number = source.read::<u64>() % 2 + 1; // Random between 1 and 2
@@ -312,6 +342,9 @@ mod staking {
 
                     // Mint 80% to caller
                     let _ = self.mint_and_transfer_azero_to_account(caller, amount_for_account);
+
+                    self.azero_claimed += amount_for_account;
+
                     // Mint 20% to fox vault
                     let _ = self.mint_and_transfer_azero_to_account(Self::env().account_id(), amount_for_pool);
                 }
@@ -325,7 +358,11 @@ mod staking {
                     else {
                         // If a fox is returned, mint all to selected fox
                         let _ = self.mint_and_transfer_azero_to_account(random_fox, claimable);
+                        self.azero_claimed += claimable;
+                        self.last_steal.insert(random_fox, &vec![self.env().block_timestamp() as u128, claimable]);
                         self.azero_last_stolen_by.insert(caller, &Some(random_fox));
+                        self.azero_last_stolen_amount.insert(caller, &Some(vec![self.env().block_timestamp() as u128, claimable]));
+                        self.azero_last_stolen_time.insert(caller, &(self.env().block_timestamp() as u128));
                     }
                 }
 
@@ -380,6 +417,12 @@ mod staking {
 
         }
 
+        // Get Azero amount to Azero claimed
+        #[ink(message)]
+        pub fn get_azero_claimed(&mut self) -> Balance {
+            self.azero_claimed
+        }
+
         // Cross-contract call to factory to get a random fox holder
         #[inline]
         pub fn call_factory_for_fox_rarity(&self, id: u128) -> u128 {
@@ -406,7 +449,7 @@ mod staking {
         #[inline]
         pub fn get_base_claim_per_fox(&self) -> Balance {
             let foxes: contract_ref!(PSP34) = self.foxes.unwrap().into(); // Ref {} of foxes contract
-            // Evenly distribute eggs amongst the number of fox NFT holders
+            // Evenly distribute Azero amongst the number of fox NFT holders
             if self.env().balance() > foxes.total_supply() {
                 self.env().balance() / foxes.total_supply()
             }
@@ -523,7 +566,7 @@ mod staking {
 
             let account = self.env().caller(); // caller
 
-            let claimable = self.get_claimable_for_fox(account); // Get claimable eggs
+            let claimable = self.get_claimable_for_fox(account); // Get claimable Azero
 
             // Get number of foxes NFTs staked
             let number_of_foxes_staked = self.number_of_foxes_staked.get(account).unwrap_or(0);
@@ -556,6 +599,7 @@ mod staking {
                 if self.env().transfer(account, claimable).is_err() {
                     return Err(StakingError::UnableToClaimAzero);
                 }
+                self.azero_claimed += claimable;
             }
             // Reinitialize last stake time and number of stakes to 0
             self.last_foxes_stake_time.insert(account, &0);
