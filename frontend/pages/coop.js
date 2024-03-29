@@ -259,7 +259,7 @@ export default function Coop() {
                     width={150}
                     height={600}
                     alt="logo"
-                    className="mx-4"
+                    className="mx-4 farmer-img"
                   />
                 </div>
             </div>

@@ -35,6 +35,17 @@ export const getGas = (api) => {
     }; 
 }
 
+export const gameStats = async (api) => {
+    if (!api) {
+        return 2;
+    }
+    let gas = getGas(api);
+    let factory = new ContractPromise(api, ABIs.factory, CAs.factory);
+    const stats_ = await factory.query["getPlatformStatus"](query_address, gas);
+    const stats = stats_.output.toHuman().Ok;
+    return [doFormatNumber(stats[0]), doFormatNumber(stats[1]), doFormatNumber(stats[2]), doFormatNumber(stats[3]) / (10 ** 12), doFormatNumber(stats[4]) / (10 ** 12)];
+};
+
 export const getFoxMints = async (api, account) => {
     if (!api || !account) {
         return 2;
