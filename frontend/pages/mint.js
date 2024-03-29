@@ -206,7 +206,7 @@ export default function Mint() {
                     </div>
                   </div>
 
-                  <h1 className="text-white text-4xl mt-1 pb-3">{nftLeft.toLocaleString()} NFTs left</h1>
+                  <h1 className="text-white text-2xl mt-1 pb-3">{nftLeft.toLocaleString()} NFTs left</h1>
 
                   <span className="d-block mt-4 mb-3" style={{color:'#FFFFFF', fontSize:16}}>
                     ⓘ Random mints cost {mintPrice[0]} AZERO and Direct fox mints cost {mintPrice[1]} AZERO

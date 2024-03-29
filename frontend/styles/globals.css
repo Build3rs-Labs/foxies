@@ -143,7 +143,7 @@ button:active {
 }
 
 .nft-icons {
-  width:12vw;
+  width:13vw;
   height:auto
 }
 
@@ -286,7 +286,7 @@ button:active {
 
 .loader-bar {
   border-radius: 30px;
-  width:140px;
+  width:180px;
   max-width:40vw;
   height:25px;
   background-color: white;
