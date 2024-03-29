@@ -57,7 +57,7 @@ export default function Coop() {
       };
       call();
     }
-  }, [account]);
+  }, [account, stolenForFox, stolenFromChicken]);
 
   return (
     <>

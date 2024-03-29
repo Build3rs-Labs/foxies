@@ -170,6 +170,10 @@ export default function Header() {
               <Link href="/coop">COOP</Link>
             </li>
 
+            <li className="my-8 hover:underline">
+              <Link href="/lastnight">RECAP</Link>
+            </li>
+
             <li className=" my-8 flex">
               <a href="https://twitter.com/foxiesgame" target="blank"  className="px-4 mt-2">
                 <Image src="/twitter.png" width={35} alt="twitter" height={35} />
@@ -192,7 +196,7 @@ export default function Header() {
       <div className=" w-full justify-between items-end mx-8 pt-8 relative hidden lg:flex">
         <div className="flex">
           <Link href="/coop">
-            <button className="mt-1 mx-auto h-11  bg-white rounded-full text-2xl text-black px-6 flex items-center">
+            <button className="mt-1 mx-auto h-11 bluey rounded-full text-2xl text-black px-6 flex items-center">
               <span className=" ">Bring me to the coop !</span>
             </button>
           </Link>

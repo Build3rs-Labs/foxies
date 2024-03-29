@@ -201,7 +201,7 @@ export default function Mint() {
                     </div>
                   </div>
 
-                  <div className="loader mt-5 pt-4">
+                  <div className="loader mt-5 pt-4 px-5">
                     <img src="/heart.png" className="heart"/>
                     <div className="loader-bar pixel-corners--wrapper">
                       <div className="loader-progress pixel-corners--wrapper"
@@ -211,7 +211,7 @@ export default function Mint() {
 
                   <h1 className="text-white text-2xl mt-1 pb-3">{nftLeft.toLocaleString()} NFT{(nftLeft == 1)?"":"s"} left</h1>
 
-                  <span className="d-block mt-4 mb-3" style={{color:'#FFFFFF', fontSize:16}}>
+                  <span className="d-block px-5 mt-4 mb-3" style={{color:'#FFFFFF', fontSize:16}}>
                     ⓘ Random mints cost {mintPrice[0]} AZERO and Direct fox mints cost {mintPrice[1]} AZERO
                   </span>
                   <div className="flex z-10">
