@@ -205,7 +205,7 @@ export default function HeaderCoop() {
           <Sound/>
 
           <Link href="/mint">
-            <button className="mt-1 mx-auto h-11 ms-5 bg-white rounded-full text-2xl text-black px-6 flex items-center">
+            <button className={`mt-1 mx-auto h-11 ms-5 ${(pathname != '/lastnight')?'bg-white':'secondary'} rounded-full text-2xl text-black px-6 flex items-center`}>
               <span className=" ">Bring me to the mint !</span>
             </button>
           </Link>

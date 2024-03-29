@@ -64,7 +64,7 @@ export default function Coop() {
 
           <div className="lastnight">
             <div className="flex p-5 mt-5 block-parent">
-              <div className="w-1/3 mt-5 block-small">
+              <div className="w-1/3 block-small">
                 <center>
                   <span className="relative text-white text-2xl mt-4 font-VT323">You own {balances[0] + staked[0]} {(balances[0] + staked[0] === 1) ? "chicken" : "chickens"}</span>
                   <img src="/chicken.png" alt="logo" className="nft-icons mt-5 not-mobile"/>
@@ -81,7 +81,7 @@ export default function Coop() {
                   </button>
                 </center>
               </div>
-              <div className="w-1/3 mt-5 block-small">
+              <div className="w-1/3 block-small">
                 <center>
                   <span className="relative text-white text-2xl mt-4 font-VT323">You own {balances[1] + staked[1]} {(balances[1] + staked[1] === 1) ? "fox" : "foxes"}</span>
                   <img src="/fox.png" alt="logo" className="nft-icons mt-5 not-mobile"/>
