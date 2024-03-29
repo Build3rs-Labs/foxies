@@ -27,6 +27,11 @@ mod factory {
         Id
     };
 
+    use ink::env::{
+        call::{build_call, ExecutionInput, Selector},
+        DefaultEnvironment
+    };
+
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub enum FactoryError {
@@ -71,7 +76,13 @@ mod factory {
         // Account for minting fees to be sent to
         fees_account: Option<AccountId>,
         // Rewards to staking pool
-        rewards_pool: Option<AccountId>
+        rewards_pool: Option<AccountId>,
+        // A list of whitelisted callers
+        whitelisted: Mapping<AccountId, bool>,
+        // AZERO traded
+        azero_traded: u128,
+        // AZERO claimed
+        azero_claimed: u128
     }
 
     impl Factory {
@@ -90,7 +101,10 @@ mod factory {
                 direct_fox_mints: Mapping::default(),
                 azero_for_direct_fox_mints: AZERO_FOR_DIRECT_FOX_MINT,
                 fees_account: Some(fees_account),
-                rewards_pool: None
+                rewards_pool: None,
+                whitelisted: Mapping::default(),
+                azero_traded: 0,
+                azero_claimed: 0
             }
         }
 
@@ -106,6 +120,7 @@ mod factory {
                 return Err(FactoryError::OnlyOwnerAllowed);
             }
             self.rewards_pool = Some(address);
+            self.whitelisted.insert(address, &true);
             Ok(())
         }
 
@@ -116,6 +131,7 @@ mod factory {
                 return Err(FactoryError::OnlyOwnerAllowed);
             }
             self.chickens_nft_address = Some(address);
+            self.whitelisted.insert(address, &true);
             Ok(())
         }
 
@@ -126,6 +142,27 @@ mod factory {
                 return Err(FactoryError::OnlyOwnerAllowed);
             }
             self.foxes_nft_address = Some(address);
+            self.whitelisted.insert(address, &true);
+            Ok(())
+        }
+
+        // Make an address whitelisted: Only manager can call this method
+        #[ink(message)]
+        pub fn add_whitelisted(&mut self, address: AccountId, to_have:bool) -> Result<(), FactoryError> {
+            if self.env().caller() != self.owner.unwrap() {
+                return Err(FactoryError::OnlyOwnerAllowed);
+            }
+            self.whitelisted.insert(address, &to_have);
+            Ok(())
+        }
+
+        // Make an address whitelisted: Only manager can call this method
+        #[ink(message)]
+        pub fn remove_whitelisted(&mut self, address: AccountId) -> Result<(), FactoryError> {
+            if self.env().caller() != self.owner.unwrap() {
+                return Err(FactoryError::OnlyOwnerAllowed);
+            }
+            self.whitelisted.insert(address, &false);
             Ok(())
         }
 
@@ -144,13 +181,73 @@ mod factory {
             self.azero_for_direct_fox_mints
         }
 
+        #[ink(message)]
+        pub fn get_platform_status(&mut self) -> (Balance, Balance, Balance, Balance, Balance) {
+
+            let chickens_ca = self.chickens_nft_address;
+            let foxes_ca = self.foxes_nft_address;
+            let staking_ca = self.rewards_pool;
+
+            let mut found = 0;
+
+            match chickens_ca {
+                Some(_value) => {
+                    found += 1;
+                },
+                None => {},
+            };
+            match foxes_ca {
+                Some(_value) => {
+                    found += 1;
+                },
+                None => {},
+            };
+            match staking_ca {
+                Some(_value) => {
+                    found += 1;
+                },
+                None => {},
+            };
+
+            if found < 3 {
+                return (0, 0, 0, 0, 0);
+            }
+            else {
+                let chickens_nft: contract_ref!(PSP34) = chickens_ca.unwrap().into();
+                let foxes_nft: contract_ref!(PSP34) = foxes_ca.unwrap().into();
+                
+                let foxes_minted = foxes_nft.total_supply();
+                let chickens_minted = chickens_nft.total_supply();
+
+                let total_minted = chickens_minted + foxes_minted;
+
+                let azero_traded = self.azero_traded;
+
+                let azero_claimed = build_call::<DefaultEnvironment>()
+                .call(self.rewards_pool.unwrap())
+                .exec_input(ExecutionInput::new(Selector::new(ink::selector_bytes!(
+                    "get_azero_claimed"
+                ))))
+                .returns::<Balance>()
+                .try_invoke().unwrap().unwrap();
+
+                return (total_minted, foxes_minted, chickens_minted, azero_traded, azero_claimed);
+            }
+            
+        }
+
         // Gets the amount of AZERO for random mints
         #[ink(message)]
         pub fn get_azero_for_random_mints(&mut self) -> Balance {
-            let nft: contract_ref!(PSP34) = self.chickens_nft_address.unwrap().into();
-            let total_supply = nft.total_supply();
+
+            let chickens_nft: contract_ref!(PSP34) = self.chickens_nft_address.unwrap().into();
+            let foxes_nft: contract_ref!(PSP34) = self.foxes_nft_address.unwrap().into();
+
+            let total_supply = chickens_nft.total_supply() + foxes_nft.total_supply();
+
             let denom = 10u128.pow(12);
-            let mut price = 0;
+            let price;
+
             if total_supply >= 0 && total_supply < 2000 {
                 price = 5 * denom;
             }
@@ -168,6 +265,8 @@ mod factory {
             }
             price
         }
+
+
 
         #[ink(message)]
         pub fn mint_by_admin(&mut self, mint_type: u8, account: AccountId) -> Result<(), FactoryError> {
@@ -232,8 +331,11 @@ mod factory {
                     // Record last mint for account as fox
                     self.last_mint.insert(caller, &Some((1, mint.unwrap())));
                 }
+
+                self.azero_traded += azero_sent;
+
             }
-            else {
+            else if azero_sent == self.get_azero_for_direct_fox_mints() {
                 // Get a defined mint for a Fox (Can only be used twice)
                 let direct_fox_mints = self.get_direct_fox_mints(self.env().caller());
 
@@ -251,6 +353,8 @@ mod factory {
                 
                 // Increment direct fox mints
                 self.direct_fox_mints.insert(caller, &(direct_fox_mints + 1));
+
+                self.azero_traded += azero_sent;
                 
             }
 
