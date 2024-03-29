@@ -55,6 +55,34 @@ button:active {
   opacity:1
 }
 
+.lastnight {
+  position:absolute;
+  top:0px;
+  left:0px;
+  width:100vw;
+  height:100vh;
+  z-index:1000;
+  padding:20px;
+  padding-top: 100px;
+  overflow-y:auto;
+}
+
+.bars-h {
+  width:33.33333333333333%;
+  display: inline-block;
+  box-sizing: border-box;
+  padding:30px;
+}
+
+.msg {
+  width:100%;
+  border-radius:10px;
+  border:1px solid black;
+  padding:20px;
+  background-color: white;
+  text-align: left;
+}
+
 .farmer-right {
   position:fixed;
   bottom:5%;
@@ -66,6 +94,33 @@ button:active {
   align-items: flex-end;
 }
 
+.farmer-right-alt {
+  position:fixed;
+  top:30%;
+  right:10%;
+  z-index:1000;
+  opacity:1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.wooden {
+  width:35vw;
+  background-image: url('/wooden-box.png');
+  background-size: 100% 100%;
+  box-sizing: border-box;
+  padding:30px;
+}
+
+.mobile {
+  display:none;
+}
+
+.not-mobile {
+  display:block;
+}
+
 .game-stats {
   border-radius:10px;
   border:1px solid black;
@@ -74,14 +129,23 @@ button:active {
   background-color: #E4F1F8;
 }
 
+.bluey {
+  background-color:#82A5F3
+}
+
 .azero-ticker-small {
   width:16px;
   height:16px;
 }
 
+.azero-ticker-tiny {
+  width:22px;
+  height:22px;
+}
+
 .azero-ticker-large {
-  width:20px;
-  height:20px;
+  width:25px;
+  height:25px;
 }
 
 .farmer-img {
@@ -108,7 +172,7 @@ button:active {
   width:100vw;
   padding-top:80px;
   opacity:0;
-  display:flex;
+  display:none;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
@@ -122,7 +186,7 @@ button:active {
   width:100vw;
   padding-top:80px;
   opacity:0;
-  display:flex;
+  display:none;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
@@ -147,10 +211,25 @@ button:active {
   height:auto
 }
 
+.flexy {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .bubble-up {
   opacity:0;
   transform:translateY(20px);
   animation:bubbleIn 0.5s forwards ease-in-out;
+}
+
+.icon-nfts {
+  width:40px;
+  height:auto;
+}
+
+.flexicon {
+  display: inline-block;
 }
 
 .arrows {
@@ -374,8 +453,30 @@ button:active {
   }
 }
 
+.block-parent {
+  display: flex;
+}
+
 @media(max-width:900px) {
   .farmer-right {
     display: none;
+  }
+  .farmer-right-alt {
+    display: none;
+  }
+  .mobile {
+    display: block;
+  }
+  .not-mobile {
+    display: none;
+  }
+  .bars-h {
+    width:100%;
+  }
+  .block-parent {
+    display: block!important;
+  }
+  .block-small {
+    width:100%
   }
 }

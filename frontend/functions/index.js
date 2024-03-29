@@ -35,6 +35,14 @@ export const getGas = (api) => {
     }; 
 }
 
+export const shuffle = (array)=> {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
 export const gameStats = async (api) => {
     if (!api) {
         return 2;
@@ -90,6 +98,26 @@ export const getLastMint = async (api, account)=> {
     const last_mint_ = await factory.query["getLastMintByAccount"](query_address, gas, account.address);
     const numberReturn = doFormatNumber(last_mint_.output.toHuman().Ok[0]);
     return numberReturn;
+}
+
+export const getLastStolenFromChicken = async (api, account)=> {
+    if (!api || !account) {
+        return;
+    }
+    let gas = getGas(api);
+    let staking = new ContractPromise(api, ABIs.factory, CAs.staking);
+    const last_stolen_ = await staking.query["getLastAmountForStolenAzero"](query_address, gas, account.address);
+    return last_stolen_.output.toHuman().Ok;
+}
+
+export const getLastStolenForFox = async (api, account)=> {
+    if (!api || !account) {
+        return;
+    }
+    let gas = getGas(api);
+    let staking = new ContractPromise(api, ABIs.factory, CAs.staking);
+    const last_stolen_ = await staking.query["getLastSteal"](query_address, gas, account.address);
+    return last_stolen_.output.toHuman().Ok;
 }
 
 export const getTokenIdsForBoth = async (api, account, balances) => {

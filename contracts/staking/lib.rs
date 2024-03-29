@@ -96,6 +96,8 @@ mod staking {
         fox_staked_by: Mapping<u128, AccountId>,
         // Get address of fox who last stole all azero from a given account
         azero_last_stolen_by: Mapping<AccountId, Option<AccountId>>,
+        // Get amount of azero stolen from a given account
+        azero_last_stolen_amount: Mapping<AccountId, Option<u128>>,
         // Get the last steal made by a fox
         last_steal: Mapping<AccountId, Vec<Balance>>,
         // Get last time Azero was stolen by a fox
@@ -125,7 +127,8 @@ mod staking {
                 azero_last_stolen_by: Default::default(),
                 last_steal: Default::default(),
                 azero_last_stolen_time: Default::default(),
-                azero_claimed: 0
+                azero_claimed: 0,
+                azero_last_stolen_amount: None
             }
         }
         
@@ -250,6 +253,12 @@ mod staking {
             self.azero_last_stolen_by.get(account).unwrap_or(None)
         }
 
+        // Get amount of Azero stolen from a given account
+        #[ink(message)]
+        pub fn get_last_amount_for_stolen_azero(&self, account: AccountId) -> Option<AccountId> {
+            self.azero_last_stolen_amount.get(account).unwrap_or(None)
+        }
+
         // Get the last time Azero was stolen from chicken
         #[ink(message)]
         pub fn get_last_time_for_stolen_azero(&self, account: AccountId) -> u128 {
@@ -352,6 +361,7 @@ mod staking {
                         self.azero_claimed += claimable;
                         self.last_steal.insert(random_fox, &vec![self.env().block_timestamp() as u128, claimable]);
                         self.azero_last_stolen_by.insert(caller, &Some(random_fox));
+                        self.azero_last_stolen_amount.insert(caller, &Some(claimable));
                         self.azero_last_stolen_time.insert(caller, &(self.env().block_timestamp() as u128));
                     }
                 }

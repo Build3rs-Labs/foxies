@@ -126,63 +126,63 @@ export default function Mint() {
         <div className="">
 
             <div className="farmer">
-                <div className="">
-                  <div
-                    style={{padding:30, fontSize:20}}
-                    className={`max-w-[100%] px-10 py-6 mr-2 lg:mr-0
-                    text-center rounded-full bubble-up ${styles.bubble} ${styles["bubble-bottom-left"]}`}
-                  >
-                    <div ref={el}></div>
-                  </div>
+              <div className="">
+                <div
+                  style={{padding:30, fontSize:20}}
+                  className={`max-w-[100%] px-10 py-6 mr-2 lg:mr-0
+                  text-center rounded-full bubble-up ${styles.bubble} ${styles["bubble-bottom-left"]}`}
+                >
+                  <div ref={el}></div>
                 </div>
-                <div className="bottom-20 lg:right-1/2">
-                  <Image
-                    src="/farmer1.png"
-                    width={150}
-                    height={600}
-                    alt="logo"
-                    className="mx-4"
-                  />
-                </div>
+              </div>
+              <div className="bottom-20 lg:right-1/2">
+                <Image
+                  src="/farmer1.png"
+                  width={150}
+                  height={600}
+                  alt="logo"
+                  className="mx-4"
+                />
+              </div>
             </div>
 
             <div className="farmer-right">
-                <div className="">
-                  <div
-                    style={{padding:'20px 30px 20px 30px', fontSize:20}}
-                    className={`game-stats`}
-                  >
-                    <center>
-                      <div className="game-stats-text centralized underline w-100">Game Status:</div>
-                      <div className="mt-3">
-                        <div className="game-stats-text">
-                          <span className="underline me-2">{stats[0].toLocaleString()}</span> NFTs Minted
-                        </div>
-                        <div className="game-stats-text mt-1">
-                          <span className="underline me-2">{stats[1].toLocaleString()}</span> Foxes Minted
-                        </div>
-                        <div className="game-stats-text mt-1">
-                          <span className="underline me-2">{stats[2].toLocaleString()}</span> Chickens Minted
-                        </div>
-                        <div className="game-stats-text mt-1">
-                          <span className="underline me-2">{stats[3].toLocaleString()}</span> $AZERO <img src="/azero.png" className=" mx-1 azero-ticker-small"/> Traded
-                        </div>
-                        <div className="game-stats-text mt-1">
-                          <span className="underline me-2">{stats[4].toLocaleString()}</span> $AZERO <img src="/azero.png" className=" mx-1 azero-ticker-small"/> Claimed
-                        </div>
+              <div className="">
+                <div
+                  style={{padding:'20px 30px 20px 30px', fontSize:20}}
+                  className={`game-stats`}
+                >
+                  <center>
+                    <div className="game-stats-text centralized underline w-100">Game Status:</div>
+                    <div className="mt-3">
+                      <div className="game-stats-text">
+                        <span className="underline me-2">{stats[0].toLocaleString()}</span> NFTs Minted
                       </div>
-                    </center>
-                  </div>
+                      <div className="game-stats-text mt-1">
+                        <span className="underline me-2">{stats[1].toLocaleString()}</span> Foxes Minted
+                      </div>
+                      <div className="game-stats-text mt-1">
+                        <span className="underline me-2">{stats[2].toLocaleString()}</span> Chickens Minted
+                      </div>
+                      <div className="game-stats-text mt-1">
+                        <span className="underline me-2">{stats[3].toLocaleString()}</span> $AZERO <img src="/azero.png" className=" mx-1 azero-ticker-small"/> Traded
+                      </div>
+                      <div className="game-stats-text mt-1">
+                        <span className="underline me-2">{stats[4].toLocaleString()}</span> $AZERO <img src="/azero.png" className=" mx-1 azero-ticker-small"/> Claimed
+                      </div>
+                    </div>
+                  </center>
                 </div>
-                <div className="bottom-20 lg:right-1/2">
-                  <Image
-                    src="/farmer3.png"
-                    width={150}
-                    height={600}
-                    alt="logo"
-                    className="mx-4 farmer-img"
-                  />
-                </div>
+              </div>
+              <div className="bottom-20 lg:right-1/2">
+                <Image
+                  src="/farmer3.png"
+                  width={150}
+                  height={600}
+                  alt="logo"
+                  className="mx-4 farmer-img"
+                />
+              </div>
             </div>
 
             <div className="minter">
@@ -206,7 +206,7 @@ export default function Mint() {
                     </div>
                   </div>
 
-                  <h1 className="text-white text-2xl mt-1 pb-3">{nftLeft.toLocaleString()} NFTs left</h1>
+                  <h1 className="text-white text-2xl mt-1 pb-3">{nftLeft.toLocaleString()} NFT{(nftLeft == 1)?"":"s"} left</h1>
 
                   <span className="d-block mt-4 mb-3" style={{color:'#FFFFFF', fontSize:16}}>
                     ⓘ Random mints cost {mintPrice[0]} AZERO and Direct fox mints cost {mintPrice[1]} AZERO
