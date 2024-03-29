@@ -237,21 +237,7 @@ export default function Coop() {
           </button>
           <button onClick={()=>handleUnstake(animalType)} className="unstake-btn relative mx-2 secondary mt-4 border-2 border-black bg-white rounded-full text-2xl lg:text-3xl text-black px-4 flex items-center">
             <span className="relative font-VT323">
-              Unstake{(animalType == "foxes")?
-                <>
-                  {(balances[3] == 0)?
-                  null:
-                  <div className="claimable-btn">{balances[3].toLocaleString(undefined, {maximumFractionDigits:12})}</div>
-                  }
-                </>
-                :
-                <>
-                  {(balances[4] == 0)?
-                  null:
-                  <div className="claimable-btn">{balances[4].toLocaleString(undefined, {maximumFractionDigits:12})}</div>
-                  }
-                </>
-                }
+              Unstake 
               <span className="ml-2">
                 &gt;
               </span>

@@ -48,8 +48,11 @@ export default function Mint() {
         document.getElementsByClassName("minter")[0].style.animation = 'entrance 2s ease-in-out forwards';
         document.getElementsByClassName("learn")[0].style.animation = 'exit 2s ease-in-out forwards';
         let timeout = setTimeout(()=>{
-          document.getElementsByClassName("learn")[0].remove();
-          clearTimeout(timeout);
+          try {
+            document.getElementsByClassName("learn")[0].remove();
+            clearTimeout(timeout);
+          }
+          catch(error){}
         }, 2000);
       }
       catch (error) {}

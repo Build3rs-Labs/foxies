@@ -105,9 +105,15 @@ export const getLastStolenFromChicken = async (api, account)=> {
         return;
     }
     let gas = getGas(api);
-    let staking = new ContractPromise(api, ABIs.factory, CAs.staking);
+    let staking = new ContractPromise(api, ABIs.staking, CAs.staking);
     const last_stolen_ = await staking.query["getLastAmountForStolenAzero"](query_address, gas, account.address);
-    return last_stolen_.output.toHuman().Ok;
+    const last_stolen = last_stolen_.output.toHuman().Ok;
+    if (last_stolen == null) {
+        return [0, 0];
+    }
+    else {
+        return [doFormatNumber(last_stolen[0]), doFormatNumber(last_stolen[1]) / (10 ** 12)];
+    }
 }
 
 export const getLastStolenForFox = async (api, account)=> {
@@ -115,9 +121,10 @@ export const getLastStolenForFox = async (api, account)=> {
         return;
     }
     let gas = getGas(api);
-    let staking = new ContractPromise(api, ABIs.factory, CAs.staking);
+    let staking = new ContractPromise(api, ABIs.staking, CAs.staking);
     const last_stolen_ = await staking.query["getLastSteal"](query_address, gas, account.address);
-    return last_stolen_.output.toHuman().Ok;
+    const last_stolen = last_stolen_.output.toHuman().Ok;
+    return [doFormatNumber(last_stolen[0]), doFormatNumber(last_stolen[1]) / (10 ** 12)];
 }
 
 export const getTokenIdsForBoth = async (api, account, balances) => {

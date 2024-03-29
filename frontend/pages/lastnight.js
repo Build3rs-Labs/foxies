@@ -5,7 +5,7 @@ import HeaderCoop from "@/components/HeaderCoop";
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import React, { useEffect, useState } from "react";
 import { useWallet } from "useink";
-import { getBalances, getStaked  } from "../functions/index";
+import { getBalances, getLastStolenFromChicken, getStaked, getLastStolenForFox  } from "../functions/index";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -21,6 +21,10 @@ export default function Coop() {
   const [balances, setBalances] = useState([0, 0, 0, 0, 0]);
 
   const [staked, setStaked] = useState([0, 0]);
+
+  const [stolenForFox, setStolenForFox] = useState([0, 0]);
+
+  const [stolenFromChicken, setStolenFromChicken] = useState([0, 0]);
 
   var api;
   var wsProvider;
@@ -38,6 +42,14 @@ export default function Coop() {
         let result = await getBalances(api, account);
 
         let staked = await getStaked(api, account);
+
+        let laststolenfromchicken = await getLastStolenFromChicken(api, account);
+
+        setStolenFromChicken(laststolenfromchicken);
+
+        let laststolenforfox = await getLastStolenForFox(api, account);
+
+        setStolenForFox(laststolenforfox);
 
         setStaked(staked);
         setBalances(result);
@@ -69,7 +81,14 @@ export default function Coop() {
                   <span className="relative text-white text-2xl mt-4 font-VT323">You own {balances[0] + staked[0]} {(balances[0] + staked[0] === 1) ? "chicken" : "chickens"}</span>
                   <img src="/chicken.png" alt="logo" className="nft-icons mt-5 not-mobile"/>
                   <div className="msg text-xl mt-5" style={{marginBottom:100}}>
-                    Last night, the chickens staked in your farm produced {balances[3].toLocaleString()} $AZERO.
+                    Last night, the chickens staked in your farm produced {balances[4].toLocaleString(undefined, {maximumFractionDigits:12})} $AZERO.
+                    {(stolenFromChicken[1] > 0)?
+                    <>
+                    <br/>
+                    Unfortunately, the sneaky foxes stole {stolenFromChicken[1].toLocaleString(undefined, {maximumFractionDigits:12})} $AZERO from you.
+                    </>
+                    :null
+                    }
                   </div>
                 </center>
               </div>
@@ -86,7 +105,14 @@ export default function Coop() {
                   <span className="relative text-white text-2xl mt-4 font-VT323">You own {balances[1] + staked[1]} {(balances[1] + staked[1] === 1) ? "fox" : "foxes"}</span>
                   <img src="/fox.png" alt="logo" className="nft-icons mt-5 not-mobile"/>
                   <div className="msg text-xl mt-5" style={{marginBottom:100}}>
-                    Last night, the foxes staked in your farm produced {balances[4].toLocaleString()} $AZERO.
+                    Last night, the foxes staked in your farm produced {balances[3].toLocaleString(undefined, {maximumFractionDigits:12})} $AZERO.
+                    {(stolenForFox[1] > 0)?
+                    <>
+                    <br/>
+                    Unfortunately, the sneaky foxes stole {stolenForFox[1].toLocaleString(undefined, {maximumFractionDigits:12})} $AZERO from you.
+                    </>
+                    :null
+                    }
                   </div>
                 </center>
               </div>
