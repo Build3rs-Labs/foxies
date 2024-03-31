@@ -306,6 +306,13 @@ mod staking {
             
         }
 
+        #[inline]
+        pub fn random_int_from_range(&self, from: u64, to: u64) -> u64 {
+            let mut source = random::default(self.env().block_timestamp());
+            let rand_int:u64 = source.read::<u64>() % to + from;
+            rand_int
+        }
+
         // Unstake chickens staked by caller
         #[ink(message)]
         pub fn unstake_chickens(&mut self) -> Result<(), StakingError> {
@@ -327,8 +334,8 @@ mod staking {
 
             if claimable > 0 { // If there are Azero claimable
 
-                let mut source = random::default(self.env().block_timestamp());
-                let random_number = source.read::<u64>() % 2 + 1; // Random between 1 and 2
+                
+                let random_number = self.random_int_from_range(1, 2);
 
                 let zero_account = AccountId::from([0u8; 32]); // Zero account
 
