@@ -82,13 +82,16 @@ mod factory {
         // AZERO traded
         azero_traded: u128,
         // AZERO claimed
-        azero_claimed: u128
+        azero_claimed: u128,
+        // Randomness seed
+        seed: u64
     }
 
     impl Factory {
         #[ink(constructor)]
         pub fn new(fees_account: AccountId) -> Self {
             let caller = Self::env().caller();
+            let timestamp = Self::env().block_timestamp();
             Self {
                 rarities: Mapping::default(),
                 nfts: vec![],
@@ -104,13 +107,19 @@ mod factory {
                 rewards_pool: None,
                 whitelisted: Mapping::default(),
                 azero_traded: 0,
-                azero_claimed: 0
+                azero_claimed: 0,
+                seed: timestamp
             }
         }
 
         #[ink(message)]
         pub fn get_account_id(&self) -> AccountId {
             Self::env().account_id()
+        }
+
+        #[inline]
+        pub fn update_seed(&mut self, adder: u64) {
+            self.seed += adder;
         }
 
         // Set staking contract address: Only manager can call this method
@@ -294,6 +303,7 @@ mod factory {
             else {
                 return Err(FactoryError::InvalidMintType);
             }
+            self.update_seed(3);
             Ok(())
         }
 
@@ -321,6 +331,7 @@ mod factory {
                     }
                     // Record last mint for account as chicken
                     self.last_mint.insert(caller, &Some((0, mint.unwrap())));
+                    self.update_seed(1);
                 }
                 else {
                     // 8000 to 10000 range targets fox
@@ -330,6 +341,7 @@ mod factory {
                     }
                     // Record last mint for account as fox
                     self.last_mint.insert(caller, &Some((1, mint.unwrap())));
+                    self.update_seed(2);
                 }
 
                 self.azero_traded += azero_sent;
@@ -355,6 +367,8 @@ mod factory {
                 self.direct_fox_mints.insert(caller, &(direct_fox_mints + 1));
 
                 self.azero_traded += azero_sent;
+
+                self.update_seed(3);
                 
             }
 
@@ -486,7 +500,7 @@ mod factory {
 
         #[inline]
         fn random_int_from_range(&self, from: u64, to: u64) -> u64 {
-            let mut source = random::default(self.env().block_timestamp());
+            let mut source = random::default(self.seed);
             let rand_int:u64 = source.read::<u64>() % to + from;
             rand_int
         }
