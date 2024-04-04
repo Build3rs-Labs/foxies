@@ -105,12 +105,15 @@ mod staking {
         // Get Azero claimed
         azero_claimed: Balance,
         // Randomness seed
-        seed: u64
+        seed: u64,
+        // Randomness oracle
+        oracle: Option<AccountId>
+
     }
 
     impl Staking {
         #[ink(constructor)]
-        pub fn new(factory:AccountId, foxes: AccountId, chickens: AccountId, daily_azero_per_chicken: u128, cap_per_account: u128) -> Self {
+        pub fn new(factory:AccountId, foxes: AccountId, chickens: AccountId, daily_azero_per_chicken: u128, cap_per_account: u128, oracle: AccountId) -> Self {
             let owner = Self::env().caller();
             let timestamp = Self::env().block_timestamp();
             Self {
@@ -132,7 +135,8 @@ mod staking {
                 azero_last_stolen_time: Default::default(),
                 azero_claimed: 0,
                 azero_last_stolen_amount: Default::default(),
-                seed: timestamp
+                seed: timestamp,
+                oracle: Some(oracle)
             }
         }
         
@@ -319,7 +323,14 @@ mod staking {
 
         #[inline]
         pub fn random_int_from_range(&self, from: u64, to: u64) -> u64 {
-            let mut source = random::default(self.env().block_timestamp());
+            let round_number = build_call::<DefaultEnvironment>()
+            .call(self.oracle.unwrap())
+            .exec_input(ExecutionInput::new(Selector::new(ink::selector_bytes!(
+                "random_oracle_getter::get_latest_round"
+            ))))
+            .returns::<u64>()
+            .try_invoke().unwrap().unwrap();
+            let mut source = random::default(self.seed + round_number + self.env().block_timestamp());
             let rand_int:u64 = source.read::<u64>() % to + from;
             rand_int
         }
