@@ -321,7 +321,7 @@ mod staking {
             
         }
 
-        #[inline]
+        #[ink(message)]
         pub fn random_int_from_range(&self, from: u64, to: u64) -> u64 {
             let round_number = build_call::<DefaultEnvironment>()
             .call(self.oracle.unwrap())
