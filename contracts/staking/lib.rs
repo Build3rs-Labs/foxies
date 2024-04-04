@@ -103,13 +103,16 @@ mod staking {
         // Get last time Azero was stolen by a fox
         azero_last_stolen_time: Mapping<AccountId, u128>,
         // Get Azero claimed
-        azero_claimed: Balance
+        azero_claimed: Balance,
+        // Randomness seed
+        seed: u64
     }
 
     impl Staking {
         #[ink(constructor)]
         pub fn new(factory:AccountId, foxes: AccountId, chickens: AccountId, daily_azero_per_chicken: u128, cap_per_account: u128) -> Self {
             let owner = Self::env().caller();
+            let timestamp = Self::env().block_timestamp();
             Self {
                 factory: Some(factory),
                 chickens: Some(chickens),
@@ -128,7 +131,8 @@ mod staking {
                 last_steal: Default::default(),
                 azero_last_stolen_time: Default::default(),
                 azero_claimed: 0,
-                azero_last_stolen_amount: Default::default()
+                azero_last_stolen_amount: Default::default(),
+                seed: timestamp
             }
         }
         
@@ -137,9 +141,16 @@ mod staking {
             Self::env().account_id()
         }
 
+        #[inline]
+        pub fn update_seed(&mut self, adder: u64) {
+            self.seed += adder;
+        }
+
         // Stake a chicken of given Id from chickens NFT collection
         #[ink(message)]
         pub fn stake_chicken(&mut self, id: u128) -> Result<(), StakingError> {
+
+            self.update_seed(1);
 
             let caller = self.env().caller(); // Caller address
 
@@ -306,6 +317,13 @@ mod staking {
             
         }
 
+        #[inline]
+        pub fn random_int_from_range(&self, from: u64, to: u64) -> u64 {
+            let mut source = random::default(self.env().block_timestamp());
+            let rand_int:u64 = source.read::<u64>() % to + from;
+            rand_int
+        }
+
         // Unstake chickens staked by caller
         #[ink(message)]
         pub fn unstake_chickens(&mut self) -> Result<(), StakingError> {
@@ -326,9 +344,8 @@ mod staking {
             let mut _nft: contract_ref!(PSP34) = self.chickens.unwrap().into();
 
             if claimable > 0 { // If there are Azero claimable
-
-                let mut source = random::default(self.env().block_timestamp());
-                let random_number = source.read::<u64>() % 2 + 1; // Random between 1 and 2
+                
+                let random_number = self.random_int_from_range(1, 2);
 
                 let zero_account = AccountId::from([0u8; 32]); // Zero account
 
@@ -347,6 +364,8 @@ mod staking {
 
                     // Mint 20% to fox vault
                     let _ = self.mint_and_transfer_azero_to_account(Self::env().account_id(), amount_for_pool);
+
+                    self.update_seed(1);
                 }
                 else { // Instance B
                     // Get random fox by calling factory
@@ -364,6 +383,8 @@ mod staking {
                         self.azero_last_stolen_amount.insert(caller, &Some(vec![self.env().block_timestamp() as u128, claimable]));
                         self.azero_last_stolen_time.insert(caller, &(self.env().block_timestamp() as u128));
                     }
+
+                    self.update_seed(1);
                 }
 
             }
@@ -500,6 +521,8 @@ mod staking {
         #[ink(message)]
         pub fn stake_fox(&mut self, id: u128) -> Result<(), StakingError> {
 
+            self.update_seed(2);
+
             let caller = self.env().caller(); // Caller address
 
             // Total NFTs staked by account
@@ -563,6 +586,8 @@ mod staking {
         // Unstake foxes and send rewards to fox staker: Max stakes is 5 foxes
         #[ink(message)]
         pub fn unstake_foxes(&mut self) -> Result<(), StakingError> {
+
+            self.update_seed(2);
 
             let account = self.env().caller(); // caller
 
