@@ -391,10 +391,6 @@ mod factory {
         #[ink(message)]
         pub fn pick_random_fox_holder_with_rarity(&self) -> (AccountId, u128) {
 
-            if self.env().caller() != self.rewards_pool.unwrap() {
-                return (AccountId::from([0u8; 32]), 0);
-            }
-
             // Generate random number
             
             let random_number:u128 = self.get_fox_for_reward().try_into().unwrap();
