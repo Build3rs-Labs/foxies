@@ -84,12 +84,14 @@ mod factory {
         // AZERO claimed
         azero_claimed: u128,
         // Randomness seed
-        seed: u64
+        seed: u64,
+        // Randomness oracle
+        oracle: Option<AccountId>
     }
 
     impl Factory {
         #[ink(constructor)]
-        pub fn new(fees_account: AccountId) -> Self {
+        pub fn new(fees_account: AccountId, oracle: AccountId) -> Self {
             let caller = Self::env().caller();
             let timestamp = Self::env().block_timestamp();
             Self {
@@ -108,7 +110,8 @@ mod factory {
                 whitelisted: Mapping::default(),
                 azero_traded: 0,
                 azero_claimed: 0,
-                seed: timestamp
+                seed: timestamp,
+                oracle: Some(oracle)
             }
         }
 
@@ -495,8 +498,18 @@ mod factory {
         }
 
         #[inline]
-        fn random_int_from_range(&self, from: u64, to: u64) -> u64 {
-            let mut source = random::default(self.seed);
+        pub fn random_int_from_range(&self, from: u64, to: u64) -> u64 {
+            if to == 0{
+                return from;
+            }
+            let round_number = build_call::<DefaultEnvironment>()
+            .call(self.oracle.unwrap())
+            .exec_input(ExecutionInput::new(Selector::new(ink::selector_bytes!(
+                "RandomOracleGetter::get_latest_round"
+            ))))
+            .returns::<u64>()
+            .try_invoke().unwrap().unwrap();
+            let mut source = random::default(self.seed + round_number + self.env().block_timestamp());
             let rand_int:u64 = source.read::<u64>() % to + from;
             rand_int
         }
