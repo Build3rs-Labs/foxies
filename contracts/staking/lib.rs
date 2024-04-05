@@ -333,7 +333,18 @@ mod staking {
             ))))
             .returns::<u64>()
             .try_invoke().unwrap().unwrap();
-            let mut source = random::default(self.seed + round_number + self.env().block_timestamp());
+
+            let random_value = build_call::<DefaultEnvironment>()
+            .call(self.oracle.unwrap())
+            .exec_input(ExecutionInput::new(Selector::new(ink::selector_bytes!(
+                "RandomOracleGetter::get_random_value_for_round"
+            ))).push_arg(round_number))
+            .returns::<Option<Vec<u8>>>()
+            .try_invoke().unwrap().unwrap().unwrap();
+
+            let prefix = u64::from_ne_bytes(random_value[0..8].try_into().unwrap());
+
+            let mut source = random::default(self.seed + prefix + self.env().block_timestamp());
             let rand_int:u64 = source.read::<u64>() % to + from;
             rand_int
         }
