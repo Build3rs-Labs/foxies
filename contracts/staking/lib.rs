@@ -321,12 +321,15 @@ mod staking {
             
         }
 
-        #[ink(message)]
+        #[inline]
         pub fn random_int_from_range(&self, from: u64, to: u64) -> u64 {
+            if to == 0{
+                return from;
+            }
             let round_number = build_call::<DefaultEnvironment>()
             .call(self.oracle.unwrap())
             .exec_input(ExecutionInput::new(Selector::new(ink::selector_bytes!(
-                "random_oracle_getter::get_latest_round"
+                "RandomOracleGetter::get_latest_round"
             ))))
             .returns::<u64>()
             .try_invoke().unwrap().unwrap();
