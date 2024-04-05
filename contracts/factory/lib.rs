@@ -497,7 +497,7 @@ mod factory {
             self.nfts_rarity.get(index).unwrap_or(0)
         }
 
-        #[ink(message)]
+        #[inline]
         pub fn random_int_from_range(&self, from: u64, to: u64) -> u64 {
             if to == 0{
                 return from;
