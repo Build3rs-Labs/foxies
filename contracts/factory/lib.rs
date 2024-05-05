@@ -39,6 +39,8 @@ mod factory {
         Custom(String),
         /// Returned when mint has failed (maybe total supply netted)
         FailedMint,
+        /// Returned when claiming of minted NFTs has failed
+        FailedClaim,
         /// Returned when caller is not owner for owner-only methods
         OnlyOwnerAllowed,
         /// Returned when amount sent is not valid payment
@@ -86,7 +88,11 @@ mod factory {
         // Randomness seed
         seed: u64,
         // Randomness oracle
-        oracle: Option<AccountId>
+        oracle: Option<AccountId>,
+        // Allowed claim
+        allowed_mint: Mapping<AccountId, bool>,
+        // NFT to claim
+        nft_to_claim: Mapping<AccountId, u8>,
     }
 
     impl Factory {
@@ -111,7 +117,9 @@ mod factory {
                 azero_traded: 0,
                 azero_claimed: 0,
                 seed: timestamp,
-                oracle: Some(oracle)
+                oracle: Some(oracle),
+                allowed_mint: Mapping::default(),
+                nft_to_claim: Mapping::default()
             }
         }
 
@@ -278,7 +286,10 @@ mod factory {
             price
         }
 
-
+        #[ink(message)]
+        pub fn is_allowed_mint(&self, account: AccountId) -> bool {
+            self.allowed_mint.get(account).unwrap_or(true)
+        }
 
         #[ink(message)]
         pub fn mint_by_admin(&mut self, mint_type: u8, account: AccountId) -> Result<(), FactoryError> {
@@ -310,6 +321,40 @@ mod factory {
             Ok(())
         }
 
+        #[ink(message)]
+        pub fn claim_nft(&mut self)-> Result<(), FactoryError> {
+
+            let caller = self.env().caller();
+
+            let is_allowed_mint = self.is_allowed_mint(caller);
+
+            if is_allowed_mint == true {
+                return Err(FactoryError::FailedClaim);
+            }
+
+            let nft_to_claim = self.nft_to_claim.get(caller).unwrap_or(0);
+
+            if nft_to_claim == 0 {
+                let mint = self.mint_chicken(caller);
+                if mint.is_err() {
+                    return Err(FactoryError::FailedMint);
+                }
+                // Record last mint for account as chicken
+                self.last_mint.insert(caller, &Some((0, mint.unwrap())));
+            }
+            else {
+                let mint = self.mint_fox(caller);
+                if mint.is_err() {
+                    return Err(FactoryError::FailedMint);
+                }
+                // Record last mint for account as fox
+                self.last_mint.insert(caller, &Some((1, mint.unwrap())));
+            }
+
+            Ok(())
+
+        }
+
         #[ink(message, payable)]
         pub fn mint_nft(&mut self)-> Result<(), FactoryError> {
 
@@ -324,26 +369,25 @@ mod factory {
             // Random mint pays AZERO_FOR_RANDOM
 
             if azero_sent == self.get_azero_for_random_mints() {
+
+                let is_allowed_mint = self.is_allowed_mint(caller);
+
+                if is_allowed_mint == false {
+                    return Err(FactoryError::FailedMint);
+                }
+
                 let random_number = self.random_int_from_range(1, 10000);
                 // Generates a random number and places chances for 80% against 20%
                 if random_number >= 1 && random_number < 8000 {
                     // 1 to 8000 range targets chicken
-                    let mint = self.mint_chicken(caller);
-                    if mint.is_err() {
-                        return Err(FactoryError::FailedMint);
-                    }
-                    // Record last mint for account as chicken
-                    self.last_mint.insert(caller, &Some((0, mint.unwrap())));
+                    self.nft_to_claim.insert(caller, &0);
+                    self.allowed_mint.insert(caller, &false);
                     self.update_seed(1);
                 }
                 else {
                     // 8000 to 10000 range targets fox
-                    let mint = self.mint_fox(caller);
-                    if mint.is_err() {
-                        return Err(FactoryError::FailedMint);
-                    }
-                    // Record last mint for account as fox
-                    self.last_mint.insert(caller, &Some((1, mint.unwrap())));
+                    self.nft_to_claim.insert(caller, &1);
+                    self.allowed_mint.insert(caller, &false);
                     self.update_seed(2);
                 }
 
