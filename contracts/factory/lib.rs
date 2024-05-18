@@ -92,7 +92,7 @@ mod factory {
         // Allowed claim
         allowed_mint: Mapping<AccountId, bool>,
         // NFT to claim
-        nft_to_claim: Mapping<AccountId, u8>,
+        nft_to_claim: Mapping<AccountId, Vec<u64>>,
     }
 
     impl Factory {
@@ -332,9 +332,15 @@ mod factory {
                 return Err(FactoryError::FailedClaim);
             }
 
-            let nft_to_claim = self.nft_to_claim.get(caller).unwrap_or(0);
+            let nft_to_claim = self.nft_to_claim.get(caller).unwrap_or(vec![0, 0]);
 
-            if nft_to_claim == 0 {
+            // Claiming must not happen in the same block with minting
+
+            if nft_to_claim[usize::try_from(1).unwrap()] <= self.env().block_timestamp() {
+                return Err(FactoryError::FailedClaim);
+            }
+
+            if nft_to_claim[usize::try_from(0).unwrap()] == 0 {
                 let mint = self.mint_chicken(caller);
                 if mint.is_err() {
                     return Err(FactoryError::FailedMint);
@@ -380,13 +386,13 @@ mod factory {
                 // Generates a random number and places chances for 80% against 20%
                 if random_number >= 1 && random_number < 8000 {
                     // 1 to 8000 range targets chicken
-                    self.nft_to_claim.insert(caller, &0);
+                    self.nft_to_claim.insert(caller, &vec![0, self.env().block_timestamp()]);
                     self.allowed_mint.insert(caller, &false);
                     self.update_seed(1);
                 }
                 else {
                     // 8000 to 10000 range targets fox
-                    self.nft_to_claim.insert(caller, &1);
+                    self.nft_to_claim.insert(caller, &vec![1, self.env().block_timestamp()]);
                     self.allowed_mint.insert(caller, &false);
                     self.update_seed(2);
                 }
