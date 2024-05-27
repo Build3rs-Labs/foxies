@@ -92,7 +92,7 @@ mod factory {
         // Allowed claim
         allowed_mint: Mapping<AccountId, bool>,
         // NFT to claim
-        nft_to_claim: Mapping<AccountId, Vec<u64>>,
+        nft_to_claim: Mapping<AccountId, (u64, u64)>,
     }
 
     impl Factory {
@@ -332,15 +332,17 @@ mod factory {
                 return Err(FactoryError::FailedClaim);
             }
 
-            let nft_to_claim = self.nft_to_claim.get(caller).unwrap_or(vec![0, 0]);
+            let (nft_type, round) = self.nft_to_claim.get(caller).unwrap_or((0, 0));
 
             // Claiming must not happen in the same block with minting
 
-            if nft_to_claim[usize::try_from(1).unwrap()] <= self.env().block_timestamp() {
+            let latest_round = self.get_latest_round();
+
+            if round >= latest_round {
                 return Err(FactoryError::FailedClaim);
             }
 
-            if nft_to_claim[usize::try_from(0).unwrap()] == 0 {
+            if nft_type == 0 {
                 let mint = self.mint_chicken(caller);
                 if mint.is_err() {
                     return Err(FactoryError::FailedMint);
@@ -371,6 +373,8 @@ mod factory {
             }
 
             let caller = self.env().caller();
+            
+            let latest_round = self.get_latest_round();
 
             // Random mint pays AZERO_FOR_RANDOM
 
@@ -386,13 +390,13 @@ mod factory {
                 // Generates a random number and places chances for 80% against 20%
                 if random_number >= 1 && random_number < 8000 {
                     // 1 to 8000 range targets chicken
-                    self.nft_to_claim.insert(caller, &vec![0, self.env().block_timestamp()]);
+                    self.nft_to_claim.insert(caller, &(0, latest_round));
                     self.allowed_mint.insert(caller, &false);
                     self.update_seed(1);
                 }
                 else {
                     // 8000 to 10000 range targets fox
-                    self.nft_to_claim.insert(caller, &vec![1, self.env().block_timestamp()]);
+                    self.nft_to_claim.insert(caller, &(1, latest_round));
                     self.allowed_mint.insert(caller, &false);
                     self.update_seed(2);
                 }
@@ -541,6 +545,19 @@ mod factory {
             51 - self._random()
         }
 
+        // Get latest DIA round number
+        #[inline]
+        pub fn get_latest_round(&self) -> u64 {
+            let round_number = build_call::<DefaultEnvironment>()
+            .call(self.oracle.unwrap())
+            .exec_input(ExecutionInput::new(Selector::new(ink::selector_bytes!(
+                "RandomOracleGetter::get_latest_round"
+            ))))
+            .returns::<u64>()
+            .try_invoke().unwrap().unwrap();
+            round_number
+        }
+
         // Get the rarity of a fox at a given NFT Id
         #[ink(message)]
         pub fn get_fox_rarity(&self, index:u128) -> u128 {
@@ -552,13 +569,8 @@ mod factory {
             if to == 0{
                 return from;
             }
-            let round_number = build_call::<DefaultEnvironment>()
-            .call(self.oracle.unwrap())
-            .exec_input(ExecutionInput::new(Selector::new(ink::selector_bytes!(
-                "RandomOracleGetter::get_latest_round"
-            ))))
-            .returns::<u64>()
-            .try_invoke().unwrap().unwrap();
+
+            let round_number = self.get_latest_round();
 
             let random_value = build_call::<DefaultEnvironment>()
             .call(self.oracle.unwrap())
