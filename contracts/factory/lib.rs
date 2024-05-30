@@ -582,7 +582,7 @@ mod factory {
 
             let prefix = u64::from_ne_bytes(random_value[0..8].try_into().unwrap());
 
-            let mut source = random::default(self.seed + prefix + self.env().block_timestamp());
+            let mut source = random::default(self.seed + prefix + round_number);
             let rand_int:u64 = source.read::<u64>() % to + from;
             rand_int
         }
