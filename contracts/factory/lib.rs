@@ -332,7 +332,12 @@ mod factory {
                 return Err(FactoryError::FailedClaim);
             }
 
-            let (nft_type, round) = self.nft_to_claim.get(caller).unwrap_or((0, 0));
+            let (nft_type, round) = match self.nft_to_claim.get(caller) {
+                Some((type_val, round_val)) => (*type_val, *round_val),
+                None => {
+                    return Err(FactoryError::FailedClaim);
+                },
+            };
 
             // Claiming must not happen in the same block with minting
 
